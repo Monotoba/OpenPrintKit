@@ -6,8 +6,6 @@
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 [![Chat](https://img.shields.io/badge/community-chat-brightgreen.svg)]()
 
-[![Build Status](https://github.com/YOUR_USERNAME/OpenPrintKit/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/OpenPrintKit/actions)
-
 ---
 
 ### Define once. Slice anywhere.
