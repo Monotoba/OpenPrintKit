@@ -44,13 +44,21 @@ opk bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer
 ✅ All example profiles validate successfully (4 tests passed).
 
 🧠 Why OPK?
+
 Problem	OPK Solution
+
 Slicer configs are siloed and fragile	Schema-based, versioned JSON profiles
+
 Sharing printer profiles is error-prone	Portable .orca_printer bundles
+
 Inconsistent calibration across slicers	Unified Printer Description Language (PDL)
+
 Manual tweaking wastes time	Deterministic generation and validation
+
 Profiles lost in GUI exports	Git-friendly source files + reproducible build
+
 🧰 Project Structure
+
 OpenPrintKit/
 ├─ opk/                   # Core Python package
 │  ├─ core/               # Schemas, validation, bundling
