@@ -124,13 +124,3 @@ Chat / Collaboration	Coming soon (Matrix or Discord)
 
 
 ---
-
-### 🔧 Next suggestions
-Once you’ve added this file:
-1. Replace `YOUR_USERNAME` in badge URLs with your GitHub username.
-2. Add a simple `LICENSE` file (`MIT`) and push both:
-   ```bash
-   git add README.md LICENSE
-   git commit -m "docs: add complete README with badges and project summary"
-   git push
-  ```
