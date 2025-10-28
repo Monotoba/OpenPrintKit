@@ -1,30 +1,61 @@
 name: CI
+
 on:
-  push: {branches: [main, master]}
-  pull_request: {branches: [main, master]}
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-test:
+    name: Python ${{ matrix.python-version }} • ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13"]
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: ${{ matrix.python-version }} }
-      - name: Install
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install package (editable) + test deps
         run: |
           python -m pip install --upgrade pip
           pip install -e .
           pip install pytest
-      - name: Tests
-        env: { QT_QPA_PLATFORM: offscreen }
-        run: pytest -q
-      - name: Build sample bundle
-        run: opk bundle --in examples --out dist/LK5Pro_OrcaProfile_ci.orca_printer
-      - uses: actions/upload-artifact@v4
+
+      - name: Run unit tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -q
+
+      - name: Validate example profiles
+        run: |
+          python -m opk.cli.__main__ validate examples/printers/Longer_LK5_Pro_Marlin.json
+          python -m opk.cli.__main__ validate examples/filaments/PLA_Baseline_LK5Pro.json
+          python -m opk.cli.__main__ validate examples/processes/Standard_0p20_LK5Pro.json
+
+      - name: Build Orca bundle artifact
+        run: |
+          python -m opk.cli.__main__ bundle --in examples --out dist/LK5Pro_OrcaProfile_ci.orca_printer
+          dir dist || ls -l dist
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
         with:
           name: opk-bundle-${{ runner.os }}-py${{ matrix.python-version }}
           path: dist/*.orca_printer
+          if-no-files-found: error
