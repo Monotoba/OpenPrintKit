@@ -1,0 +1,47 @@
+site_name: Printer Definition Language (PDL)
+site_description: Open, slicer-agnostic specification for defining 3D printers, materials, and processes.
+site_url: https://YOUR_GH_USERNAME.github.io/PDL-Spec  # update after split
+repo_name: OpenPrintKit / pdl-spec
+repo_url: https://github.com/YOUR_GH_USERNAME/OpenPrintKit  # or new repo URL after split
+edit_uri: edit/main/pdl-spec/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - content.code.copy
+    - content.tabs.link
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.tabbed
+  - pymdownx.snippets
+
+nav:
+  - Overview: index.md
+  - Specification:
+      - PDL Spec (v1.0.0): PDL_SPEC.md
+  - Examples:
+      - Minimal: examples/minimal.yaml
+      - LK5 Pro (full): examples/full_lk5pro.yaml
+  - Schema:
+      - pdl.schema.json: schema/pdl.schema.json
+  - Contributing: contributing.md
+  - License: license.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/YOUR_GH_USERNAME

@@ -407,3 +407,12 @@ build/
 .ruff_cache/
 .pytest_cache/
 .zencoder/
+
+# PDL Language Specification
+# Ignore PDL build outputs and local GitHub Pages
+pdl-spec/site/
+pdl-spec/.venv/
+pdl-spec/__pycache__/
+pdl-spec/dist/
+pdl-spec/.pytest_cache/
+pdl-spec/.DS_Store

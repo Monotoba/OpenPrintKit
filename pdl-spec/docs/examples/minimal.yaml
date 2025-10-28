@@ -1,0 +1,8 @@
+pdl_version: 1.0.0
+id: vendor.model
+name: Vendor Model
+firmware: marlin
+kinematics: cartesian
+geometry:
+  bed_shape: [[0,0],[220,0],[220,220],[0,220]]
+  z_height: 250
