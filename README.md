@@ -58,7 +58,7 @@ Manual tweaking wastes time	Deterministic generation and validation
 Profiles lost in GUI exports	Git-friendly source files + reproducible build
 
 🧰 Project Structure
-
+```
 OpenPrintKit/
 ├─ opk/                   # Core Python package
 │  ├─ core/               # Schemas, validation, bundling
@@ -68,6 +68,7 @@ OpenPrintKit/
 ├─ examples/              # Example JSON profiles (LK5 Pro)
 ├─ tests/                 # Pytest unit tests (4 passing)
 └─ dist/                  # Output bundles (.orca_printer)
+```
 
 🧩 Features
 
