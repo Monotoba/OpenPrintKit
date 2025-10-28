@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Printer Profile Schema",
+  "type": "object",
+  "required": ["type", "name", "nozzle_diameter", "filament_diameter", "build_volume"],
+  "properties": {
+    "type": { "const": "printer" },
+    "name": { "type": "string" },
+    "nozzle_diameter": { "type": "number", "minimum": 0.1, "maximum": 2.0 },
+    "filament_diameter": { "type": "number", "enum": [1.75, 2.85, 3.0] },
+    "build_volume": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number", "minimum": 10 }
+    },
+    "firmware": { "type": "string", "default": "Marlin" },
+    "kinematics": {
+      "type": "string",
+      "enum": ["cartesian", "corexy", "corexz", "delta", "scara", "polar"]
+    },
+    "comments": { "type": "string" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,19 @@
+{
+  "type": "process",
+  "name": "Standard 0.20 mm - LK5 Pro (PLA)",
+  "layer_height": 0.20,
+  "first_layer_height": 0.28,
+  "print_speed": 60,
+  "travel_speed": 180,
+  "wall_count": 3,
+  "infill_density": 20,
+  "adhesion_type": "brim",
+  "fan_speed": 100,
+  "retraction_length": 0.8,
+  "retraction_speed": 40,
+  "z_hop_height": 0.4,
+  "acceleration": 1000,
+  "jerk": 8,
+  "enable_ironing": false,
+  "comments": "Default balanced process for PLA at 0.20 mm on the Longer LK5 Pro using 0.4 mm nozzle. Safe first-layer height and moderate speeds for good adhesion."
+}

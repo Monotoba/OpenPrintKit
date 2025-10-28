@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OPK PDL (Printer Description Language)",
+  "type": "object",
+  "required": ["pdl_version","id","name","firmware","kinematics","geometry"],
+  "properties": {
+    "pdl_version": {"type":"string"},
+    "id": {"type":"string"},
+    "name":{"type":"string"},
+    "firmware":{"type":"string","enum":["marlin","klipper","reprap","rrf","smoothie"]},
+    "kinematics":{"type":"string","enum":["cartesian","corexy","corexz","delta","scara","polar"]},
+    "geometry":{
+      "type":"object",
+      "required":["bed_shape","z_height"],
+      "properties":{
+        "bed_shape":{"type":"array","minItems":3,"items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number"}}},
+        "z_height":{"type":"number","exclusiveMinimum":0},
+        "origin":{"type":"string"}
+      }
+    }
+  },
+  "additionalProperties": true
+}

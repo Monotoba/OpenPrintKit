@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Filament Profile Schema",
+  "type": "object",
+  "required": ["type", "name", "filament_type", "nozzle_temperature", "bed_temperature"],
+  "properties": {
+    "type": { "const": "filament" },
+    "name": { "type": "string" },
+    "filament_type": {
+      "type": "string",
+      "enum": ["PLA", "PETG", "ABS", "TPU", "Nylon", "Other"]
+    },
+    "nozzle_temperature": { "type": "number", "minimum": 150, "maximum": 300 },
+    "bed_temperature": { "type": "number", "minimum": 0, "maximum": 130 },
+    "retraction_length": { "type": "number", "minimum": 0, "maximum": 10 },
+    "retraction_speed": { "type": "number", "minimum": 1, "maximum": 200 },
+    "fan_speed": { "type": "number", "minimum": 0, "maximum": 100 }
+  },
+  "additionalProperties": true
+}

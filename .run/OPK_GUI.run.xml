@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration name="OPK GUI" type="PythonConfigurationType" factoryName="Python">
+    <option name="SCRIPT_NAME" value="opk/ui/main_window.py" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+  </configuration>
+</component>

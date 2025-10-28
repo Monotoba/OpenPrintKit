@@ -1,0 +1,18 @@
+{
+  "type": "filament",
+  "name": "PLA Baseline - LK5 Pro",
+  "filament_type": "PLA",
+  "nozzle_temperature": 205,
+  "bed_temperature": 60,
+  "filament_diameter": 1.75,
+  "flow_multiplier": 1.00,
+  "fan_speed": 100,
+  "retraction_length": 0.8,
+  "retraction_speed": 40,
+  "drying_temperature": 45,
+  "drying_time_minutes": 180,
+  "spool_weight_grams": 1000,
+  "color": "Natural / Clear",
+  "brand": "Generic PLA",
+  "notes": "Baseline settings for common 1.75 mm PLA on the Longer LK5 Pro with a 0.4 mm nozzle. Optimized for dimensional accuracy, adhesion, and low stringing."
+}

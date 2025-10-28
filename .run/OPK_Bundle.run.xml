@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration name="OPK Build Bundle" type="PythonConfigurationType" factoryName="Python">
+    <option name="SCRIPT_NAME" value="-m" />
+    <option name="PARAMETERS" value="opk.cli.__main__ bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+  </configuration>
+</component>

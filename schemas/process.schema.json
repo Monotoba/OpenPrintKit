@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Process Profile Schema",
+  "type": "object",
+  "required": ["type", "name", "layer_height", "print_speed"],
+  "properties": {
+    "type": { "const": "process" },
+    "name": { "type": "string" },
+    "layer_height": { "type": "number", "minimum": 0.05, "maximum": 1.0 },
+    "first_layer_height": { "type": "number", "minimum": 0.05, "maximum": 1.0 },
+    "print_speed": { "type": "number", "minimum": 1, "maximum": 300 },
+    "travel_speed": { "type": "number", "minimum": 1, "maximum": 500 },
+    "wall_count": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "infill_density": { "type": "number", "minimum": 0, "maximum": 100 },
+    "adhesion_type": {
+      "type": "string",
+      "enum": ["none", "skirt", "brim", "raft"]
+    },
+    "comments": { "type": "string" }
+  },
+  "additionalProperties": true
+}
