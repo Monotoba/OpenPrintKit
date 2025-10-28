@@ -119,7 +119,6 @@ Feature Requests	Discussions
 
 Chat / Collaboration	Coming soon (Matrix or Discord)
 
-“From open data to perfect first layers.”
 — The OpenPrintKit Project
 
 
