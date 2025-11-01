@@ -212,6 +212,14 @@ machine_control:
   z_offset: -0.05                     # → M851 Z-0.05
   start_custom: ["M117 Startup"]
   end_custom:   ["M117 Finished"]
+  # Peripherals
+  camera: { use_before_snapshot: true, command: "M240" }
+  sd_logging: { enable_start: true, filename: "log.gco", stop_at_end: true }
+  fans: { part_start_percent: 50, aux_index: 1, aux_start_percent: 75, off_at_end: true }
+  exhaust: { enable_start: true, speed_percent: 100, off_at_end: true, pin: 10 }
+  aux_outputs:
+    - { label: Aux1, pin: 11, start_value: 255, end_value: 0 }
+    - { label: Aux2, pin: 12, start_value: 128 }
 ```
 
 Tooling merges `machine_control` with explicit `gcode` hooks at generation time.
