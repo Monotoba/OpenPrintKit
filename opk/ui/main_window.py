@@ -219,7 +219,23 @@ class MainWindow(QMainWindow):
 
 
 def main():
-    app = QApplication(sys.argv)
+    import os
+    try:
+        app = QApplication(sys.argv)
+    except Exception as e:
+        print(f"[FATAL] Failed to start QApplication: {e}", file=sys.stderr)
+        sys.exit(2)
+
+    if os.environ.get("OPK_DEBUG"):
+        try:
+            print(f"[DEBUG] Qt platform={app.platformName()} screens={len(app.screens())}")
+        except Exception as e:
+            print(f"[DEBUG] Unable to query platform/screens: {e}")
+
+    if not app.screens():
+        print("[FATAL] No available screens/display. Check X11/Wayland or set QT_QPA_PLATFORM.", file=sys.stderr)
+        sys.exit(3)
+
     m = MainWindow(); m.resize(800, 480); m.show()
     ret = app.exec()
     # Save window state

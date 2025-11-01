@@ -100,6 +100,12 @@ OpenPrintKit/
 - Tools → G-code Preview: open a PDL YAML/JSON, select a hook (start, layer_change, etc.), define variables, and preview rendered G-code
 - Tools → Validate Hook Variables: open a PDL and variables JSON to scan all hooks for unresolved placeholders
 
+If the app exits immediately, try:
+
+- `OPK_DEBUG=1 python -m opk.ui.main_window` (prints platform + screen count)
+- Set platform explicitly: `QT_QPA_PLATFORM=xcb` or `QT_QPA_PLATFORM=wayland`
+- Ensure you have a display/session (X11/Wayland) available
+
 🧩 Features
 
 ✅ JSON-Schema validation for all profiles
