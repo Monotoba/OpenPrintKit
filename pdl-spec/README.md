@@ -13,13 +13,19 @@ and will be extracted into its own repository once the core specification stabil
 PDL describes:
 
 - Geometry, limits, and firmware of 3D printers
-- Extruder and filament characteristics
+- Extruders/toolheads (multi-extruder), mixing nozzles, and filament characteristics
 - Default process parameters (layer height, speed, retraction)
 - Standard G-code sequences (start/end)
 - Material temperature and speed envelopes
 
 PDL enables **deterministic, reproducible slicing** across different slicers
 (Orca, Cura, Prusa, etc.) and acts as the canonical data source for OPK’s generators.
+
+Multi-material and multi-color systems are modeled via:
+
+- `extruders`: any number of extruders/toolheads with nozzle type/diameter and drive type
+- `multi_material.spool_banks`: banks/carousels (e.g., AMS/MMU) with arbitrary capacity
+- `extruders[*].mixing_channels`: >1 to represent mixing nozzles
 
 ---
 

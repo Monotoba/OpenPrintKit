@@ -71,6 +71,8 @@ workspace/
 
 * YAML editor with schema autocompletion (optional), side diagnostics.
 * Form view for common fields (geometry, extruder, materials).
+* Multi-extruder editor with nozzle type/diameter and mixing channels.
+* Multi-material banks (e.g., AMS/MMU) with arbitrary capacity.
 * Validate button (schema + rules) → issues panel with line/field refs.
 * Save guarded by “no errors” (warnings allowed).
 
@@ -108,7 +110,7 @@ workspace/
 
 ### C2. Rules Validator
 
-* Run rules: nozzle/layer, temps ranges per material, adhesion types, retraction vs extruder type, ABL/G-code consistency.
+* Run rules: nozzle/layer, temps ranges per material, adhesion types, retraction vs extruder type, ABL/probe + G-code consistency, multi-extruder sanity.
 
 **Acceptance**
 
