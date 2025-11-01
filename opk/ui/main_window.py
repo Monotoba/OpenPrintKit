@@ -20,6 +20,7 @@ from ..core import schema as S
 from ..core.bundle import build_bundle
 from .rules_dialog import RulesDialog
 from .install_wizard import InstallWizard
+from .gcode_preview_dialog import GcodePreviewDialog
 from PySide6.QtCore import QSettings
 from .preferences_dialog import PreferencesDialog
 
@@ -68,6 +69,10 @@ class MainWindow(QMainWindow):
         tb.addAction(act_bundle)
         tb.addAction(act_ws_init)
         tb.addAction(act_install)
+
+        tools_menu = mb.addMenu("Tools")
+        act_gcode_prev = QAction("G-code Preview…", self); act_gcode_prev.triggered.connect(self._gcode_preview)
+        tools_menu.addAction(act_gcode_prev)
 
         help_menu = mb.addMenu("Help")
         act_about = QAction("About", self); act_about.triggered.connect(self._about)
@@ -169,6 +174,11 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             self.settings.setValue("paths/orca_preset", dlg.orca_preset_dir)
             self.log(f"[PREFS] Orca presets set to: {dlg.orca_preset_dir}")
+
+    def _gcode_preview(self):
+        dlg = GcodePreviewDialog(self)
+        dlg.resize(700, 600)
+        dlg.exec()
 
     # Drag & drop validation
     def dragEnterEvent(self, e):

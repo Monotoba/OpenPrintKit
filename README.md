@@ -87,6 +87,8 @@ OpenPrintKit/
 - `opk bundle --in SRC --out OUT.orca_printer` — Build Orca bundle from `printers/`, `filaments/`, `processes/`
 - `opk workspace init ROOT [--no-examples]` — Scaffold a standard workspace
 - `opk install --src SRC --dest ORCA_PRESET_DIR [--backup BACKUP.zip] [--dry-run]` — Dry-run and install profiles to Orca presets
+- `opk gcode-hooks --pdl PDL.yaml` — List available G-code hooks in a PDL file
+- `opk gcode-preview --pdl PDL.yaml --hook start --vars vars.json` — Render a hook with provided variables
 
 ### GUI
 
@@ -94,6 +96,7 @@ OpenPrintKit/
 - Menu actions: Validate, Run Rules, Build Bundle, Workspace Init, Install to Orca, Preferences
 - Toolbar with quick-access icons for common actions
 - Drag-and-drop `.json` files onto the window to validate them
+- Tools → G-code Preview: open a PDL YAML/JSON, select a hook (start, layer_change, etc.), define variables, and preview rendered G-code
 
 🧩 Features
 

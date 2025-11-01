@@ -116,6 +116,42 @@ For comprehensive lifecycle coverage, PDL additionally supports both explicit fi
 
 Tip: Use conditional templating and variables provided by your slicer (e.g., `{if ...}`, `{layer_z}`, `{filament_diameter[0]}`) inside sequences for dynamic behavior.
 
+### 3.5 Canonical Hooks Reference
+
+PDL defines common, optional hook fields to cover a full-featured slicer lifecycle. If a hook is not present in `gcode`, it’s simply ignored.
+
+- Global lifecycle: `start`, `end`, `on_abort`, `pause`, `resume`, `power_loss_resume`, `auto_shutdown`
+- Tool/filament: `tool_change`, `before_tool_change`, `after_tool_change`, `filament_change`
+- Layer: `layer_change`, `before_layer_change`, `after_layer_change`, `top_layer_start`, `bottom_layer_start`
+- Object/region: `before_object`, `after_object`, `before_region`, `after_region`
+- Motion/extrusion: `retraction`, `unretraction`, `travel_start`, `travel_end`, `bridge_start`, `bridge_end`
+- Temperature/env: `before_heating`, `after_heating`, `before_cooling`
+- Monitoring/timelapse: `on_progress_percent`, `on_layer_interval`, `on_time_interval`, `before_snapshot`, `after_snapshot`
+- Support/material: `support_interface_start`, `support_interface_end`
+
+For additional or proprietary events, use the generic `gcode.hooks` map with lower-case keys (letters/digits/`_.-`), for example:
+
+```yaml
+gcode:
+  hooks:
+    monitor.progress_25: ["M117 25%"]
+    env.lights_on: ["M150 R255 G255 B255"]
+```
+
+Minimal example snippet using placeholders and macros:
+
+```yaml
+gcode:
+  start:
+    - M140 S{bed}
+    - M104 S{nozzle}
+    - G28
+  before_tool_change: ["G10 ; retract"]
+  after_tool_change: ["G11 ; unretract", "M117 Tool {tool}"]
+  macros:
+    purge_line: ["G92 E0", "G1 X0 Y0 F6000", "G1 E10 F300", "G92 E0"]
+```
+
 ## 4. Versioning
 
 - PDL follows Semantic Versioning (SemVer):

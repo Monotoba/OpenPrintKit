@@ -5,6 +5,7 @@ from ..core import schema as S
 from ..core.io import load_json
 from ..core.bundle import build_bundle
 from ..core.install import plan_install, perform_install
+from ..core.gcode import list_hooks as gc_list_hooks, render_sequence as gc_render
 
 
 def cmd_workspace_init(root, with_examples: bool):
@@ -92,6 +93,15 @@ def main():
     cv.add_argument("--from", dest="from_fmt", required=True, choices=["cura"], help="Source format")
     cv.add_argument("--in", dest="src", required=True, help="Input file or directory to convert")
     cv.add_argument("--out", dest="out", required=True, help="Output directory (printers)")
+
+    # gcode: list hooks and preview
+    gh = sub.add_parser("gcode-hooks", help="List available gcode hooks in a PDL file (YAML/JSON)")
+    gh.add_argument("--pdl", required=True, help="Path to PDL file")
+
+    gp = sub.add_parser("gcode-preview", help="Render a gcode hook with variables")
+    gp.add_argument("--pdl", required=True, help="Path to PDL file")
+    gp.add_argument("--hook", required=True, help="Hook name (e.g., start, before_layer_change, monitor.progress_25)")
+    gp.add_argument("--vars", dest="vars_path", help="JSON file with variables for placeholder substitution")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -118,6 +128,39 @@ def main():
                 print(f"[WROTE] {w}")
             print(f"[SUMMARY] wrote={len(written)}")
             raise SystemExit(0)
+    if args.cmd == "gcode-hooks":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        gcode = (data or {}).get("gcode") or {}
+        hooks = gc_list_hooks(gcode)
+        for h in hooks:
+            print(h)
+        print(f"[SUMMARY] hooks={len(hooks)}")
+        raise SystemExit(0)
+    if args.cmd == "gcode-preview":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        gcode = (data or {}).get("gcode") or {}
+        seq = None
+        if args.hook in gcode:
+            seq = gcode.get(args.hook)
+        elif isinstance(gcode.get("hooks"), dict) and args.hook in gcode.get("hooks"):
+            seq = gcode["hooks"][args.hook]
+        if not isinstance(seq, list):
+            print(f"[ERROR] Hook not found or not a sequence: {args.hook}")
+            raise SystemExit(2)
+        vars_obj = {}
+        if args.vars_path:
+            vars_obj = _json.loads(_Path(args.vars_path).read_text(encoding="utf-8"))
+        rendered, missing = gc_render(seq, vars_obj)
+        print("\n".join(rendered))
+        if missing:
+            print(f"\n[WARN] Unresolved placeholders: {', '.join(sorted(missing))}")
+        raise SystemExit(0)
 
 if __name__ == "__main__":
     main()
