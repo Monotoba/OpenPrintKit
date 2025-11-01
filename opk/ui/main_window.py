@@ -73,13 +73,6 @@ except Exception:  # ImportError or plugin issues — provide minimal stubs for 
 from ..core.io import load_json
 from ..core import schema as S
 from ..core.bundle import build_bundle
-from .rules_dialog import RulesDialog
-from .install_wizard import InstallWizard
-from .gcode_preview_dialog import GcodePreviewDialog
-from .gcode_validate_dialog import GcodeValidateDialog
-from .mcode_reference_dialog import McodeReferenceDialog
-from .gen_snippets_dialog import GenerateSnippetsDialog
-from .gen_profiles_dialog import GenerateProfilesDialog
 from .preferences_dialog import PreferencesDialog
 from .app_settings_dialog import AppSettingsDialog
 from .pdl_editor import PDLForm
@@ -191,6 +184,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Validation", "Some files failed validation. See log.")
 
     def _rules(self):
+        from .rules_dialog import RulesDialog
         last_dirs = {
             "rules": self.settings.value("dirs/rules", "")
         }
@@ -237,6 +231,7 @@ class MainWindow(QMainWindow):
             self.settings.setValue("dirs/ws", root)
 
     def _install(self):
+        from .install_wizard import InstallWizard
         last_dirs = {
             "install_src": self.settings.value("dirs/install_src", ""),
             "install_dst": self.settings.value("dirs/install_dst", ""),
@@ -291,26 +286,31 @@ class MainWindow(QMainWindow):
         self.log(f"[PDL] Saved {fn}")
 
     def _gcode_preview(self):
+        from .gcode_preview_dialog import GcodePreviewDialog
         dlg = GcodePreviewDialog(self)
         dlg.resize(700, 600)
         dlg.exec()
 
     def _gcode_validate(self):
+        from .gcode_validate_dialog import GcodeValidateDialog
         dlg = GcodeValidateDialog(self)
         dlg.resize(700, 500)
         dlg.exec()
 
     def _gen_snippets(self):
+        from .gen_snippets_dialog import GenerateSnippetsDialog
         dlg = GenerateSnippetsDialog(self)
         dlg.resize(650, 200)
         dlg.exec()
 
     def _gen_profiles(self):
+        from .gen_profiles_dialog import GenerateProfilesDialog
         dlg = GenerateProfilesDialog(self)
         dlg.resize(650, 240)
         dlg.exec()
 
     def _mcode_ref(self):
+        from .mcode_reference_dialog import McodeReferenceDialog
         dlg = McodeReferenceDialog(self)
         dlg.resize(800, 600)
         dlg.exec()
@@ -451,7 +451,7 @@ def main():
 class QTabWidgetWrap(QWidget):
     def __init__(self, editor: QWidget, logs: QPlainTextEdit):
         super().__init__()
-        from PySide6.QtWidgets import QTabWidget
+        from ._qt_compat import QTabWidget
         tabs = QTabWidget()
         tabs.addTab(editor, "PDL Editor")
         tabs.addTab(logs, "Logs")
