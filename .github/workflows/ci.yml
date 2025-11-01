@@ -18,8 +18,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        # PySide6 wheels are not consistently available on 3.13 across all OSes yet
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
+        exclude:
+          - os: windows-latest
+            python-version: "3.13"
 
     steps:
       - name: Checkout
