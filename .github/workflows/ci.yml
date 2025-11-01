@@ -16,12 +16,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       QT_QPA_PLATFORM: offscreen
+      PYTHONPATH: .
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        # Temporarily exclude 3.13 until PySide6 wheels are widely available
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        exclude:
+          # PySide6 wheels commonly unavailable; we run source-based tests without install anyway,
+          # but Windows often has additional constraints — trim the riskiest combos
+          - os: windows-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.14"
 
     steps:
       - name: Checkout
@@ -33,17 +40,23 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install package (editable) + test deps
+      - name: Install deps (editable)
+        if: ${{ matrix.python-version == '3.11' || matrix.python-version == '3.12' }}
         run: |
           python -m pip install --upgrade pip
           pip install -e .
           pip install pytest
 
-      - name: Run unit tests
-        env:
-          QT_QPA_PLATFORM: offscreen
+      - name: Install deps (source-run)
+        if: ${{ matrix.python-version != '3.11' && matrix.python-version != '3.12' }}
         run: |
-          python -m pytest -q
+          python -m pip install --upgrade pip
+          pip install pytest jsonschema pyyaml rich
+          # Try to install PySide6 where available; ignore if not
+          pip install PySide6 || echo "::warning ::PySide6 not available; GUI imports will use stubs"
+
+      - name: Run unit tests
+        run: python -m pytest -q
 
       - name: Validate example profiles
         run: |
