@@ -86,6 +86,12 @@ def main():
     ins.add_argument("--dest", required=True, help="Destination Orca presets directory")
     ins.add_argument("--backup", help="Path to backup ZIP of overwritten files")
     ins.add_argument("--dry-run", action="store_true", help="Compute and print plan without writing files")
+
+    # convert
+    cv = sub.add_parser("convert", help="Convert from other formats")
+    cv.add_argument("--from", dest="from_fmt", required=True, choices=["cura"], help="Source format")
+    cv.add_argument("--in", dest="src", required=True, help="Input file or directory to convert")
+    cv.add_argument("--out", dest="out", required=True, help="Output directory (printers)")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -103,6 +109,15 @@ def main():
         res = perform_install(ops, backup_zip=Path(args.backup) if args.backup else None)
         print(f"[INSTALL] written={res['written']} skipped={res['skipped']} total={res['total']}")
         raise SystemExit(0)
+    if args.cmd == "convert":
+        if args.from_fmt == "cura":
+            from ..plugins.converters.cura import convert_cura_input
+            out_dir = Path(args.out)
+            written = convert_cura_input(Path(args.src), out_dir)
+            for w in written:
+                print(f"[WROTE] {w}")
+            print(f"[SUMMARY] wrote={len(written)}")
+            raise SystemExit(0)
 
 if __name__ == "__main__":
     main()
