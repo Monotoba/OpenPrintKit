@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/pdl.schema.json",
+  "title": "Printer Definition Language (PDL)",
+  "type": "object",
+  "properties": {
+    "pdl_version": { "type": ["string", "number"] },
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "firmware": { "type": "string" },
+    "kinematics": { "type": "string" },
+    "geometry": {
+      "type": "object",
+      "properties": {
+        "bed_shape": { "type": "array" },
+        "z_height": { "type": ["number", "integer"] }
+      },
+      "required": ["bed_shape", "z_height"]
+    }
+  },
+  "required": ["pdl_version", "id", "name", "firmware", "kinematics", "geometry"]
+}
