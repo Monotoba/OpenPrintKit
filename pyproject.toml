@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 opk = "opk.cli.__main__:main"
+opk-gui = "opk.ui.main_window:main"
 
 [tool.black]
 line-length = 100

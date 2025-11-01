@@ -71,3 +71,17 @@ PYTHONPATH=. pytest -q
 - If `pytest` can’t import `opk`, prepend `PYTHONPATH=.` as shown above.
 - If `opk` is not found, ensure your virtual environment is active and `pip install -e .` completed successfully.
 
+## GUI (Optional)
+
+Launch the desktop app:
+
+```bash
+opk-gui
+```
+
+Available from the menu:
+
+- Validate JSON files against schema
+- Run rule checks
+- Build Orca bundle
+- Initialize a workspace

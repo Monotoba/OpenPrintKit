@@ -77,7 +77,7 @@ OpenPrintKit/
 ├─ schemas/               # JSON schemas for printer/filament/process/bundle
 ├─ examples/              # Example JSON profiles (LK5 Pro)
 ├─ tests/                 # Pytest unit tests (4 passing)
-└─ dist/                  # Output bundles (.orca_printer)
+ └─ dist/                  # Output bundles (.orca_printer)
 ```
 
 ### CLI Overview
@@ -86,6 +86,11 @@ OpenPrintKit/
 - `opk rules [--printer P] [--filament F] [--process S]` — Rule checks (warnings/errors) with summary and exit code 2 on errors
 - `opk bundle --in SRC --out OUT.orca_printer` — Build Orca bundle from `printers/`, `filaments/`, `processes/`
 - `opk workspace init ROOT [--no-examples]` — Scaffold a standard workspace
+
+### GUI
+
+- Launch with `opk-gui`
+- Menu actions: Validate, Run Rules, Build Bundle, Workspace Init
 
 🧩 Features
 
