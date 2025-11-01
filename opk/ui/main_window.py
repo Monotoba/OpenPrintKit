@@ -23,6 +23,7 @@ from .gcode_preview_dialog import GcodePreviewDialog
 from .gcode_validate_dialog import GcodeValidateDialog
 from PySide6.QtCore import QSettings
 from .preferences_dialog import PreferencesDialog
+from .pdl_editor import PDLForm
 
 
 class MainWindow(QMainWindow):
@@ -38,11 +39,12 @@ class MainWindow(QMainWindow):
             self.restoreState(state)
 
     def _init_ui(self):
-        w = QWidget(); lay = QVBoxLayout(w)
+        # Central: tabbed editor + logs
+        self.editor = PDLForm(self)
         self.log_view = QPlainTextEdit(readOnly=True)
         self.log_view.setPlaceholderText("Logs will appear here…")
-        lay.addWidget(self.log_view)
-        self.setCentralWidget(w)
+        container = QTabWidgetWrap(self.editor, self.log_view)
+        self.setCentralWidget(container)
         self.setAcceptDrops(True)
         self.statusBar().showMessage("Ready")
 
@@ -57,8 +59,10 @@ class MainWindow(QMainWindow):
         act_ws_init = QAction(style.standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder), "Workspace Init…", self); act_ws_init.triggered.connect(self._workspace_init)
         act_install = QAction(style.standardIcon(QStyle.StandardPixmap.SP_ArrowDown), "Install to Orca…", self); act_install.triggered.connect(self._install)
         act_exit = QAction("Exit", self); act_exit.triggered.connect(self.close)
+        act_open_pdl = QAction("Open PDL…", self); act_open_pdl.triggered.connect(self._open_pdl)
+        act_save_pdl = QAction("Save PDL As…", self); act_save_pdl.triggered.connect(self._save_pdl)
 
-        for a in (act_validate, act_rules, act_bundle, act_ws_init, act_install):
+        for a in (act_open_pdl, act_save_pdl, act_validate, act_rules, act_bundle, act_ws_init, act_install):
             file_menu.addAction(a)
         file_menu.addSeparator(); file_menu.addAction(act_exit)
 
@@ -177,6 +181,38 @@ class MainWindow(QMainWindow):
             self.settings.setValue("paths/orca_preset", dlg.orca_preset_dir)
             self.log(f"[PREFS] Orca presets set to: {dlg.orca_preset_dir}")
 
+    def _open_pdl(self):
+        fn, _ = QFileDialog.getOpenFileName(self, "Open PDL (YAML/JSON)", "", "PDL (*.yaml *.yml *.json)")
+        if not fn:
+            return
+        import json, yaml
+        p = Path(fn)
+        data = json.loads(p.read_text(encoding="utf-8")) if p.suffix.lower()==".json" else yaml.safe_load(p.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            QMessageBox.warning(self, "Open PDL", "Invalid PDL file")
+            return
+        self.editor.load_pdl(data)
+        self.log(f"[PDL] Loaded {fn}")
+
+    def _save_pdl(self):
+        fn, _ = QFileDialog.getSaveFileName(self, "Save PDL As", "", "YAML (*.yaml *.yml);;JSON (*.json)")
+        if not fn:
+            return
+        import json, yaml
+        obj = self.editor.dump_pdl()
+        try:
+            from ..core import schema as S
+            S.validate("pdl", obj)
+        except Exception as e:
+            if QMessageBox.question(self, "PDL Validation", f"Validation failed:\n{e}\n\nSave anyway?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+                return
+        p = Path(fn)
+        if p.suffix.lower() == ".json":
+            p.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+        else:
+            p.write_text(yaml.safe_dump(obj, sort_keys=False), encoding="utf-8")
+        self.log(f"[PDL] Saved {fn}")
+
     def _gcode_preview(self):
         dlg = GcodePreviewDialog(self)
         dlg.resize(700, 600)
@@ -242,3 +278,14 @@ def main():
     m.settings.setValue("window/geometry", m.saveGeometry())
     m.settings.setValue("window/state", m.saveState())
     sys.exit(ret)
+
+
+class QTabWidgetWrap(QWidget):
+    def __init__(self, editor: QWidget, logs: QPlainTextEdit):
+        super().__init__()
+        from PySide6.QtWidgets import QTabWidget
+        tabs = QTabWidget()
+        tabs.addTab(editor, "PDL Editor")
+        tabs.addTab(logs, "Logs")
+        lay = QVBoxLayout(self)
+        lay.addWidget(tabs)
