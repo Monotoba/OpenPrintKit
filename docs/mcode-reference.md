@@ -31,6 +31,16 @@ Note: Klipper implements most functions through macros and [output_pin]; equival
 - M191 — Wait for chamber temperature — Marlin, RRF
 - M42 (raw pin control) — Can drive fans/outputs — Marlin, RRF
 
+## Exhaust & Auxiliary Outputs
+
+- Exhaust: drive via dedicated fan channel (M106 Pn / M107 Pn) or raw output pin (M42 Pnn Snnn). Configurable in `machine_control.exhaust`.
+- Auxiliary Outputs (M42): defined via `machine_control.aux_outputs` with pin and start/end values.
+
+## Custom Peripherals (Hooked M-codes)
+
+- Attach arbitrary M-code sequences to any lifecycle hook using `machine_control.custom_peripherals`.
+- In the GUI (Peripherals tab), use the “Custom Peripherals” list to add items with a label, a hook selector, and a multi-line script.
+
 ## Filament / Extruder & Servo Control
 
 - M280 Pn Snnn — Servo to angle — Marlin
@@ -89,6 +99,11 @@ Note: Klipper implements most functions through macros and [output_pin]; equival
 - RepRapFirmware (Duet): Structured device creation (e.g., M950), lights (M150), case light (M355).
 - Smoothieware: Subset similar to Marlin.
 
+### Policy Notes (Generators)
+
+- Klipper: Camera trigger (M240) is mapped to `M118 TIMELAPSE_TAKE_FRAME` by default when using structured machine control; customize with the camera command field.
+- RRF/Marlin: Commands are passed through; ensure device indices/pins match your firmware configuration.
+
 ## Summary by Category
 
 - Power: M80, M81, M18, M84 — PSU/steppers
@@ -99,4 +114,3 @@ Note: Klipper implements most functions through macros and [output_pin]; equival
 - Messages: M117, M118 — LCD/host
 - Diagnostics: M122, M503, M500 — Diagnostics/store
 - Safety: M112, M999 — Stop/reset
-

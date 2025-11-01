@@ -5,7 +5,7 @@ from ..core import schema as S
 from ..core.io import load_json
 from ..core.bundle import build_bundle
 from ..core.install import plan_install, perform_install
-from ..core.gcode import list_hooks as gc_list_hooks, render_sequence as gc_render, apply_machine_control as gc_apply_mc
+from ..core.gcode import list_hooks as gc_list_hooks, render_sequence as gc_render, render_hooks_with_firmware as gc_render_fw
 
 
 def cmd_workspace_init(root, with_examples: bool):
@@ -140,8 +140,8 @@ def main():
         import json as _json, yaml as _yaml
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
-        # Merge machine_control into gcode for preview
-        gcode = gc_apply_mc(data or {}, (data or {}).get("gcode") or {})
+        # Merge machine_control and apply firmware mapping
+        gcode = gc_render_fw(data or {})
         hooks = gc_list_hooks(gcode)
         for h in hooks:
             print(h)
@@ -152,7 +152,7 @@ def main():
         import json as _json, yaml as _yaml
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
-        gcode = gc_apply_mc(data or {}, (data or {}).get("gcode") or {})
+        gcode = gc_render_fw(data or {})
         seq = None
         if args.hook in gcode:
             seq = gcode.get(args.hook)
@@ -174,7 +174,7 @@ def main():
         import json as _json, yaml as _yaml
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
-        gcode = gc_apply_mc(data or {}, (data or {}).get("gcode") or {})
+        gcode = gc_render_fw(data or {})
         hooks = gc_list_hooks(gcode)
         vars_obj = _json.loads(_Path(args.vars_path).read_text(encoding="utf-8"))
         total_missing = {}

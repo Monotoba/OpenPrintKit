@@ -210,3 +210,26 @@ def apply_machine_control(pdl: Dict[str, object], base_gcode: Dict[str, List[str
     if start: out["start"] = start
     if end: out["end"] = end
     return out
+
+
+def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
+    """Return hooks merged from pdl['gcode'] and 'machine_control', applying
+    simple firmware-specific policies where appropriate.
+    """
+    base = (pdl or {}).get("gcode") or {}
+    out = apply_machine_control(pdl, base)
+    firmware = str((pdl or {}).get("firmware") or "").lower()
+    # Klipper: prefer host/macro messages for camera trigger (M240 alternative)
+    if firmware == "klipper":
+        def _map(seq: List[str] | None) -> List[str] | None:
+            if not seq: return seq
+            mapped: List[str] = []
+            for s in seq:
+                if isinstance(s, str) and s.strip().upper().startswith("M240"):
+                    mapped.append("M118 TIMELAPSE_TAKE_FRAME")
+                else:
+                    mapped.append(s)
+            return mapped
+        out["before_snapshot"] = _map(out.get("before_snapshot")) or out.get("before_snapshot")
+        out["after_snapshot"] = _map(out.get("after_snapshot")) or out.get("after_snapshot")
+    return out
