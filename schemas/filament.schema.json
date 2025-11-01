@@ -6,15 +6,14 @@
   "properties": {
     "type": { "const": "filament" },
     "name": { "type": "string" },
-    "filament_type": {
-      "type": "string",
-      "enum": ["PLA", "PETG", "ABS", "TPU", "Nylon", "Other"]
-    },
-    "nozzle_temperature": { "type": "number", "minimum": 150, "maximum": 300 },
-    "bed_temperature": { "type": "number", "minimum": 0, "maximum": 130 },
+    "filament_type": { "type": "string" },
+    "nozzle_temperature": { "type": "number", "minimum": 150, "maximum": 350 },
+    "bed_temperature": { "type": "number", "minimum": 0, "maximum": 150 },
     "retraction_length": { "type": "number", "minimum": 0, "maximum": 10 },
     "retraction_speed": { "type": "number", "minimum": 1, "maximum": 200 },
-    "fan_speed": { "type": "number", "minimum": 0, "maximum": 100 }
+    "fan_speed": { "type": "number", "minimum": 0, "maximum": 100 },
+    "color": { "type": "string" },
+    "color_hex": { "type": "string", "pattern": "^#?[0-9A-Fa-f]{6}$" }
   },
   "additionalProperties": true
 }

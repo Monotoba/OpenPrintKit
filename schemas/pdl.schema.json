@@ -7,7 +7,7 @@
     "pdl_version": {"type":"string"},
     "id": {"type":"string"},
     "name":{"type":"string"},
-    "firmware":{"type":"string","enum":["marlin","klipper","reprap","rrf","smoothie"]},
+    "firmware":{"type":"string","enum":["marlin","klipper","reprap","rrf","smoothie","bambu","crealityos","other"]},
     "kinematics":{"type":"string","enum":["cartesian","corexy","corexz","delta","scara","polar"]},
     "geometry":{
       "type":"object",
@@ -17,6 +17,57 @@
         "z_height":{"type":"number","exclusiveMinimum":0},
         "origin":{"type":"string"}
       }
+    },
+    "extruders":{
+      "type":"array",
+      "minItems":1,
+      "items":{
+        "type":"object",
+        "required":["nozzle_diameter"],
+        "properties":{
+          "id":{"type":"string"},
+          "nozzle_diameter":{"type":"number","minimum":0.1,"maximum":2.0},
+          "nozzle_type":{"type":"string","enum":["brass","hardened_steel","stainless","ruby","tungsten","other"]},
+          "drive":{"type":"string","enum":["direct","bowden","other"]},
+          "max_nozzle_temperature":{"type":"number","minimum":100,"maximum":400},
+          "mixing_channels":{"type":"integer","minimum":1,"default":1},
+          "supported_filaments":{"type":"array","items":{"type":"string"}}
+        },
+        "additionalProperties": true
+      }
+    },
+    "multi_material":{
+      "type":"object",
+      "properties":{
+        "spool_banks":{
+          "type":"array",
+          "items":{
+            "type":"object",
+            "required":["name","capacity"],
+            "properties":{
+              "name":{"type":"string"},
+              "capacity":{"type":"integer","minimum":1}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "features":{
+      "type":"object",
+      "properties":{
+        "auto_bed_leveling":{"type":"boolean"},
+        "probe":{
+          "type":"object",
+          "properties":{
+            "type":{"type":"string","enum":["inductive","bltouch","crt","strain_gauge","nozzle_contact","manual","other"]},
+            "mesh_size":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"integer","minimum":1}}
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true
