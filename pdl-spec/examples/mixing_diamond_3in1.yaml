@@ -1,0 +1,32 @@
+pdl_version: "1.0"
+id: mixing.diamond.3in1
+name: Diamond 3-in-1 Mixing Extruder (Generic)
+firmware: marlin
+kinematics: cartesian
+geometry:
+  bed_shape: [[0,0],[200,0],[200,200],[0,200]]
+  z_height: 200
+extruders:
+  - id: MIX
+    nozzle_diameter: 0.4
+    nozzle_type: brass
+    drive: direct
+    mixing_channels: 3
+gcode:
+  start:
+    - M140 S{bed}
+    - M104 S{nozzle}
+    - M190 S{bed}
+    - M109 S{nozzle}
+    - G28
+  tool_change:
+    - "; mixing tool change to input {tool}"
+  macros:
+    prime_mixing:
+      - G92 E0
+      - G1 X0 Y0 F6000
+      - G1 E10 F300
+      - G92 E0
+    purge_tower:
+      - "; print purge tower here"
+

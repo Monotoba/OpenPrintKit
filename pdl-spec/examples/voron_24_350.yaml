@@ -1,0 +1,52 @@
+pdl_version: "1.0"
+id: voron.24.350
+name: Voron 2.4 (350)
+firmware: klipper
+kinematics: corexy
+geometry:
+  bed_shape: [[0,0],[350,0],[350,350],[0,350]]
+  z_height: 350
+  origin: front_left
+extruders:
+  - id: E0
+    nozzle_diameter: 0.4
+    nozzle_type: hardened_steel
+    drive: direct
+    max_nozzle_temperature: 300
+  - id: E1
+    nozzle_diameter: 0.6
+    nozzle_type: brass
+    drive: direct
+multi_material:
+  spool_banks:
+    - name: AMS-1
+      capacity: 4
+features:
+  auto_bed_leveling: true
+  probe:
+    type: inductive
+    mesh_size: [7,7]
+gcode:
+  start:
+    - M140 S{bed}
+    - M104 S{nozzle}
+    - M190 S{bed}
+    - M109 S{nozzle}
+    - G28
+    - BED_MESH_PROFILE LOAD=default
+  end:
+    - M104 S0
+    - M140 S0
+    - G91
+    - G1 Z10 F3000
+    - G90
+    - M84
+  tool_change:
+    - "; tool change to T{tool}"
+  macros:
+    bed_mesh:
+      - G28
+      - BED_MESH_CLEAR
+      - BED_MESH_CALIBRATE
+      - SAVE_CONFIG
+
