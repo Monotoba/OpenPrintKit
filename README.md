@@ -37,6 +37,16 @@ opk validate examples/processes/Standard_0p20_LK5Pro.json
 
 # Bundle into an Orca-compatible archive
 opk bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer
+
+# Run rules checks across profiles (schema-independent sanity checks)
+opk rules \
+  --printer  examples/printers/Longer_LK5_Pro_Marlin.json \
+  --filament examples/filaments/PLA_Baseline_LK5Pro.json \
+  --process  examples/processes/Standard_0p20_LK5Pro.json
+
+# Initialize a new workspace (with examples)
+opk workspace init ./my-workspace
+ls ./my-workspace
 ```
 
 ✅ All example profiles validate successfully (4 tests passed).
@@ -67,6 +77,13 @@ OpenPrintKit/
 ├─ tests/                 # Pytest unit tests (4 passing)
 └─ dist/                  # Output bundles (.orca_printer)
 ```
+
+### CLI Overview
+
+- `opk validate {paths...}` — Schema validation for JSON profiles
+- `opk rules [--printer P] [--filament F] [--process S]` — Rule checks (warnings/errors) with summary and exit code 2 on errors
+- `opk bundle --in SRC --out OUT.orca_printer` — Build Orca bundle from `printers/`, `filaments/`, `processes/`
+- `opk workspace init ROOT [--no-examples]` — Scaffold a standard workspace
 
 🧩 Features
 
