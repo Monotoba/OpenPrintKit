@@ -1,0 +1,13 @@
+{
+  "type": "printer",
+  "name": "Voron 2.4 (350)",
+  "firmware": "Klipper",
+  "kinematics": "corexy",
+  "nozzle_diameter": 0.4,
+  "filament_diameter": 1.75,
+  "build_volume": [350, 350, 350],
+  "heated_bed": true,
+  "auto_bed_leveling": true,
+  "comments": "Voron 2.4 350mm build volume."
+}
+

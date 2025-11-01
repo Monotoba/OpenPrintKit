@@ -1,0 +1,13 @@
+{
+  "type": "printer",
+  "name": "Prusa i3 MK4",
+  "firmware": "Prusa Firmware 4.x",
+  "kinematics": "cartesian",
+  "nozzle_diameter": 0.4,
+  "filament_diameter": 1.75,
+  "build_volume": [250, 210, 220],
+  "heated_bed": true,
+  "auto_bed_leveling": true,
+  "comments": "Minimal Prusa i3 MK4 profile."
+}
+

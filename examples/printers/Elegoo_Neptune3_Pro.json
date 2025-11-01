@@ -1,0 +1,13 @@
+{
+  "type": "printer",
+  "name": "Elegoo Neptune 3 Pro",
+  "firmware": "Marlin 2.x",
+  "kinematics": "cartesian",
+  "nozzle_diameter": 0.4,
+  "filament_diameter": 1.75,
+  "build_volume": [225, 225, 280],
+  "heated_bed": true,
+  "auto_bed_leveling": true,
+  "comments": "Minimal Neptune 3 Pro example."
+}
+

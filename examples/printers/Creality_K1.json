@@ -1,0 +1,13 @@
+{
+  "type": "printer",
+  "name": "Creality K1",
+  "firmware": "CrealityOS",
+  "kinematics": "corexy",
+  "nozzle_diameter": 0.4,
+  "filament_diameter": 1.75,
+  "build_volume": [220, 220, 250],
+  "heated_bed": true,
+  "auto_bed_leveling": true,
+  "comments": "Minimal K1 coreXY example."
+}
+
