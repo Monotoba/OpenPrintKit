@@ -50,3 +50,24 @@ def test_pdl_with_limits():
         "limits": {"print_speed_max": 120, "travel_speed_max": 200, "acceleration_max": 5000, "jerk_max": 8}
     }
     S.validate("pdl", pdl)
+
+def test_pdl_probe_polarity_and_endstops():
+    pdl = {
+        "pdl_version": "1.0",
+        "id": "polarity.test",
+        "name": "Polarity Test",
+        "firmware": "marlin",
+        "kinematics": "cartesian",
+        "geometry": {"bed_shape": [[0,0],[220,0],[220,220],[0,220]], "z_height": 220},
+        "extruders": [{"nozzle_diameter": 0.4}],
+        "features": {
+            "auto_bed_leveling": True,
+            "probe": {"type": "bltouch", "mesh_size": [5,5], "active_low": True}
+        },
+        "endstops": {
+            "x_min_active_low": True,
+            "y_min_active_low": True,
+            "z_min_active_low": True
+        }
+    }
+    S.validate("pdl", pdl)

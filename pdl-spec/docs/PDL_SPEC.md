@@ -93,6 +93,7 @@ The `features` object includes `auto_bed_leveling` and optional `probe` details:
 
 - `probe.type`: inductive | bltouch | crt | strain_gauge | nozzle_contact | manual | other
 - `probe.mesh_size`: [rows, cols] integer tuple
+- `probe.active_low`: boolean for probe signal polarity
 
 ### 3.4 G-code Blocks and Macros
 
@@ -173,3 +174,18 @@ PDL may embed an array of filament/material presets under `materials`. Each entr
 - Color metadata: `color` or `color_hex`
 
 This is complementary to standalone Filament profiles (FDL). Use embedded presets for turnkey printer bundles, and standalone FDL for shared libraries.
+### 3.7 Endstops (Limit Switches)
+
+Use the top‑level `endstops` object to declare per‑axis limit switch polarity:
+
+```yaml
+endstops:
+  x_min_active_low: true
+  x_max_active_low: false
+  y_min_active_low: true
+  y_max_active_low: false
+  z_min_active_low: true
+  z_max_active_low: false
+```
+
+If omitted, slicers or firmware defaults apply.

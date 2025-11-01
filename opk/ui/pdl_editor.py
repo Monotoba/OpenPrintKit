@@ -153,10 +153,25 @@ class PDLForm(QWidget):
         self.f_probe_type = QComboBox(); self.f_probe_type.addItems(PROBE_TYPES)
         self.f_mesh_r = QSpinBox(); self.f_mesh_r.setRange(1, 20)
         self.f_mesh_c = QSpinBox(); self.f_mesh_c.setRange(1, 20)
+        self.f_probe_active_low = QCheckBox()
+        # Endstops group
+        es = QGroupBox("Endstops Polarity (Active Low)")
+        es_form = QFormLayout(es)
+        self.es_x_min = QCheckBox(); self.es_x_max = QCheckBox()
+        self.es_y_min = QCheckBox(); self.es_y_max = QCheckBox()
+        self.es_z_min = QCheckBox(); self.es_z_max = QCheckBox()
+        es_form.addRow("X Min", self.es_x_min)
+        es_form.addRow("X Max", self.es_x_max)
+        es_form.addRow("Y Min", self.es_y_min)
+        es_form.addRow("Y Max", self.es_y_max)
+        es_form.addRow("Z Min", self.es_z_min)
+        es_form.addRow("Z Max", self.es_z_max)
         form.addRow("Auto Bed Leveling", self.f_abl)
         form.addRow("Probe Type", self.f_probe_type)
         form.addRow("Mesh Size (R)", self.f_mesh_r)
         form.addRow("Mesh Size (C)", self.f_mesh_c)
+        form.addRow("Probe Active Low", self.f_probe_active_low)
+        form.addRow(es)
         self.tabs.addTab(w, "Features")
 
     # ---------- Filaments ----------
@@ -359,6 +374,15 @@ class PDLForm(QWidget):
         mesh = pr.get("mesh_size") or [7,7]
         self.f_mesh_r.setValue(int(mesh[0] if len(mesh) > 0 else 7))
         self.f_mesh_c.setValue(int(mesh[1] if len(mesh) > 1 else 7))
+        self.f_probe_active_low.setChecked(bool(pr.get("active_low") or False))
+        # Endstops
+        es = g.get("endstops") or {}
+        self.es_x_min.setChecked(bool(es.get("x_min_active_low") or False))
+        self.es_x_max.setChecked(bool(es.get("x_max_active_low") or False))
+        self.es_y_min.setChecked(bool(es.get("y_min_active_low") or False))
+        self.es_y_max.setChecked(bool(es.get("y_max_active_low") or False))
+        self.es_z_min.setChecked(bool(es.get("z_min_active_low") or False))
+        self.es_z_max.setChecked(bool(es.get("z_max_active_low") or False))
 
         # G-code explicit hooks
         gc = g.get("gcode") or {}
@@ -459,7 +483,7 @@ class PDLForm(QWidget):
 
         # Features
         feat: Dict[str, Any] = {"auto_bed_leveling": self.f_abl.isChecked()}
-        feat["probe"] = {"type": self.f_probe_type.currentText(), "mesh_size": [self.f_mesh_r.value(), self.f_mesh_c.value()]}
+        feat["probe"] = {"type": self.f_probe_type.currentText(), "mesh_size": [self.f_mesh_r.value(), self.f_mesh_c.value()], "active_low": self.f_probe_active_low.isChecked()}
         g["features"] = feat
 
         # G-code explicit hooks
@@ -499,7 +523,7 @@ class PDLForm(QWidget):
         if self.l_jerk.value(): lim_out["jerk_max"] = self.l_jerk.value()
         if lim_out:
             g["limits"] = lim_out
-        
+
         # Materials (Filaments)
         mats: List[Dict[str, Any]] = []
         for r in range(self.t_filaments.rowCount()):
@@ -534,6 +558,17 @@ class PDLForm(QWidget):
             mats.append(entry)
         if mats:
             g["materials"] = mats
+        # Endstops
+        es_out: Dict[str, Any] = {
+            "x_min_active_low": self.es_x_min.isChecked(),
+            "x_max_active_low": self.es_x_max.isChecked(),
+            "y_min_active_low": self.es_y_min.isChecked(),
+            "y_max_active_low": self.es_y_max.isChecked(),
+            "z_min_active_low": self.es_z_min.isChecked(),
+            "z_max_active_low": self.es_z_max.isChecked(),
+        }
+        if any(es_out.values()):
+            g["endstops"] = es_out
         return g
 
     # --- Helpers for Bed Shape editor

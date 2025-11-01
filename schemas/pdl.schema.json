@@ -72,10 +72,23 @@
           "type":"object",
           "properties":{
             "type":{"type":"string","enum":["inductive","bltouch","crt","strain_gauge","nozzle_contact","manual","other"]},
-            "mesh_size":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"integer","minimum":1}}
+            "mesh_size":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"integer","minimum":1}},
+            "active_low":{"type":"boolean"}
           },
           "additionalProperties": true
         }
+      },
+      "additionalProperties": true
+    },
+    "endstops":{
+      "type":"object",
+      "properties":{
+        "x_min_active_low":{"type":"boolean"},
+        "x_max_active_low":{"type":"boolean"},
+        "y_min_active_low":{"type":"boolean"},
+        "y_max_active_low":{"type":"boolean"},
+        "z_min_active_low":{"type":"boolean"},
+        "z_max_active_low":{"type":"boolean"}
       },
       "additionalProperties": true
     },
