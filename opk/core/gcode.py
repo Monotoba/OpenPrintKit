@@ -267,4 +267,19 @@ def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
             add(seq, "M9")
             out["end"] = seq
 
+    # OpenPrintTag injection: emit as comment block at start
+    opt = (pdl or {}).get("open_print_tag") or {}
+    if isinstance(opt, dict) and opt:
+        import json as _json
+        block = ";BEGIN:OPENPRINTTAG"
+        payload = {k:v for k,v in opt.items() if v not in (None,"")}
+        try:
+            block_json = ";OPT:" + _json.dumps(payload, ensure_ascii=False)
+        except Exception:
+            block_json = ";OPT:{\"error\":\"invalid tag\"}"
+        endb = ";END:OPENPRINTTAG"
+        seq = list(out.get("start") or [])
+        seq = [block, block_json, endb] + seq
+        out["start"] = seq
+
     return out

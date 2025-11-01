@@ -43,6 +43,7 @@ class PDLForm(QWidget):
         self._init_features_tab()
         self._init_machine_control_tab()
         self._init_peripherals_tab()
+        self._init_openprinttag_tab()
         self._init_gcode_tab()
 
         self.set_defaults()
@@ -288,6 +289,36 @@ class PDLForm(QWidget):
         rowcp.addWidget(cp_add); rowcp.addWidget(cp_del); rowcp.addStretch(1)
         form.addRow(rowcp)
         self.tabs.addTab(w, "Peripherals")
+
+    # ---------- OpenPrintTag ----------
+    def _init_openprinttag_tab(self):
+        w = QWidget(); form = QFormLayout(w)
+        self.opt_id = QLineEdit(); self.opt_id.setToolTip("OpenPrintTag ID")
+        self.opt_version = QLineEdit(); self.opt_version.setToolTip("OpenPrintTag version")
+        self.opt_url = QLineEdit(); self.opt_url.setToolTip("URL for documentation or support")
+        self.opt_manu = QLineEdit(); self.opt_manu.setToolTip("Manufacturer")
+        self.opt_model = QLineEdit(); self.opt_model.setToolTip("Model")
+        self.opt_serial = QLineEdit(); self.opt_serial.setToolTip("Serial number")
+        self.opt_notes = QTextEdit(); self.opt_notes.setToolTip("Notes")
+        form.addRow("ID", self.opt_id)
+        form.addRow("Version", self.opt_version)
+        form.addRow("URL", self.opt_url)
+        form.addRow("Manufacturer", self.opt_manu)
+        form.addRow("Model", self.opt_model)
+        form.addRow("Serial", self.opt_serial)
+        form.addRow(QLabel("Notes"), self.opt_notes)
+        # Custom data key/values
+        self.t_opt_data = QTableWidget(0, 2)
+        self.t_opt_data.setHorizontalHeaderLabels(["Key","Value"])
+        self.t_opt_data.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        form.addRow(QLabel("Custom Data"))
+        form.addRow(self.t_opt_data)
+        row = QHBoxLayout();
+        add = QPushButton("Add Data"); add.clicked.connect(self._opt_add)
+        rem = QPushButton("Remove Data"); rem.clicked.connect(self._opt_del)
+        row.addWidget(add); row.addWidget(rem); row.addStretch(1)
+        form.addRow(row)
+        self.tabs.addTab(w, "OpenPrintTag")
 
     # ---------- Filaments ----------
     def _init_filaments_tab(self):
@@ -553,6 +584,20 @@ class PDLForm(QWidget):
             self.t_hooks.setItem(r, 0, QTableWidgetItem(name))
             te = QTextEdit(); te.setPlainText("\n".join(seq or []))
             self.t_hooks.setCellWidget(r, 1, te)
+        # OpenPrintTag
+        opt = g.get("open_print_tag") or {}
+        self.opt_id.setText(str(opt.get("id") or ""))
+        self.opt_version.setText(str(opt.get("version") or ""))
+        self.opt_url.setText(str(opt.get("url") or ""))
+        self.opt_manu.setText(str(opt.get("manufacturer") or ""))
+        self.opt_model.setText(str(opt.get("model") or ""))
+        self.opt_serial.setText(str(opt.get("serial") or ""))
+        self.opt_notes.setPlainText(str(opt.get("notes") or ""))
+        self.t_opt_data.setRowCount(0)
+        for k, v in (opt.get("data") or {}).items():
+            r = self.t_opt_data.rowCount(); self.t_opt_data.insertRow(r)
+            self.t_opt_data.setItem(r, 0, QTableWidgetItem(str(k)))
+            self.t_opt_data.setItem(r, 1, QTableWidgetItem(str(v)))
         # Machine control: infer checkboxes from start/end and structured mc
         mc = (g.get("machine_control") or {})
         start_seq = gc.get("start") or []
@@ -801,6 +846,25 @@ class PDLForm(QWidget):
             pass
         else:
             g["machine_control"] = mc
+        # OpenPrintTag serialization
+        opt: Dict[str, Any] = {}
+        if self.opt_id.text().strip(): opt["id"] = self.opt_id.text().strip()
+        if self.opt_version.text().strip(): opt["version"] = self.opt_version.text().strip()
+        if self.opt_url.text().strip(): opt["url"] = self.opt_url.text().strip()
+        if self.opt_manu.text().strip(): opt["manufacturer"] = self.opt_manu.text().strip()
+        if self.opt_model.text().strip(): opt["model"] = self.opt_model.text().strip()
+        if self.opt_serial.text().strip(): opt["serial"] = self.opt_serial.text().strip()
+        if self.opt_notes.toPlainText().strip(): opt["notes"] = self.opt_notes.toPlainText().strip()
+        data_map: Dict[str, Any] = {}
+        for r in range(self.t_opt_data.rowCount()):
+            k = self.t_opt_data.item(r,0).text().strip() if self.t_opt_data.item(r,0) else ""
+            v = self.t_opt_data.item(r,1).text().strip() if self.t_opt_data.item(r,1) else ""
+            if k:
+                data_map[k] = v
+        if data_map:
+            opt["data"] = data_map
+        if opt:
+            g["open_print_tag"] = opt
         # Limits
 
         # Limits
@@ -858,6 +922,16 @@ class PDLForm(QWidget):
         if any(es_out.values()):
             g["endstops"] = es_out
         return g
+
+    def _opt_add(self):
+        r = self.t_opt_data.rowCount(); self.t_opt_data.insertRow(r)
+        self.t_opt_data.setItem(r, 0, QTableWidgetItem("key"))
+        self.t_opt_data.setItem(r, 1, QTableWidgetItem("value"))
+
+    def _opt_del(self):
+        rows = sorted({i.row() for i in self.t_opt_data.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_opt_data.removeRow(r)
 
     # --- Helpers for Bed Shape editor
     def _add_bed_point(self):

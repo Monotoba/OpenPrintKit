@@ -233,6 +233,21 @@
       },
       "additionalProperties": true
     }
+    ,
+    "open_print_tag":{
+      "type":"object",
+      "properties":{
+        "id":{"type":"string"},
+        "version":{"type":"string"},
+        "url":{"type":"string"},
+        "manufacturer":{"type":"string"},
+        "model":{"type":"string"},
+        "serial":{"type":"string"},
+        "notes":{"type":"string"},
+        "data":{"type":"object","additionalProperties":{"type":"string"}}
+      },
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

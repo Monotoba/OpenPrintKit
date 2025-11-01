@@ -109,6 +109,9 @@ def main():
 
     pv = sub.add_parser("pdl-validate", help="Validate a PDL file against schema and rules")
     pv.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
+
+    tp = sub.add_parser("tag-preview", help="Preview OpenPrintTag block for a PDL file")
+    tp.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -211,6 +214,17 @@ def main():
         s = summarize(issues)
         print(f"[SUMMARY] errors={s['error']} warns={s['warn']} infos={s['info']} total={s['total']}")
         raise SystemExit(0 if s['error'] == 0 else 2)
+    if args.cmd == "tag-preview":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        from ..core.gcode import render_hooks_with_firmware as _render
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        hooks = _render(data or {})
+        start = hooks.get("start") or []
+        for line in start[:3]:
+            print(line)
+        raise SystemExit(0)
 
 if __name__ == "__main__":
     main()

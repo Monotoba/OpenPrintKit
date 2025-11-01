@@ -10,3 +10,6 @@ This help page summarizes OPK concepts and UI:
 
 See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-reference.md`.
 
+## OpenPrintTag
+
+Embed metadata in start G-code as comments for downstream tools. Configure under the OpenPrintTag tab; the generator inserts a `;BEGIN:OPENPRINTTAG` block with a JSON payload.
