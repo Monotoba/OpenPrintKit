@@ -12,6 +12,7 @@ Commands:
 - `opk gcode-preview --pdl PDL.yaml --hook start --vars vars.json` — Render a hook with provided variables.
 - `opk gcode-validate --pdl PDL.yaml --vars vars.json` — Validate all hooks for unresolved placeholders.
 - `opk pdl-validate --pdl PDL.yaml` — Validate PDL schema and machine_control rules.
+- `opk tag-preview --pdl PDL.yaml` — Print the OpenPrintTag block that is injected at start.
+- `opk gen-snippets --pdl PDL.yaml --out-dir OUT [--firmware FW]` — Generate firmware-ready `*_start.gcode` and `*_end.gcode` files.
 
 See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.
-

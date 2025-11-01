@@ -283,3 +283,14 @@ def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
         out["start"] = seq
 
     return out
+
+
+def generate_snippets(pdl: Dict[str, object], firmware: str | None = None) -> tuple[list[str], list[str]]:
+    """Return (start_lines, end_lines) after applying machine_control and firmware mapping.
+    If firmware is provided, overrides pdl['firmware'] for mapping.
+    """
+    p = dict(pdl or {})
+    if firmware:
+        p["firmware"] = firmware
+    hooks = render_hooks_with_firmware(p)
+    return (hooks.get("start") or [], hooks.get("end") or [])

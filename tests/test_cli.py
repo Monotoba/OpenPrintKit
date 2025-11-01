@@ -88,3 +88,26 @@ machine_control:
     assert code == 0
     out = capsys.readouterr().out
     assert "[SUMMARY]" in out
+
+
+def test_cli_gen_snippets(tmp_path: Path, capsys):
+    pdl = tmp_path / "test.yaml"
+    outd = tmp_path / "out"
+    pdl.write_text("""\
+pdl_version: "1.0"
+id: test
+name: Test
+firmware: marlin
+kinematics: cartesian
+geometry:
+  bed_shape: [[0,0],[200,0],[200,200],[0,200]]
+  z_height: 200
+extruders: [{ nozzle_diameter: 0.4 }]
+machine_control:
+  psu_on_start: true
+""", encoding="utf-8")
+    code = run_main(["opk", "gen-snippets", "--pdl", str(pdl), "--out-dir", str(outd)])
+    assert code == 0
+    assert (outd / "test_start.gcode").exists()
+    start_text = (outd / "test_start.gcode").read_text(encoding="utf-8")
+    assert "M80" in start_text

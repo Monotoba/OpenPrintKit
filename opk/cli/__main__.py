@@ -112,6 +112,11 @@ def main():
 
     tp = sub.add_parser("tag-preview", help="Preview OpenPrintTag block for a PDL file")
     tp.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
+
+    gs = sub.add_parser("gen-snippets", help="Generate firmware-ready start/end G-code snippets")
+    gs.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
+    gs.add_argument("--out-dir", required=True, help="Output directory for snippets")
+    gs.add_argument("--firmware", help="Override firmware for mapping (e.g., marlin, rrf, klipper, grbl, linuxcnc)")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -224,6 +229,20 @@ def main():
         start = hooks.get("start") or []
         for line in start[:3]:
             print(line)
+        raise SystemExit(0)
+    if args.cmd == "gen-snippets":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        from ..core.gcode import generate_snippets as _gen
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        start, end = _gen(data or {}, firmware=args.firmware)
+        outdir = _Path(args.out_dir); outdir.mkdir(parents=True, exist_ok=True)
+        base = _Path(args.pdl).stem
+        (_Path(outdir) / f"{base}_start.gcode").write_text("\n".join(start) + "\n", encoding="utf-8")
+        (_Path(outdir) / f"{base}_end.gcode").write_text("\n".join(end) + "\n", encoding="utf-8")
+        print(f"[WROTE] {outdir}/{base}_start.gcode")
+        print(f"[WROTE] {outdir}/{base}_end.gcode")
         raise SystemExit(0)
 
 if __name__ == "__main__":
