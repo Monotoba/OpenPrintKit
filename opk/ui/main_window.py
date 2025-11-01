@@ -21,6 +21,7 @@ from ..core.bundle import build_bundle
 from .rules_dialog import RulesDialog
 from .install_wizard import InstallWizard
 from PySide6.QtCore import QSettings
+from .preferences_dialog import PreferencesDialog
 
 
 class MainWindow(QMainWindow):
@@ -41,6 +42,8 @@ class MainWindow(QMainWindow):
         self.log_view.setPlaceholderText("Logs will appear here…")
         lay.addWidget(self.log_view)
         self.setCentralWidget(w)
+        self.setAcceptDrops(True)
+        self.statusBar().showMessage("Ready")
 
         # Menus
         mb = self.menuBar()
@@ -58,9 +61,22 @@ class MainWindow(QMainWindow):
             file_menu.addAction(a)
         file_menu.addSeparator(); file_menu.addAction(act_exit)
 
+        # Toolbar
+        tb = self.addToolBar("Main")
+        tb.addAction(act_validate)
+        tb.addAction(act_rules)
+        tb.addAction(act_bundle)
+        tb.addAction(act_ws_init)
+        tb.addAction(act_install)
+
         help_menu = mb.addMenu("Help")
         act_about = QAction("About", self); act_about.triggered.connect(self._about)
         help_menu.addAction(act_about)
+
+        # Preferences under File menu
+        file_menu.addSeparator()
+        act_prefs = QAction("Preferences…", self); act_prefs.triggered.connect(self._preferences)
+        file_menu.addAction(act_prefs)
 
     # Utilities
     def log(self, msg: str) -> None:
@@ -137,10 +153,49 @@ class MainWindow(QMainWindow):
             "install_src": self.settings.value("dirs/install_src", ""),
             "install_dst": self.settings.value("dirs/install_dst", ""),
         }
+        # default to stored Orca preset path if present
+        if not last_dirs["install_dst"]:
+            last_dirs["install_dst"] = self.settings.value("paths/orca_preset", "")
         dlg = InstallWizard(self, last_dirs=last_dirs)
         dlg.exec()
         self.settings.setValue("dirs/install_src", last_dirs.get("install_src", ""))
         self.settings.setValue("dirs/install_dst", last_dirs.get("install_dst", ""))
+        if last_dirs.get("install_dst"):
+            self.settings.setValue("paths/orca_preset", last_dirs.get("install_dst"))
+
+    def _preferences(self):
+        current = self.settings.value("paths/orca_preset", "")
+        dlg = PreferencesDialog(self, orca_preset_dir=current)
+        if dlg.exec():
+            self.settings.setValue("paths/orca_preset", dlg.orca_preset_dir)
+            self.log(f"[PREFS] Orca presets set to: {dlg.orca_preset_dir}")
+
+    # Drag & drop validation
+    def dragEnterEvent(self, e):
+        if any(url.toLocalFile().endswith(".json") for url in e.mimeData().urls() or []):
+            e.acceptProposedAction()
+        else:
+            e.ignore()
+
+    def dropEvent(self, e):
+        paths = [url.toLocalFile() for url in e.mimeData().urls() or [] if url.toLocalFile().endswith(".json")]
+        if not paths:
+            e.ignore(); return
+        ok = True
+        for fn in paths:
+            try:
+                obj = load_json(fn)
+                S.validate(obj.get("type"), obj)
+            except Exception as ex:
+                ok = False
+                self.log(f"[FAIL] {Path(fn).name}: {ex}")
+            else:
+                self.log(f"[ OK ] {Path(fn).name}")
+        e.acceptProposedAction()
+        if ok:
+            self.statusBar().showMessage("Validation succeeded", 3000)
+        else:
+            self.statusBar().showMessage("Validation had failures", 3000)
 
     def _about(self):
         QMessageBox.information(self, "About OpenPrintKit", "OpenPrintKit — Validate, bundle, and manage printer profiles.")
