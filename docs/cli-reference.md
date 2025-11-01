@@ -18,5 +18,6 @@ Commands:
 - `opk gen --pdl PDL.yaml --slicer cura --out OUTDIR` — Generate a minimal Cura `.cfg` profile.
 - `opk gen --pdl PDL.yaml --slicer prusa --out OUTDIR` — Generate a minimal Prusa `.ini` profile.
 - `opk gen --pdl PDL.yaml --slicer ideamaker --out OUTDIR` — Generate a minimal ideaMaker `.cfg` profile.
+- `opk gen --pdl PDL.yaml --slicer bambu --out OUTDIR` — Generate a minimal Bambu Studio `.ini`-style profile.
 
 See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.
