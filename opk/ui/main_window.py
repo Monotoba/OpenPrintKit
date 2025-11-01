@@ -10,9 +10,8 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QFileDialog,
     QMessageBox,
-    QAction,
 )
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QStyle
 
 from ..core.io import load_json
