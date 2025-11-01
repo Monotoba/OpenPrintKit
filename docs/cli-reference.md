@@ -16,5 +16,7 @@ Commands:
 - `opk gen-snippets --pdl PDL.yaml --out-dir OUT [--firmware FW]` — Generate firmware-ready `*_start.gcode` and `*_end.gcode` files.
 - `opk gen --pdl PDL.yaml --slicer orca --out OUTDIR [--bundle OUT.orca_printer]` — Generate OPK profiles for Orca bundling.
 - `opk gen --pdl PDL.yaml --slicer cura --out OUTDIR` — Generate a minimal Cura `.cfg` profile.
+- `opk gen --pdl PDL.yaml --slicer prusa --out OUTDIR` — Generate a minimal Prusa `.ini` profile.
+- `opk gen --pdl PDL.yaml --slicer ideamaker --out OUTDIR` — Generate a minimal ideaMaker `.cfg` profile.
 
 See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.

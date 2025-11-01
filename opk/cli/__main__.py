@@ -120,7 +120,7 @@ def main():
 
     gn = sub.add_parser("gen", help="Generate slicer profiles from PDL")
     gn.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
-    gn.add_argument("--slicer", required=True, choices=["orca","cura"], help="Target slicer")
+    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker"], help="Target slicer")
     gn.add_argument("--out", required=True, help="Output directory for profiles")
     gn.add_argument("--bundle", help="Optional bundle output .orca_printer")
     args = ap.parse_args()
@@ -269,6 +269,18 @@ def main():
         if args.slicer == 'cura':
             from ..plugins.slicers.cura import generate_cura
             generated = generate_cura(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            raise SystemExit(0)
+        if args.slicer == 'prusa':
+            from ..plugins.slicers.prusa import generate_prusa
+            generated = generate_prusa(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            raise SystemExit(0)
+        if args.slicer == 'ideamaker':
+            from ..plugins.slicers.ideamaker import generate_ideamaker
+            generated = generate_ideamaker(data or {}, out_dir)
             for k, p in generated.items():
                 print(f"[WROTE] {p}")
             raise SystemExit(0)
