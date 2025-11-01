@@ -32,7 +32,7 @@ Each PDL document must define:
 | `extruders` | array<object> | ❌ | One or more extruders/toolheads |
 | `multi_material` | object | ❌ | Spool banks (e.g., AMS/MMU) and mixing |
 | `features` | object | ❌ | Auto-bed leveling and probe details |
-| `materials` | object | ❌ | Material definitions |
+| `materials` | array<object> | ❌ | Filament/material presets embedded in PDL |
 | `process_defaults` | object | ❌ | Baseline print settings |
 | `gcode` | object | ❌ | Start/end/tool-change and custom macros |
 
@@ -163,3 +163,13 @@ gcode:
 - Increment PATCH for typo or clarifications.
 
 ---
+### 3.6 Materials (Embedded Filament Presets)
+
+PDL may embed an array of filament/material presets under `materials`. Each entry typically includes:
+
+- `name`, `filament_type`, optional `filament_diameter`
+- Temperature/cooling: `nozzle_temperature`, `bed_temperature`, `fan_speed`
+- Retraction: `retraction_length`, `retraction_speed`
+- Color metadata: `color` or `color_hex`
+
+This is complementary to standalone Filament profiles (FDL). Use embedded presets for turnkey printer bundles, and standalone FDL for shared libraries.

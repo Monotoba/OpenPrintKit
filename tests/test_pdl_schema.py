@@ -22,3 +22,18 @@ def test_pdl_extruders_abl_valid():
     }
     S.validate("pdl", pdl)
 
+def test_pdl_with_materials():
+    pdl = {
+        "pdl_version": "1.0",
+        "id": "mat.test",
+        "name": "Materials Test",
+        "firmware": "marlin",
+        "kinematics": "cartesian",
+        "geometry": {"bed_shape": [[0,0],[220,0],[220,220],[0,220]], "z_height": 220},
+        "extruders": [{"nozzle_diameter": 0.4}],
+        "materials": [
+            {"name": "PLA", "filament_type": "PLA", "filament_diameter": 1.75, "nozzle_temperature": 205, "bed_temperature": 60,
+             "retraction_length": 0.8, "retraction_speed": 40, "fan_speed": 100, "color_hex": "#FFFFFF"}
+        ]
+    }
+    S.validate("pdl", pdl)

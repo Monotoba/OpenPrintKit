@@ -37,6 +37,7 @@ class PDLForm(QWidget):
         self._init_build_area_tab()
         self._init_extruders_tab()
         self._init_multimaterial_tab()
+        self._init_filaments_tab()
         self._init_features_tab()
         self._init_gcode_tab()
 
@@ -132,6 +133,44 @@ class PDLForm(QWidget):
         form.addRow("Mesh Size (C)", self.f_mesh_c)
         self.tabs.addTab(w, "Features")
 
+    # ---------- Filaments ----------
+    def _init_filaments_tab(self):
+        w = QWidget(); v = QVBoxLayout(w)
+        self.t_filaments = QTableWidget(0, 9)
+        self.t_filaments.setHorizontalHeaderLabels([
+            "Name","Type","Dia","Nozzle °C","Bed °C","Retract Len","Retract Spd","Fan %","Color"
+        ])
+        self.t_filaments.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        v.addWidget(self.t_filaments)
+        row = QHBoxLayout()
+        btn_add = QPushButton("Add"); btn_add.clicked.connect(self._add_filament)
+        btn_del = QPushButton("Remove"); btn_del.clicked.connect(self._del_filament)
+        row.addWidget(btn_add); row.addWidget(btn_del); row.addStretch(1)
+        v.addLayout(row)
+        self.tabs.addTab(w, "Filaments")
+
+    def _add_filament(self):
+        r = self.t_filaments.rowCount(); self.t_filaments.insertRow(r)
+        defaults = ["PLA","PLA","1.75","205","60","0.8","40","100","#FFFFFF"]
+        for c in range(9):
+            item = QTableWidgetItem("")
+            self.t_filaments.setItem(r, c, item)
+        # Set some defaults
+        self.t_filaments.item(r,0).setText(defaults[0])
+        self.t_filaments.item(r,1).setText(defaults[1])
+        self.t_filaments.item(r,2).setText(defaults[2])
+        self.t_filaments.item(r,3).setText(defaults[3])
+        self.t_filaments.item(r,4).setText(defaults[4])
+        self.t_filaments.item(r,5).setText(defaults[5])
+        self.t_filaments.item(r,6).setText(defaults[6])
+        self.t_filaments.item(r,7).setText(defaults[7])
+        self.t_filaments.item(r,8).setText(defaults[8])
+
+    def _del_filament(self):
+        rows = sorted({i.row() for i in self.t_filaments.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_filaments.removeRow(r)
+
     # ---------- G-code (Start/End) ----------
     def _init_gcode_tab(self):
         w = QWidget(); v = QVBoxLayout(w)
@@ -212,6 +251,24 @@ class PDLForm(QWidget):
         self.g_start.setPlainText("\n".join(gc.get("start") or []))
         self.g_end.setPlainText("\n".join(gc.get("end") or []))
 
+        # Filaments/Materials
+        self.t_filaments.setRowCount(0)
+        for m in g.get("materials") or []:
+            r = self.t_filaments.rowCount(); self.t_filaments.insertRow(r)
+            vals = [
+                str(m.get("name") or ""),
+                str(m.get("filament_type") or ""),
+                str(m.get("filament_diameter") or ""),
+                str(m.get("nozzle_temperature") or ""),
+                str(m.get("bed_temperature") or ""),
+                str(m.get("retraction_length") or ""),
+                str(m.get("retraction_speed") or ""),
+                str(m.get("fan_speed") or ""),
+                str(m.get("color_hex") or (m.get("color") or "")),
+            ]
+            for c, val in enumerate(vals):
+                self.t_filaments.setItem(r, c, QTableWidgetItem(val))
+
     def dump_pdl(self) -> Dict[str, Any]:
         g: Dict[str, Any] = {}
         g["pdl_version"] = self.f_pdl_version.text().strip() or "1.0"
@@ -256,5 +313,39 @@ class PDLForm(QWidget):
             "start": [ln for ln in self.g_start.toPlainText().splitlines() if ln.strip()],
             "end": [ln for ln in self.g_end.toPlainText().splitlines() if ln.strip()],
         }
-        return g
 
+        # Materials (Filaments)
+        mats: List[Dict[str, Any]] = []
+        for r in range(self.t_filaments.rowCount()):
+            def _txt(c):
+                it = self.t_filaments.item(r, c); return it.text().strip() if it else ""
+            name = _txt(0); ftype = _txt(1)
+            if not name and not ftype:
+                continue
+            entry: Dict[str, Any] = {
+                "name": name,
+                "filament_type": ftype or "Other",
+            }
+            # numeric optionals
+            try: entry["filament_diameter"] = float(_txt(2) or 0)
+            except Exception: pass
+            try: entry["nozzle_temperature"] = float(_txt(3) or 0)
+            except Exception: pass
+            try: entry["bed_temperature"] = float(_txt(4) or 0)
+            except Exception: pass
+            try: entry["retraction_length"] = float(_txt(5) or 0)
+            except Exception: pass
+            try: entry["retraction_speed"] = float(_txt(6) or 0)
+            except Exception: pass
+            try: entry["fan_speed"] = float(_txt(7) or 0)
+            except Exception: pass
+            color = _txt(8)
+            if color:
+                if color.startswith('#') or len(color) == 6:
+                    entry["color_hex"] = color
+                else:
+                    entry["color"] = color
+            mats.append(entry)
+        if mats:
+            g["materials"] = mats
+        return g
