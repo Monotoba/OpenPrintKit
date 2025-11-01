@@ -24,6 +24,7 @@ from .gcode_validate_dialog import GcodeValidateDialog
 from .mcode_reference_dialog import McodeReferenceDialog
 from PySide6.QtCore import QSettings
 from .preferences_dialog import PreferencesDialog
+from .app_settings_dialog import AppSettingsDialog
 from .pdl_editor import PDLForm
 
 
@@ -97,6 +98,8 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
         act_prefs = QAction("Preferences…", self); act_prefs.triggered.connect(self._preferences)
         file_menu.addAction(act_prefs)
+        act_settings = QAction("Settings…", self); act_settings.triggered.connect(self._settings)
+        file_menu.addAction(act_settings)
 
     # Utilities
     def log(self, msg: str) -> None:
@@ -235,6 +238,11 @@ class MainWindow(QMainWindow):
     def _mcode_ref(self):
         dlg = McodeReferenceDialog(self)
         dlg.resize(800, 600)
+        dlg.exec()
+
+    def _settings(self):
+        dlg = AppSettingsDialog(self)
+        dlg.resize(600, 400)
         dlg.exec()
 
     def _help_overview(self):
