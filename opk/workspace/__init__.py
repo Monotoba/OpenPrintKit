@@ -1,0 +1,2 @@
+"""Workspace scaffolding and helpers."""
+

@@ -94,6 +94,48 @@ def main():
     cv.add_argument("--in", dest="src", required=True, help="Input file or directory to convert")
     cv.add_argument("--out", dest="out", required=True, help="Output directory (printers)")
 
+    # gcode utilities
+    gh = sub.add_parser("gcode-hooks", help="List available G-code hooks in a PDL file")
+    gh.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+
+    gp = sub.add_parser("gcode-preview", help="Render a G-code hook with variables")
+    gp.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+    gp.add_argument("--hook", required=True, help="Hook name (e.g. start, before_layer_change)")
+    gp.add_argument("--vars", dest="vars_path", help="Path to JSON file with variables")
+
+    gv = sub.add_parser("gcode-validate", help="Validate variables across all G-code hooks")
+    gv.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+    gv.add_argument("--vars", dest="vars_path", required=True, help="Path to JSON file with variables")
+
+    # PDL validation and previews
+    pv = sub.add_parser("pdl-validate", help="Validate a PDL file against schema and rules")
+    pv.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+
+    tp = sub.add_parser("tag-preview", help="Preview OpenPrintTag header from PDL")
+    tp.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+
+    # Generate snippets and slicer profiles
+    gsn = sub.add_parser("gen-snippets", help="Generate start/end G-code snippets from a PDL")
+    gsn.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+    gsn.add_argument("--out-dir", dest="out_dir", required=True, help="Output directory")
+    gsn.add_argument("--firmware", choices=["marlin","klipper","rrf","reprap","duet","grbl","linuxcnc"], help="Override firmware mapping")
+
+    gen = sub.add_parser("gen", help="Generate slicer profiles from a PDL")
+    gen.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
+    gen.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu"], help="Target slicer")
+    gen.add_argument("--out", required=True, help="Output directory")
+    gen.add_argument("--bundle", help="Optional bundle path (for orca)")
+
+    # Spool client operations (stubs)
+    sp = sub.add_parser("spool", help="Spool data operations (stubs)")
+    sp.add_argument("--source", required=True, choices=["spoolman","tigertag","openspool","opentag3d"], help="Remote database source")
+    sp.add_argument("--base-url", required=True, help="Base URL for the API")
+    sp.add_argument("--api-key", help="API key/token (if required)")
+    sp.add_argument("--action", required=True, choices=["create","read","update","delete","search"], help="Operation")
+    sp.add_argument("--id", dest="item_id", help="Item ID (read/update/delete)")
+    sp.add_argument("--payload", help="JSON payload for create/update")
+    sp.add_argument("--query", help="Search query string")
+
     # gcode: list hooks and preview
     gh = sub.add_parser("gcode-hooks", help="List available gcode hooks in a PDL file (YAML/JSON)")
     gh.add_argument("--pdl", required=True, help="Path to PDL file")
@@ -120,7 +162,7 @@ def main():
 
     gn = sub.add_parser("gen", help="Generate slicer profiles from PDL")
     gn.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
-    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker"], help="Target slicer")
+    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu"], help="Target slicer")
     gn.add_argument("--out", required=True, help="Output directory for profiles")
     gn.add_argument("--bundle", help="Optional bundle output .orca_printer")
     args = ap.parse_args()
@@ -166,6 +208,14 @@ def main():
         import json as _json, yaml as _yaml
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        # Merge project policies if present
+        try:
+            from ..core.project import find_project_file, load_project_config, merge_policies
+            proj = find_project_file(_Path(args.pdl).parent)
+            if proj:
+                data = merge_policies(data or {}, load_project_config(proj))
+        except Exception:
+            pass
         gcode = gc_render_fw(data or {})
         seq = None
         if args.hook in gcode:
@@ -188,6 +238,13 @@ def main():
         import json as _json, yaml as _yaml
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        try:
+            from ..core.project import find_project_file, load_project_config, merge_policies
+            proj = find_project_file(_Path(args.pdl).parent)
+            if proj:
+                data = merge_policies(data or {}, load_project_config(proj))
+        except Exception:
+            pass
         gcode = gc_render_fw(data or {})
         hooks = gc_list_hooks(gcode)
         vars_obj = _json.loads(_Path(args.vars_path).read_text(encoding="utf-8"))
@@ -242,6 +299,13 @@ def main():
         from ..core.gcode import generate_snippets as _gen
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        try:
+            from ..core.project import find_project_file, load_project_config, merge_policies
+            proj = find_project_file(_Path(args.pdl).parent)
+            if proj:
+                data = merge_policies(data or {}, load_project_config(proj))
+        except Exception:
+            pass
         start, end = _gen(data or {}, firmware=args.firmware)
         outdir = _Path(args.out_dir); outdir.mkdir(parents=True, exist_ok=True)
         base = _Path(args.pdl).stem
@@ -255,6 +319,13 @@ def main():
         import json as _json, yaml as _yaml
         text = _Path(args.pdl).read_text(encoding="utf-8")
         data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        try:
+            from ..core.project import find_project_file, load_project_config, merge_policies
+            proj = find_project_file(_Path(args.pdl).parent)
+            if proj:
+                data = merge_policies(data or {}, load_project_config(proj))
+        except Exception:
+            pass
         out_dir = _Path(args.out)
         if args.slicer == 'orca':
             from ..plugins.slicers.orca import generate_orca
@@ -266,24 +337,31 @@ def main():
                 build_bundle(out_dir, _Path(args.bundle))
                 print(f"[BUNDLE] {args.bundle}")
             raise SystemExit(0)
-        if args.slicer == 'cura':
-            from ..plugins.slicers.cura import generate_cura
-            generated = generate_cura(data or {}, out_dir)
-            for k, p in generated.items():
-                print(f"[WROTE] {p}")
-            raise SystemExit(0)
-        if args.slicer == 'prusa':
-            from ..plugins.slicers.prusa import generate_prusa
-            generated = generate_prusa(data or {}, out_dir)
-            for k, p in generated.items():
-                print(f"[WROTE] {p}")
-            raise SystemExit(0)
-        if args.slicer == 'ideamaker':
-            from ..plugins.slicers.ideamaker import generate_ideamaker
-            generated = generate_ideamaker(data or {}, out_dir)
-            for k, p in generated.items():
-                print(f"[WROTE] {p}")
-            raise SystemExit(0)
+    if args.cmd == "spool":
+        from ..integrations.spool_clients import get_client
+        import json as _json
+        cli = get_client(args.source, args.base_url, api_key=args.api_key)
+        try:
+            if args.action == 'create':
+                payload = _json.loads(args.payload or '{}')
+                res = cli.create(payload)
+                print(_json.dumps(res, indent=2))
+            elif args.action == 'read':
+                res = cli.read(args.item_id or '')
+                print(_json.dumps(res, indent=2))
+            elif args.action == 'update':
+                payload = _json.loads(args.payload or '{}')
+                res = cli.update(args.item_id or '', payload)
+                print(_json.dumps(res, indent=2))
+            elif args.action == 'delete':
+                ok = cli.delete(args.item_id or '')
+                print(f"[OK] delete={ok}")
+            elif args.action == 'search':
+                res = cli.search(args.query or '')
+                print(_json.dumps(res, indent=2))
+        except NotImplementedError:
+            print("[STUB] This operation is not implemented yet for", args.source)
+        raise SystemExit(0)
 
 if __name__ == "__main__":
     main()
