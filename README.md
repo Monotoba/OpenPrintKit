@@ -91,7 +91,9 @@ OpenPrintKit/
 ### GUI
 
 - Launch with `opk-gui`
-- Menu actions: Validate, Run Rules, Build Bundle, Workspace Init
+- Menu actions: Validate, Run Rules, Build Bundle, Workspace Init, Install to Orca, Preferences
+- Toolbar with quick-access icons for common actions
+- Drag-and-drop `.json` files onto the window to validate them
 
 🧩 Features
 

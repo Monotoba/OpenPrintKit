@@ -85,6 +85,8 @@ Available from the menu:
 - Run rule checks
 - Build Orca bundle
 - Initialize a workspace
+- Set default Orca presets path in Preferences
+- Drag-and-drop `.json` files onto the window to validate
 
 ## CLI Install to Orca Presets (Optional)
 
