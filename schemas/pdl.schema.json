@@ -206,14 +206,14 @@
           "enable_start":{"type":"boolean"},
           "speed_percent":{"type":"number","minimum":0,"maximum":100},
           "off_at_end":{"type":"boolean"},
-          "pin":{"type":"integer","minimum":0},
+          "pin":{"oneOf":[{"type":"integer","minimum":0},{"type":"string"}]},
           "fan_index":{"type":"integer","minimum":0}
         },"additionalProperties":false},
         "aux_outputs":{"type":"array","items":{
           "type":"object","required":["label","pin"],
           "properties":{
             "label":{"type":"string"},
-            "pin":{"type":"integer","minimum":0},
+            "pin":{"oneOf":[{"type":"integer","minimum":0},{"type":"string"}]},
             "start_value":{"type":"integer","minimum":0,"maximum":255},
             "end_value":{"type":"integer","minimum":0,"maximum":255}
           },"additionalProperties":false

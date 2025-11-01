@@ -50,15 +50,16 @@ class PDLForm(QWidget):
     # ---------- Build Area ----------
     def _init_build_area_tab(self):
         w = QWidget(); form = QFormLayout(w)
-        self.f_pdl_version = QLineEdit("1.0")
+        self.f_pdl_version = QLineEdit("1.0"); self.f_pdl_version.setToolTip("PDL schema version")
         self.f_id = QLineEdit()
-        self.f_name = QLineEdit()
-        self.f_firmware = QComboBox(); self.f_firmware.addItems(FIRMWARES)
-        self.f_kinematics = QComboBox(); self.f_kinematics.addItems(KINEMATICS)
-        self.f_width = QDoubleSpinBox(); self.f_width.setRange(10, 1000); self.f_width.setDecimals(1)
-        self.f_depth = QDoubleSpinBox(); self.f_depth.setRange(10, 1000); self.f_depth.setDecimals(1)
-        self.f_z = QDoubleSpinBox(); self.f_z.setRange(10, 1000); self.f_z.setDecimals(1)
-        self.f_origin = QLineEdit("front_left")
+        self.f_id.setToolTip("Unique printer identifier")
+        self.f_name = QLineEdit(); self.f_name.setToolTip("Human-readable name")
+        self.f_firmware = QComboBox(); self.f_firmware.addItems(FIRMWARES); self.f_firmware.setToolTip("Target firmware (affects mapping)")
+        self.f_kinematics = QComboBox(); self.f_kinematics.addItems(KINEMATICS); self.f_kinematics.setToolTip("Motion system type")
+        self.f_width = QDoubleSpinBox(); self.f_width.setRange(10, 1000); self.f_width.setDecimals(1); self.f_width.setToolTip("Bed width (X)")
+        self.f_depth = QDoubleSpinBox(); self.f_depth.setRange(10, 1000); self.f_depth.setDecimals(1); self.f_depth.setToolTip("Bed depth (Y)")
+        self.f_z = QDoubleSpinBox(); self.f_z.setRange(10, 1000); self.f_z.setDecimals(1); self.f_z.setToolTip("Z height")
+        self.f_origin = QLineEdit("front_left"); self.f_origin.setToolTip("Coordinate origin description")
 
         # Bed shape polygon editor
         self.t_bedshape = QTableWidget(0, 2)
@@ -73,7 +74,7 @@ class PDLForm(QWidget):
         # Limits group
         limits = QGroupBox("Limits")
         lim_form = QFormLayout(limits)
-        self.l_print_speed = QDoubleSpinBox(); self.l_print_speed.setRange(1, 1000)
+        self.l_print_speed = QDoubleSpinBox(); self.l_print_speed.setRange(1, 1000); self.l_print_speed.setToolTip("Max print speed")
         self.l_travel_speed = QDoubleSpinBox(); self.l_travel_speed.setRange(1, 2000)
         self.l_accel = QDoubleSpinBox(); self.l_accel.setRange(1, 50000)
         self.l_jerk = QDoubleSpinBox(); self.l_jerk.setRange(0, 200)
@@ -153,7 +154,7 @@ class PDLForm(QWidget):
     # ---------- Features ----------
     def _init_features_tab(self):
         w = QWidget(); form = QFormLayout(w)
-        self.f_abl = QCheckBox()
+        self.f_abl = QCheckBox(); self.f_abl.setToolTip("Enable/disable ABL feature")
         self.f_probe_type = QComboBox(); self.f_probe_type.addItems(PROBE_TYPES)
         self.f_mesh_r = QSpinBox(); self.f_mesh_r.setRange(1, 20)
         self.f_mesh_c = QSpinBox(); self.f_mesh_c.setRange(1, 20)
@@ -182,9 +183,10 @@ class PDLForm(QWidget):
     def _init_machine_control_tab(self):
         w = QWidget(); form = QFormLayout(w)
         # PSU controls (standard)
-        self.mc_psu_on_start = QCheckBox(); self.mc_psu_off_end = QCheckBox()
+        self.mc_psu_on_start = QCheckBox(); self.mc_psu_on_start.setToolTip("Insert M80 into start")
+        self.mc_psu_off_end = QCheckBox(); self.mc_psu_off_end.setToolTip("Insert M81 into end")
         # Mesh enable and Z offset
-        self.mc_enable_mesh = QCheckBox()
+        self.mc_enable_mesh = QCheckBox(); self.mc_enable_mesh.setToolTip("Enable bed mesh at start (M420 S1)")
         self.mc_z_offset = QDoubleSpinBox(); self.mc_z_offset.setRange(-5,5); self.mc_z_offset.setSingleStep(0.01); self.mc_z_offset.setPrefix("Z:")
         # Custom M-codes
         self.mc_start_custom = QTextEdit(); self.mc_start_custom.setPlaceholderText("; Custom M-codes at start\nM117 Starting…")
@@ -202,7 +204,8 @@ class PDLForm(QWidget):
     def _init_peripherals_tab(self):
         w = QWidget(); form = QFormLayout(w)
         # Lights
-        self.pr_light_on_start = QCheckBox(); self.pr_light_off_end = QCheckBox()
+        self.pr_light_on_start = QCheckBox(); self.pr_light_on_start.setToolTip("M355 S1 at start")
+        self.pr_light_off_end = QCheckBox(); self.pr_light_off_end.setToolTip("M355 S0 at end")
         row_rgb = QHBoxLayout();
         self.pr_rgb_r = QSpinBox(); self.pr_rgb_r.setRange(0,255); self.pr_rgb_r.setPrefix("R:")
         self.pr_rgb_g = QSpinBox(); self.pr_rgb_g.setRange(0,255); self.pr_rgb_g.setPrefix(" G:")
@@ -214,7 +217,7 @@ class PDLForm(QWidget):
         self.pr_chamber_wait = QCheckBox("Wait")
         row_cht.addWidget(self.pr_chamber_temp); row_cht.addWidget(self.pr_chamber_wait)
         # Camera
-        self.pr_camera_before = QCheckBox("Trigger before snapshot")
+        self.pr_camera_before = QCheckBox("Trigger before snapshot"); self.pr_camera_before.setToolTip("Adds camera command to before_snapshot hook")
         self.pr_camera_after = QCheckBox("Trigger after snapshot")
         self.pr_camera_cmd = QLineEdit("M240")
         # Fans
@@ -225,7 +228,7 @@ class PDLForm(QWidget):
         self.pr_fan_aux_idx = QSpinBox(); self.pr_fan_aux_idx.setRange(0,9)
         self.pr_fan_aux = QSpinBox(); self.pr_fan_aux.setRange(0,100); self.pr_fan_aux.setSuffix(" %")
         row_aux.addWidget(QLabel("Aux fan P:")); row_aux.addWidget(self.pr_fan_aux_idx); row_aux.addWidget(self.pr_fan_aux)
-        self.pr_fans_off_end = QCheckBox("Fans off at end")
+        self.pr_fans_off_end = QCheckBox("Fans off at end"); self.pr_fans_off_end.setToolTip("Insert M107 at end")
         # SD logging
         row_sd = QHBoxLayout();
         self.pr_sd_enable = QCheckBox("Enable at start")
@@ -247,7 +250,7 @@ class PDLForm(QWidget):
 
         # Exhaust controls
         ex_row1 = QHBoxLayout();
-        self.pr_exhaust_enable = QCheckBox("Enable at start")
+        self.pr_exhaust_enable = QCheckBox("Enable at start"); self.pr_exhaust_enable.setToolTip("Enable exhaust at start via M42 or M106")
         self.pr_exhaust_speed = QSpinBox(); self.pr_exhaust_speed.setRange(0,100); self.pr_exhaust_speed.setSuffix(" %")
         ex_row1.addWidget(self.pr_exhaust_enable); ex_row1.addWidget(self.pr_exhaust_speed)
         ex_row2 = QHBoxLayout();

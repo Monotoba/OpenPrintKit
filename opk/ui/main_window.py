@@ -82,6 +82,10 @@ class MainWindow(QMainWindow):
         tools_menu.addAction(act_gcode_validate)
 
         help_menu = mb.addMenu("Help")
+        act_overview = QAction("Overview…", self); act_overview.triggered.connect(self._help_overview)
+        help_menu.addAction(act_overview)
+        act_gcode = QAction("G-code Help…", self); act_gcode.triggered.connect(self._help_gcode)
+        help_menu.addAction(act_gcode)
         act_mref = QAction("M-code Reference…", self); act_mref.triggered.connect(self._mcode_ref)
         help_menu.addAction(act_mref)
         act_about = QAction("About", self); act_about.triggered.connect(self._about)
@@ -228,6 +232,35 @@ class MainWindow(QMainWindow):
 
     def _mcode_ref(self):
         dlg = McodeReferenceDialog(self)
+        dlg.resize(800, 600)
+        dlg.exec()
+
+    def _help_overview(self):
+        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+        dlg = _DocDlg(self)
+        # reuse viewer to show docs/overview.md
+        try:
+            from pathlib import Path
+            p = Path(__file__).resolve().parents[2] / "docs" / "overview.md"
+            if p.exists():
+                dlg.view.setPlainText(p.read_text(encoding="utf-8"))
+            dlg.setWindowTitle("OPK Overview")
+        except Exception:
+            pass
+        dlg.resize(800, 600)
+        dlg.exec()
+
+    def _help_gcode(self):
+        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+        dlg = _DocDlg(self)
+        try:
+            from pathlib import Path
+            p = Path(__file__).resolve().parents[2] / "docs" / "gcode-help.md"
+            if p.exists():
+                dlg.view.setPlainText(p.read_text(encoding="utf-8"))
+            dlg.setWindowTitle("G-code Help")
+        except Exception:
+            pass
         dlg.resize(800, 600)
         dlg.exec()
 

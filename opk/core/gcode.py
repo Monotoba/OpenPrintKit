@@ -175,10 +175,11 @@ def apply_machine_control(pdl: Dict[str, object], base_gcode: Dict[str, List[str
         sp = ex.get("speed_percent")
         s_val = pct_to_s(sp) if isinstance(sp, (int,float)) else 255
         pin = ex.get("pin"); fan = ex.get("fan_index")
-        if isinstance(pin, int) and pin >= 0:
-            add(start, f"M42 P{pin} S{s_val}")
+        if (isinstance(pin, int) and pin >= 0) or isinstance(pin, str):
+            pval = f'"{pin}"' if isinstance(pin, str) else str(pin)
+            add(start, f"M42 P{pval} S{s_val}")
             if ex.get("off_at_end"):
-                add(end, f"M42 P{pin} S0")
+                add(end, f"M42 P{pval} S0")
         elif isinstance(fan, int) and fan >= 0:
             add(start, f"M106 P{fan} S{s_val}")
             if ex.get("off_at_end"):
@@ -186,13 +187,13 @@ def apply_machine_control(pdl: Dict[str, object], base_gcode: Dict[str, List[str
 
     # Aux outputs (M42) — list of label/pin/start/end values
     for ao in (mc.get("aux_outputs") or []):
-        try:
-            pin = int(ao.get("pin"))
-        except Exception:
+        pin = ao.get("pin")
+        if not (isinstance(pin, int) or isinstance(pin, str)):
             continue
+        pval = f'"{pin}"' if isinstance(pin, str) else str(pin)
         sv = ao.get("start_value"); ev = ao.get("end_value")
-        if isinstance(sv, int): add(start, f"M42 P{pin} S{sv}")
-        if isinstance(ev, int): add(end, f"M42 P{pin} S{ev}")
+        if isinstance(sv, int): add(start, f"M42 P{pval} S{sv}")
+        if isinstance(ev, int): add(end, f"M42 P{pval} S{ev}")
 
     # Custom peripherals: arbitrary hook → sequence
     for cp in (mc.get("custom_peripherals") or []):
@@ -232,4 +233,38 @@ def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
             return mapped
         out["before_snapshot"] = _map(out.get("before_snapshot")) or out.get("before_snapshot")
         out["after_snapshot"] = _map(out.get("after_snapshot")) or out.get("after_snapshot")
+    # RepRapFirmware (RRF): map SD logging to M929 S1/S0
+    if firmware in ("rrf", "reprap", "reprapfirmware", "duet"):
+        def _replace_sd(seq: List[str] | None) -> List[str] | None:
+            if not seq: return seq
+            mapped: List[str] = []
+            for s in seq:
+                su = (s or "").strip().upper()
+                if su.startswith("M928 "):
+                    # M928 filename → M929 P"filename" S1
+                    fn = s.split(maxsplit=1)[1] if len(s.split())>1 else "opk_log.gco"
+                    mapped.append(f"M929 P\"{fn}\" S1")
+                elif su == "M29":
+                    mapped.append("M929 S0")
+                else:
+                    mapped.append(s)
+            return mapped
+        out["start"] = _replace_sd(out.get("start")) or out.get("start")
+        out["end"] = _replace_sd(out.get("end")) or out.get("end")
+
+    # GRBL/LinuxCNC: map exhaust to coolant (M7/M8 on, M9 off)
+    if firmware in ("grbl", "linuxcnc"):
+        mc = (pdl or {}).get("machine_control") or {}
+        ex = mc.get("exhaust") or {}
+        if ex.get("enable_start"):
+            # choose flood coolant M8 for GRBL; mist M7 for LinuxCNC
+            on = "M8" if firmware == "grbl" else "M7"
+            seq = list(out.get("start") or [])
+            add(seq, on)
+            out["start"] = seq
+        if ex.get("off_at_end"):
+            seq = list(out.get("end") or [])
+            add(seq, "M9")
+            out["end"] = seq
+
     return out
