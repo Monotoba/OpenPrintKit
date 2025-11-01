@@ -133,7 +133,43 @@ def apply_machine_control(pdl: Dict[str, object], base_gcode: Dict[str, List[str
     for ln in mc.get("end_custom") or []:
         if isinstance(ln, str) and ln.strip(): add(end, ln)
 
-    out = dict((base_gcode or {}))
+    # Peripherals
+    cam = mc.get("camera") or {}
+    cmd = (cam.get("command") or "M240").strip()
+    if cam.get("use_before_snapshot") and cmd:
+        bs = list(g.get("before_snapshot") or [])
+        add(bs, cmd)
+        g["before_snapshot"] = bs
+    if cam.get("use_after_snapshot") and cmd:
+        asq = list(g.get("after_snapshot") or [])
+        add(asq, cmd)
+        g["after_snapshot"] = asq
+
+    sdl = mc.get("sd_logging") or {}
+    if sdl.get("enable_start"):
+        fn = sdl.get("filename") or "opk_log.gco"
+        add(start, f"M928 {fn}")
+        if sdl.get("stop_at_end"):
+            add(end, "M29")
+
+    fans = mc.get("fans") or {}
+    def pct_to_s(p: float) -> int:
+        try:
+            return max(0, min(255, round(255.0 * float(p) / 100.0)))
+        except Exception:
+            return 0
+    ps = fans.get("part_start_percent")
+    if isinstance(ps, (int, float)) and ps > 0:
+        add(start, f"M106 S{pct_to_s(ps)}")
+    auxp = fans.get("aux_start_percent"); auxi = fans.get("aux_index")
+    if isinstance(auxp, (int, float)) and auxp > 0 and isinstance(auxi, int):
+        add(start, f"M106 P{auxi} S{pct_to_s(auxp)}")
+    if fans.get("off_at_end"):
+        add(end, "M107")
+        if isinstance(auxi, int):
+            add(end, f"M107 P{auxi}")
+
+    out = dict(g)
     if start: out["start"] = start
     if end: out["end"] = end
     return out

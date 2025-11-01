@@ -186,6 +186,22 @@
           "temp":{"type":"number","minimum":0,"maximum":120},
           "wait":{"type":"boolean"}
         },"additionalProperties":false},
+        "camera":{"type":"object","properties":{
+          "use_before_snapshot":{"type":"boolean"},
+          "use_after_snapshot":{"type":"boolean"},
+          "command":{"type":"string"}
+        },"additionalProperties":false},
+        "sd_logging":{"type":"object","properties":{
+          "enable_start":{"type":"boolean"},
+          "filename":{"type":"string"},
+          "stop_at_end":{"type":"boolean"}
+        },"additionalProperties":false},
+        "fans":{"type":"object","properties":{
+          "part_start_percent":{"type":"number","minimum":0,"maximum":100},
+          "aux_index":{"type":"integer","minimum":0},
+          "aux_start_percent":{"type":"number","minimum":0,"maximum":100},
+          "off_at_end":{"type":"boolean"}
+        },"additionalProperties":false},
         "enable_mesh_start":{"type":"boolean"},
         "z_offset":{"type":"number"},
         "start_custom":{"type":"array","items":{"type":"string"}},

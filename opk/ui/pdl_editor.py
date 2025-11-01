@@ -40,6 +40,7 @@ class PDLForm(QWidget):
         self._init_filaments_tab()
         self._init_features_tab()
         self._init_machine_control_tab()
+        self._init_peripherals_tab()
         self._init_gcode_tab()
 
         self.set_defaults()
@@ -187,11 +188,6 @@ class PDLForm(QWidget):
         self.mc_rgb_g = QSpinBox(); self.mc_rgb_g.setRange(0,255); self.mc_rgb_g.setPrefix(" G:")
         self.mc_rgb_b = QSpinBox(); self.mc_rgb_b.setRange(0,255); self.mc_rgb_b.setPrefix(" B:")
         row_rgb.addWidget(self.mc_rgb_r); row_rgb.addWidget(self.mc_rgb_g); row_rgb.addWidget(self.mc_rgb_b)
-        # Chamber temperature
-        row_cht = QHBoxLayout();
-        self.mc_chamber_temp = QDoubleSpinBox(); self.mc_chamber_temp.setRange(0,120); self.mc_chamber_temp.setSuffix(" °C")
-        self.mc_chamber_wait = QCheckBox("Wait")
-        row_cht.addWidget(self.mc_chamber_temp); row_cht.addWidget(self.mc_chamber_wait)
         # Mesh enable and Z offset
         self.mc_enable_mesh = QCheckBox()
         self.mc_z_offset = QDoubleSpinBox(); self.mc_z_offset.setRange(-5,5); self.mc_z_offset.setSingleStep(0.01); self.mc_z_offset.setPrefix("Z:")
@@ -204,12 +200,59 @@ class PDLForm(QWidget):
         form.addRow("Light ON at start (M355)", self.mc_light_on_start)
         form.addRow("Light OFF at end (M355)", self.mc_light_off_end)
         form.addRow("RGB at start (M150)", row_rgb)
-        form.addRow("Chamber temp at start (M141/M191)", row_cht)
         form.addRow("Enable mesh at start (M420 S1)", self.mc_enable_mesh)
         form.addRow("Probe Z offset (M851)", self.mc_z_offset)
         form.addRow(QLabel("Custom start M-codes"), self.mc_start_custom)
         form.addRow(QLabel("Custom end M-codes"), self.mc_end_custom)
         self.tabs.addTab(w, "Machine Control")
+
+    # ---------- Peripherals (Lights, Camera, Fans, SD) ----------
+    def _init_peripherals_tab(self):
+        w = QWidget(); form = QFormLayout(w)
+        # Lights
+        self.pr_light_on_start = QCheckBox(); self.pr_light_off_end = QCheckBox()
+        row_rgb = QHBoxLayout();
+        self.pr_rgb_r = QSpinBox(); self.pr_rgb_r.setRange(0,255); self.pr_rgb_r.setPrefix("R:")
+        self.pr_rgb_g = QSpinBox(); self.pr_rgb_g.setRange(0,255); self.pr_rgb_g.setPrefix(" G:")
+        self.pr_rgb_b = QSpinBox(); self.pr_rgb_b.setRange(0,255); self.pr_rgb_b.setPrefix(" B:")
+        row_rgb.addWidget(self.pr_rgb_r); row_rgb.addWidget(self.pr_rgb_g); row_rgb.addWidget(self.pr_rgb_b)
+        # Chamber
+        row_cht = QHBoxLayout();
+        self.pr_chamber_temp = QDoubleSpinBox(); self.pr_chamber_temp.setRange(0,120); self.pr_chamber_temp.setSuffix(" °C")
+        self.pr_chamber_wait = QCheckBox("Wait")
+        row_cht.addWidget(self.pr_chamber_temp); row_cht.addWidget(self.pr_chamber_wait)
+        # Camera
+        self.pr_camera_before = QCheckBox("Trigger before snapshot")
+        self.pr_camera_after = QCheckBox("Trigger after snapshot")
+        self.pr_camera_cmd = QLineEdit("M240")
+        # Fans
+        row_part = QHBoxLayout();
+        self.pr_fan_part = QSpinBox(); self.pr_fan_part.setRange(0,100); self.pr_fan_part.setSuffix(" %")
+        row_part.addWidget(QLabel("Part fan:")); row_part.addWidget(self.pr_fan_part)
+        row_aux = QHBoxLayout();
+        self.pr_fan_aux_idx = QSpinBox(); self.pr_fan_aux_idx.setRange(0,9)
+        self.pr_fan_aux = QSpinBox(); self.pr_fan_aux.setRange(0,100); self.pr_fan_aux.setSuffix(" %")
+        row_aux.addWidget(QLabel("Aux fan P:")); row_aux.addWidget(self.pr_fan_aux_idx); row_aux.addWidget(self.pr_fan_aux)
+        self.pr_fans_off_end = QCheckBox("Fans off at end")
+        # SD logging
+        row_sd = QHBoxLayout();
+        self.pr_sd_enable = QCheckBox("Enable at start")
+        self.pr_sd_file = QLineEdit("opk_log.gco")
+        self.pr_sd_stop = QCheckBox("Stop at end")
+        row_sd.addWidget(self.pr_sd_enable); row_sd.addWidget(self.pr_sd_file); row_sd.addWidget(self.pr_sd_stop)
+
+        form.addRow("Light ON at start (M355)", self.pr_light_on_start)
+        form.addRow("Light OFF at end (M355)", self.pr_light_off_end)
+        form.addRow("RGB at start (M150)", row_rgb)
+        form.addRow("Chamber temp at start (M141/M191)", row_cht)
+        form.addRow(QLabel("Camera command"), self.pr_camera_cmd)
+        form.addRow(self.pr_camera_before)
+        form.addRow(self.pr_camera_after)
+        form.addRow(row_part)
+        form.addRow(row_aux)
+        form.addRow(self.pr_fans_off_end)
+        form.addRow("SD logging (M928/M29)", row_sd)
+        self.tabs.addTab(w, "Peripherals")
 
     # ---------- Filaments ----------
     def _init_filaments_tab(self):
@@ -370,14 +413,20 @@ class PDLForm(QWidget):
         if hasattr(self, 'mc_psu_on_start'):
             self.mc_psu_on_start.setChecked(False)
             self.mc_psu_off_end.setChecked(False)
-            self.mc_light_on_start.setChecked(False)
-            self.mc_light_off_end.setChecked(False)
-            self.mc_rgb_r.setValue(0); self.mc_rgb_g.setValue(0); self.mc_rgb_b.setValue(0)
-            self.mc_chamber_temp.setValue(0); self.mc_chamber_wait.setChecked(False)
             self.mc_enable_mesh.setChecked(False)
             self.mc_z_offset.setValue(0)
             self.mc_start_custom.setPlainText("")
             self.mc_end_custom.setPlainText("")
+        if hasattr(self, 'pr_light_on_start'):
+            self.pr_light_on_start.setChecked(False)
+            self.pr_light_off_end.setChecked(False)
+            self.pr_rgb_r.setValue(0); self.pr_rgb_g.setValue(0); self.pr_rgb_b.setValue(0)
+            self.pr_chamber_temp.setValue(0); self.pr_chamber_wait.setChecked(False)
+            self.pr_camera_before.setChecked(False); self.pr_camera_after.setChecked(False)
+            self.pr_camera_cmd.setText("M240")
+            self.pr_fan_part.setValue(0); self.pr_fan_aux_idx.setValue(0); self.pr_fan_aux.setValue(0)
+            self.pr_fans_off_end.setChecked(False)
+            self.pr_sd_enable.setChecked(False); self.pr_sd_file.setText("opk_log.gco"); self.pr_sd_stop.setChecked(False)
 
     def load_pdl(self, data: Dict[str, Any]) -> None:
         self._data = data
@@ -458,28 +507,36 @@ class PDLForm(QWidget):
             self.t_hooks.setItem(r, 0, QTableWidgetItem(name))
             te = QTextEdit(); te.setPlainText("\n".join(seq or []))
             self.t_hooks.setCellWidget(r, 1, te)
-        # Machine control: infer checkboxes from start/end
+        # Machine control: infer checkboxes from start/end and structured mc
+        mc = (g.get("machine_control") or {})
         start_seq = gc.get("start") or []
         end_seq = gc.get("end") or []
         def _has(prefix, seq):
             return any(str(s).strip().upper().startswith(prefix) for s in seq)
-        self.mc_psu_on_start.setChecked(_has("M80", start_seq))
-        self.mc_psu_off_end.setChecked(_has("M81", end_seq))
-        self.mc_light_on_start.setChecked(_has("M355 S1", start_seq))
-        self.mc_light_off_end.setChecked(_has("M355 S0", end_seq))
+        self.mc_psu_on_start.setChecked(bool(mc.get("psu_on_start") or _has("M80", start_seq)))
+        self.mc_psu_off_end.setChecked(bool(mc.get("psu_off_end") or _has("M81", end_seq)))
+        # Peripherals - lights
+        self.pr_light_on_start.setChecked(bool(mc.get("light_on_start") or _has("M355 S1", start_seq)))
+        self.pr_light_off_end.setChecked(bool(mc.get("light_off_end") or _has("M355 S0", end_seq)))
         # RGB M150 R,G,B
         import re
         m150 = next((s for s in start_seq if str(s).strip().upper().startswith("M150")), None)
         if m150:
             nums = {k:int(v) for k,v in re.findall(r"([RUB])\s*(\d+)", m150, flags=re.I)}
-            self.mc_rgb_r.setValue(nums.get('R',0)); self.mc_rgb_g.setValue(nums.get('U',0)); self.mc_rgb_b.setValue(nums.get('B',0))
+            self.pr_rgb_r.setValue(nums.get('R',0)); self.pr_rgb_g.setValue(nums.get('U',0)); self.pr_rgb_b.setValue(nums.get('B',0))
+        elif isinstance(mc.get("rgb_start"), dict):
+            self.pr_rgb_r.setValue(int(mc["rgb_start"].get('r') or 0))
+            self.pr_rgb_g.setValue(int(mc["rgb_start"].get('g') or 0))
+            self.pr_rgb_b.setValue(int(mc["rgb_start"].get('b') or 0))
         # Chamber
         m141 = next((s for s in start_seq if str(s).strip().upper().startswith("M141")), None)
         if m141:
             m = re.search(r"S\s*(\d+)", m141, flags=re.I)
             if m:
-                self.mc_chamber_temp.setValue(float(m.group(1)))
-        self.mc_chamber_wait.setChecked(_has("M191", start_seq))
+                self.pr_chamber_temp.setValue(float(m.group(1)))
+        elif isinstance(mc.get("chamber"), dict) and mc["chamber"].get("temp"):
+            self.pr_chamber_temp.setValue(float(mc["chamber"]["temp"]))
+        self.pr_chamber_wait.setChecked(bool(mc.get("chamber", {}).get("wait") or _has("M191", start_seq)))
         # Mesh enable
         self.mc_enable_mesh.setChecked(any(s.strip().upper().startswith("M420 S1") for s in start_seq))
         # Z offset
@@ -489,6 +546,27 @@ class PDLForm(QWidget):
             if m:
                 try: self.mc_z_offset.setValue(float(m.group(1)))
                 except Exception: pass
+        elif isinstance(mc.get("z_offset"), (int, float)):
+            self.mc_z_offset.setValue(float(mc["z_offset"]))
+        # Camera
+        cam = mc.get("camera") or {}
+        self.pr_camera_cmd.setText(str(cam.get("command") or self.pr_camera_cmd.text()))
+        self.pr_camera_before.setChecked(bool(cam.get("use_before_snapshot") or bool(g.get("before_snapshot"))))
+        self.pr_camera_after.setChecked(bool(cam.get("use_after_snapshot") or bool(g.get("after_snapshot"))))
+        # Fans
+        fans = mc.get("fans") or {}
+        try: self.pr_fan_part.setValue(int(fans.get("part_start_percent") or 0))
+        except Exception: pass
+        try: self.pr_fan_aux_idx.setValue(int(fans.get("aux_index") or 0))
+        except Exception: pass
+        try: self.pr_fan_aux.setValue(int(fans.get("aux_start_percent") or 0))
+        except Exception: pass
+        self.pr_fans_off_end.setChecked(bool(fans.get("off_at_end") or _has("M107", end_seq)))
+        # SD logging
+        sdl = mc.get("sd_logging") or {}
+        self.pr_sd_enable.setChecked(bool(sdl.get("enable_start") or any(str(s).strip().upper().startswith("M928") for s in start_seq)))
+        if sdl.get("filename"): self.pr_sd_file.setText(str(sdl.get("filename")))
+        self.pr_sd_stop.setChecked(bool(sdl.get("stop_at_end") or _has("M29", end_seq)))
 
         # Limits
         lim = g.get("limits") or {}
@@ -605,17 +683,20 @@ class PDLForm(QWidget):
         mc: Dict[str, Any] = {
             "psu_on_start": self.mc_psu_on_start.isChecked(),
             "psu_off_end": self.mc_psu_off_end.isChecked(),
-            "light_on_start": self.mc_light_on_start.isChecked(),
-            "light_off_end": self.mc_light_off_end.isChecked(),
-            "rgb_start": {"r": self.mc_rgb_r.value(), "g": self.mc_rgb_g.value(), "b": self.mc_rgb_b.value()},
-            "chamber": {"temp": self.mc_chamber_temp.value(), "wait": self.mc_chamber_wait.isChecked()},
             "enable_mesh_start": self.mc_enable_mesh.isChecked(),
             "z_offset": self.mc_z_offset.value(),
             "start_custom": [ln for ln in self.mc_start_custom.toPlainText().splitlines() if ln.strip()],
             "end_custom": [ln for ln in self.mc_end_custom.toPlainText().splitlines() if ln.strip()],
         }
+        # Peripherals structured
+        mc["light_on_start"] = self.pr_light_on_start.isChecked()
+        mc["light_off_end"] = self.pr_light_off_end.isChecked()
+        mc["rgb_start"] = {"r": self.pr_rgb_r.value(), "g": self.pr_rgb_g.value(), "b": self.pr_rgb_b.value()}
+        mc["chamber"] = {"temp": self.pr_chamber_temp.value(), "wait": self.pr_chamber_wait.isChecked()}
+        mc["camera"] = {"use_before_snapshot": self.pr_camera_before.isChecked(), "use_after_snapshot": self.pr_camera_after.isChecked(), "command": self.pr_camera_cmd.text().strip()}
+        mc["fans"] = {"part_start_percent": self.pr_fan_part.value(), "aux_index": self.pr_fan_aux_idx.value(), "aux_start_percent": self.pr_fan_aux.value(), "off_at_end": self.pr_fans_off_end.isChecked()}
         # Remove empty/defaults
-        if not any((mc["psu_on_start"], mc["light_on_start"], mc["enable_mesh_start"], mc["z_offset"], mc["start_custom"])) and not any((mc["psu_off_end"], mc["light_off_end"], mc["end_custom"])) and not any((mc["rgb_start"][k] for k in ("r","g","b"))) and not mc["chamber"]["temp"]:
+        if not any((mc["psu_on_start"], mc["light_on_start"], mc["enable_mesh_start"], mc["z_offset"], mc["start_custom"])) and not any((mc["psu_off_end"], mc["light_off_end"], mc["end_custom"])) and not any((mc["rgb_start"][k] for k in ("r","g","b"))) and not mc["chamber"]["temp"] and not mc.get("camera",{}).get("use_before_snapshot") and not mc.get("camera",{}).get("use_after_snapshot") and not any((mc.get("fans",{}).get("part_start_percent"), mc.get("fans",{}).get("aux_start_percent"), mc.get("fans",{}).get("off_at_end"))) and not mc.get("sd_logging",{}).get("enable_start"):
             pass
         else:
             g["machine_control"] = mc

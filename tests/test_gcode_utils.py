@@ -47,3 +47,18 @@ def test_apply_machine_control_injects_start_end():
     assert "M80" in s and "M81" in e and "M355 S1" in s and "M355 S0" in e
     assert "M150" in s and "M141 S30" in s and "M191 S30" in s and "M420 S1" in s and "M851 Z0.20" in s
     assert "M117 Hello" in s and "M117 Bye" in e
+
+def test_apply_machine_control_peripherals():
+    pdl = {
+        "machine_control": {
+            "camera": {"use_before_snapshot": True, "command": "M240"},
+            "sd_logging": {"enable_start": True, "filename": "log.gco", "stop_at_end": True},
+            "fans": {"part_start_percent": 50, "aux_index": 1, "aux_start_percent": 75, "off_at_end": True}
+        }
+    }
+    g = apply_machine_control(pdl, {})
+    assert "M240" in ("\n".join(g.get("before_snapshot") or []))
+    s = "\n".join(g.get("start") or [])
+    e = "\n".join(g.get("end") or [])
+    assert "M928 log.gco" in s and "M29" in e
+    assert "M106 S" in s and "M106 P1 S" in s and "M107" in e
