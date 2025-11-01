@@ -169,6 +169,43 @@ def apply_machine_control(pdl: Dict[str, object], base_gcode: Dict[str, List[str
         if isinstance(auxi, int):
             add(end, f"M107 P{auxi}")
 
+    # Exhaust control: prefer raw pin (M42) else fan index (M106/M107)
+    ex = mc.get("exhaust") or {}
+    if ex.get("enable_start"):
+        sp = ex.get("speed_percent")
+        s_val = pct_to_s(sp) if isinstance(sp, (int,float)) else 255
+        pin = ex.get("pin"); fan = ex.get("fan_index")
+        if isinstance(pin, int) and pin >= 0:
+            add(start, f"M42 P{pin} S{s_val}")
+            if ex.get("off_at_end"):
+                add(end, f"M42 P{pin} S0")
+        elif isinstance(fan, int) and fan >= 0:
+            add(start, f"M106 P{fan} S{s_val}")
+            if ex.get("off_at_end"):
+                add(end, f"M107 P{fan}")
+
+    # Aux outputs (M42) — list of label/pin/start/end values
+    for ao in (mc.get("aux_outputs") or []):
+        try:
+            pin = int(ao.get("pin"))
+        except Exception:
+            continue
+        sv = ao.get("start_value"); ev = ao.get("end_value")
+        if isinstance(sv, int): add(start, f"M42 P{pin} S{sv}")
+        if isinstance(ev, int): add(end, f"M42 P{pin} S{ev}")
+
+    # Custom peripherals: arbitrary hook → sequence
+    for cp in (mc.get("custom_peripherals") or []):
+        hook = cp.get("hook"); seq = cp.get("sequence")
+        if not isinstance(hook, str) or not isinstance(seq, list):
+            continue
+        hook = hook.strip()
+        cur = list(g.get(hook) or [])
+        for ln in seq:
+            if isinstance(ln, str) and ln.strip():
+                add(cur, ln)
+        g[hook] = cur
+
     out = dict(g)
     if start: out["start"] = start
     if end: out["end"] = end

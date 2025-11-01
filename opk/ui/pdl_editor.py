@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox, QSpinBox, QComboBox, QCheckBox, QPushButton, QTableWidget,
     QTableWidgetItem, QHeaderView, QTextEdit, QGroupBox
 )
+from ..core.gcode import EXPLICIT_HOOK_KEYS
 
 
 FIRMWARES = ["marlin","klipper","reprap","rrf","smoothie","bambu","crealityos","other"]
@@ -179,15 +180,8 @@ class PDLForm(QWidget):
     # ---------- Machine Control (M-codes helper) ----------
     def _init_machine_control_tab(self):
         w = QWidget(); form = QFormLayout(w)
-        # PSU and Lights
+        # PSU controls (standard)
         self.mc_psu_on_start = QCheckBox(); self.mc_psu_off_end = QCheckBox()
-        self.mc_light_on_start = QCheckBox(); self.mc_light_off_end = QCheckBox()
-        # RGB color at start
-        row_rgb = QHBoxLayout();
-        self.mc_rgb_r = QSpinBox(); self.mc_rgb_r.setRange(0,255); self.mc_rgb_r.setPrefix("R:")
-        self.mc_rgb_g = QSpinBox(); self.mc_rgb_g.setRange(0,255); self.mc_rgb_g.setPrefix(" G:")
-        self.mc_rgb_b = QSpinBox(); self.mc_rgb_b.setRange(0,255); self.mc_rgb_b.setPrefix(" B:")
-        row_rgb.addWidget(self.mc_rgb_r); row_rgb.addWidget(self.mc_rgb_g); row_rgb.addWidget(self.mc_rgb_b)
         # Mesh enable and Z offset
         self.mc_enable_mesh = QCheckBox()
         self.mc_z_offset = QDoubleSpinBox(); self.mc_z_offset.setRange(-5,5); self.mc_z_offset.setSingleStep(0.01); self.mc_z_offset.setPrefix("Z:")
@@ -197,9 +191,6 @@ class PDLForm(QWidget):
 
         form.addRow("PSU ON at start (M80)", self.mc_psu_on_start)
         form.addRow("PSU OFF at end (M81)", self.mc_psu_off_end)
-        form.addRow("Light ON at start (M355)", self.mc_light_on_start)
-        form.addRow("Light OFF at end (M355)", self.mc_light_off_end)
-        form.addRow("RGB at start (M150)", row_rgb)
         form.addRow("Enable mesh at start (M420 S1)", self.mc_enable_mesh)
         form.addRow("Probe Z offset (M851)", self.mc_z_offset)
         form.addRow(QLabel("Custom start M-codes"), self.mc_start_custom)
@@ -252,6 +243,46 @@ class PDLForm(QWidget):
         form.addRow(row_aux)
         form.addRow(self.pr_fans_off_end)
         form.addRow("SD logging (M928/M29)", row_sd)
+
+        # Exhaust controls
+        ex_row1 = QHBoxLayout();
+        self.pr_exhaust_enable = QCheckBox("Enable at start")
+        self.pr_exhaust_speed = QSpinBox(); self.pr_exhaust_speed.setRange(0,100); self.pr_exhaust_speed.setSuffix(" %")
+        ex_row1.addWidget(self.pr_exhaust_enable); ex_row1.addWidget(self.pr_exhaust_speed)
+        ex_row2 = QHBoxLayout();
+        self.pr_exhaust_pin = QSpinBox(); self.pr_exhaust_pin.setRange(0,999); self.pr_exhaust_pin.setPrefix("Pin P:")
+        self.pr_exhaust_fan = QSpinBox(); self.pr_exhaust_fan.setRange(0,9); self.pr_exhaust_fan.setPrefix(" Fan P:")
+        self.pr_exhaust_off = QCheckBox("Off at end")
+        ex_row2.addWidget(self.pr_exhaust_pin); ex_row2.addWidget(self.pr_exhaust_fan); ex_row2.addWidget(self.pr_exhaust_off)
+        form.addRow(QLabel("Exhaust (choose Pin or Fan)"))
+        form.addRow(ex_row1)
+        form.addRow(ex_row2)
+
+        # Aux Outputs (M42)
+        form.addRow(QLabel("Auxiliary Outputs (M42)"))
+        self.t_aux = QTableWidget(0, 4)
+        self.t_aux.setHorizontalHeaderLabels(["Label","Pin P","Start S","End S"])
+        self.t_aux.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        form.addRow(self.t_aux)
+        rowax = QHBoxLayout();
+        ax_add = QPushButton("Add Aux"); ax_add.clicked.connect(self._add_aux)
+        ax_del = QPushButton("Remove Aux"); ax_del.clicked.connect(self._del_aux)
+        rowax.addWidget(ax_add); rowax.addWidget(ax_del); rowax.addStretch(1)
+        form.addRow(rowax)
+
+        # Custom Peripherals (hooked M-codes)
+        form.addRow(QLabel("Custom Peripherals (hooked M-codes)"))
+        self.t_cper = QTableWidget(0, 3)
+        self.t_cper.setHorizontalHeaderLabels(["Label","Hook","Script (one command per line)"])
+        self.t_cper.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.t_cper.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.t_cper.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        form.addRow(self.t_cper)
+        rowcp = QHBoxLayout();
+        cp_add = QPushButton("Add Peripheral"); cp_add.clicked.connect(self._add_cper)
+        cp_del = QPushButton("Remove Peripheral"); cp_del.clicked.connect(self._del_cper)
+        rowcp.addWidget(cp_add); rowcp.addWidget(cp_del); rowcp.addStretch(1)
+        form.addRow(rowcp)
         self.tabs.addTab(w, "Peripherals")
 
     # ---------- Filaments ----------
@@ -427,6 +458,17 @@ class PDLForm(QWidget):
             self.pr_fan_part.setValue(0); self.pr_fan_aux_idx.setValue(0); self.pr_fan_aux.setValue(0)
             self.pr_fans_off_end.setChecked(False)
             self.pr_sd_enable.setChecked(False); self.pr_sd_file.setText("opk_log.gco"); self.pr_sd_stop.setChecked(False)
+            # Exhaust defaults
+            self.pr_exhaust_enable.setChecked(False); self.pr_exhaust_speed.setValue(0)
+            self.pr_exhaust_pin.setValue(0); self.pr_exhaust_fan.setValue(0); self.pr_exhaust_off.setChecked(False)
+            # Aux outputs: initialize three rows
+            if hasattr(self, 't_aux'):
+                self.t_aux.setRowCount(0)
+                for i in range(1,4):
+                    self._add_aux(default_label=f"Aux{i}")
+            # Custom peripherals: empty
+            if hasattr(self, 't_cper'):
+                self.t_cper.setRowCount(0)
 
     def load_pdl(self, data: Dict[str, Any]) -> None:
         self._data = data
@@ -567,6 +609,37 @@ class PDLForm(QWidget):
         self.pr_sd_enable.setChecked(bool(sdl.get("enable_start") or any(str(s).strip().upper().startswith("M928") for s in start_seq)))
         if sdl.get("filename"): self.pr_sd_file.setText(str(sdl.get("filename")))
         self.pr_sd_stop.setChecked(bool(sdl.get("stop_at_end") or _has("M29", end_seq)))
+        # Exhaust
+        ex = mc.get("exhaust") or {}
+        self.pr_exhaust_enable.setChecked(bool(ex.get("enable_start") or False))
+        try: self.pr_exhaust_speed.setValue(int(ex.get("speed_percent") or 0))
+        except Exception: pass
+        try: self.pr_exhaust_pin.setValue(int(ex.get("pin") or 0))
+        except Exception: pass
+        try: self.pr_exhaust_fan.setValue(int(ex.get("fan_index") or 0))
+        except Exception: pass
+        self.pr_exhaust_off.setChecked(bool(ex.get("off_at_end") or False))
+        # Aux outputs
+        if hasattr(self, 't_aux'):
+            self.t_aux.setRowCount(0)
+            for ao in (mc.get("aux_outputs") or []):
+                r = self.t_aux.rowCount(); self.t_aux.insertRow(r)
+                self.t_aux.setItem(r, 0, QTableWidgetItem(str(ao.get("label") or "Aux")))
+                self.t_aux.setItem(r, 1, QTableWidgetItem(str(ao.get("pin") or "")))
+                self.t_aux.setItem(r, 2, QTableWidgetItem(str(ao.get("start_value") or "")))
+                self.t_aux.setItem(r, 3, QTableWidgetItem(str(ao.get("end_value") or "")))
+        # Custom Peripherals
+        if hasattr(self, 't_cper'):
+            self.t_cper.setRowCount(0)
+            for cp in (mc.get("custom_peripherals") or []):
+                r = self.t_cper.rowCount(); self.t_cper.insertRow(r)
+                self.t_cper.setItem(r, 0, QTableWidgetItem(str(cp.get("label") or "")))
+                hook_combo = QComboBox(); hook_combo.setEditable(True)
+                hook_combo.addItems(sorted(set(EXPLICIT_HOOK_KEYS)))
+                hook_combo.setCurrentText(str(cp.get("hook") or "start"))
+                self.t_cper.setCellWidget(r, 1, hook_combo)
+                te = QTextEdit(); te.setPlainText("\n".join(cp.get("sequence") or []))
+                self.t_cper.setCellWidget(r, 2, te)
 
         # Limits
         lim = g.get("limits") or {}
@@ -695,11 +768,32 @@ class PDLForm(QWidget):
         mc["chamber"] = {"temp": self.pr_chamber_temp.value(), "wait": self.pr_chamber_wait.isChecked()}
         mc["camera"] = {"use_before_snapshot": self.pr_camera_before.isChecked(), "use_after_snapshot": self.pr_camera_after.isChecked(), "command": self.pr_camera_cmd.text().strip()}
         mc["fans"] = {"part_start_percent": self.pr_fan_part.value(), "aux_index": self.pr_fan_aux_idx.value(), "aux_start_percent": self.pr_fan_aux.value(), "off_at_end": self.pr_fans_off_end.isChecked()}
+        mc["sd_logging"] = {"enable_start": self.pr_sd_enable.isChecked(), "filename": self.pr_sd_file.text().strip(), "stop_at_end": self.pr_sd_stop.isChecked()}
+        mc["exhaust"] = {"enable_start": self.pr_exhaust_enable.isChecked(), "speed_percent": self.pr_exhaust_speed.value(), "off_at_end": self.pr_exhaust_off.isChecked(), "pin": self.pr_exhaust_pin.value(), "fan_index": self.pr_exhaust_fan.value()}
+        # Auxiliary outputs
+        aux = []
+        for r in range(self.t_aux.rowCount()):
+            label = self.t_aux.item(r,0).text().strip() if self.t_aux.item(r,0) else ""
+            pin = self.t_aux.item(r,1).text().strip() if self.t_aux.item(r,1) else ""
+            sv = self.t_aux.item(r,2).text().strip() if self.t_aux.item(r,2) else ""
+            ev = self.t_aux.item(r,3).text().strip() if self.t_aux.item(r,3) else ""
+            if not pin:
+                continue
+            try:
+                entry = {"label": label or "Aux", "pin": int(pin)}
+                if sv != "": entry["start_value"] = int(sv)
+                if ev != "": entry["end_value"] = int(ev)
+                aux.append(entry)
+            except Exception:
+                continue
+        if aux:
+            mc["aux_outputs"] = aux
         # Remove empty/defaults
         if not any((mc["psu_on_start"], mc["light_on_start"], mc["enable_mesh_start"], mc["z_offset"], mc["start_custom"])) and not any((mc["psu_off_end"], mc["light_off_end"], mc["end_custom"])) and not any((mc["rgb_start"][k] for k in ("r","g","b"))) and not mc["chamber"]["temp"] and not mc.get("camera",{}).get("use_before_snapshot") and not mc.get("camera",{}).get("use_after_snapshot") and not any((mc.get("fans",{}).get("part_start_percent"), mc.get("fans",{}).get("aux_start_percent"), mc.get("fans",{}).get("off_at_end"))) and not mc.get("sd_logging",{}).get("enable_start"):
             pass
         else:
             g["machine_control"] = mc
+        # Limits
 
         # Limits
         lim_out: Dict[str, Any] = {}
@@ -776,3 +870,31 @@ class PDLForm(QWidget):
             r = self.t_bedshape.rowCount(); self.t_bedshape.insertRow(r)
             self.t_bedshape.setItem(r, 0, QTableWidgetItem(str(x)))
             self.t_bedshape.setItem(r, 1, QTableWidgetItem(str(y)))
+
+    # --- Aux and Custom Peripherals helpers
+    def _add_aux(self, default_label: str | None = None):
+        r = self.t_aux.rowCount(); self.t_aux.insertRow(r)
+        self.t_aux.setItem(r, 0, QTableWidgetItem(default_label or f"Aux{r+1}"))
+        self.t_aux.setItem(r, 1, QTableWidgetItem(""))
+        self.t_aux.setItem(r, 2, QTableWidgetItem(""))
+        self.t_aux.setItem(r, 3, QTableWidgetItem(""))
+
+    def _del_aux(self):
+        rows = sorted({i.row() for i in self.t_aux.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_aux.removeRow(r)
+
+    def _add_cper(self):
+        r = self.t_cper.rowCount(); self.t_cper.insertRow(r)
+        self.t_cper.setItem(r, 0, QTableWidgetItem("Peripheral"))
+        hook_combo = QComboBox(); hook_combo.setEditable(True)
+        hook_combo.addItems(sorted(set(EXPLICIT_HOOK_KEYS)))
+        hook_combo.setCurrentText("start")
+        self.t_cper.setCellWidget(r, 1, hook_combo)
+        te = QTextEdit(); te.setPlaceholderText("M42 Pnn Snnn\n; or other M-code(s)")
+        self.t_cper.setCellWidget(r, 2, te)
+
+    def _del_cper(self):
+        rows = sorted({i.row() for i in self.t_cper.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_cper.removeRow(r)

@@ -202,6 +202,30 @@
           "aux_start_percent":{"type":"number","minimum":0,"maximum":100},
           "off_at_end":{"type":"boolean"}
         },"additionalProperties":false},
+        "exhaust":{"type":"object","properties":{
+          "enable_start":{"type":"boolean"},
+          "speed_percent":{"type":"number","minimum":0,"maximum":100},
+          "off_at_end":{"type":"boolean"},
+          "pin":{"type":"integer","minimum":0},
+          "fan_index":{"type":"integer","minimum":0}
+        },"additionalProperties":false},
+        "aux_outputs":{"type":"array","items":{
+          "type":"object","required":["label","pin"],
+          "properties":{
+            "label":{"type":"string"},
+            "pin":{"type":"integer","minimum":0},
+            "start_value":{"type":"integer","minimum":0,"maximum":255},
+            "end_value":{"type":"integer","minimum":0,"maximum":255}
+          },"additionalProperties":false
+        }},
+        "custom_peripherals":{"type":"array","items":{
+          "type":"object","required":["label","hook","sequence"],
+          "properties":{
+            "label":{"type":"string"},
+            "hook":{"type":"string"},
+            "sequence":{"type":"array","items":{"type":"string"}}
+          },"additionalProperties":false
+        }},
         "enable_mesh_start":{"type":"boolean"},
         "z_offset":{"type":"number"},
         "start_custom":{"type":"array","items":{"type":"string"}},
