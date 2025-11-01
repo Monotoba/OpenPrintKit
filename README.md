@@ -51,7 +51,7 @@ opk workspace init ./my-workspace
 ls ./my-workspace
 ```
 
-✅ All example profiles validate successfully (4 tests passed).
+✅ Example profiles validate successfully; full test suite passes locally.
 
 🧠 Why OPK?
 
@@ -76,7 +76,7 @@ OpenPrintKit/
 │  └─ ui/                 # GUI scaffolding (PySide6)
 ├─ schemas/               # JSON schemas for printer/filament/process/bundle
 ├─ examples/              # Example JSON profiles (LK5 Pro)
-├─ tests/                 # Pytest unit tests (4 passing)
+├─ tests/                 # Pytest unit tests
  └─ dist/                  # Output bundles (.orca_printer)
 ```
 
@@ -87,10 +87,14 @@ OpenPrintKit/
 - `opk bundle --in SRC --out OUT.orca_printer` — Build Orca bundle from `printers/`, `filaments/`, `processes/`
 - `opk workspace init ROOT [--no-examples]` — Scaffold a standard workspace
 - `opk install --src SRC --dest ORCA_PRESET_DIR [--backup BACKUP.zip] [--dry-run]` — Dry-run and install profiles to Orca presets
+- `opk convert --from cura --in INPUT --out OUTDIR` — Convert Cura definitions to OPK printer profiles
 - `opk gcode-hooks --pdl PDL.yaml` — List available G-code hooks in a PDL file
 - `opk gcode-preview --pdl PDL.yaml --hook start --vars vars.json` — Render a hook with provided variables
 - `opk gcode-validate --pdl PDL.yaml --vars vars.json` — Validate all hooks for unresolved placeholders
 - `opk pdl-validate --pdl PDL.yaml` — Validate PDL schema and machine-control rules
+- `opk gen-snippets --pdl PDL.yaml --out-dir OUTDIR [--firmware marlin|klipper|rrf|grbl|linuxcnc]` — Generate start/end G-code files
+- `opk gen --pdl PDL.yaml --slicer orca|cura|prusa|ideamaker|bambu --out OUTDIR [--bundle BUNDLE.orca_printer]` — Generate slicer profiles
+- `opk spool --source spoolman|tigertag|openspool|opentag3d --base-url URL --action create|read|update|delete|search [...]` — Spool DB stubs
 
 ### GUI
 
@@ -100,12 +104,25 @@ OpenPrintKit/
 - Drag-and-drop `.json` files onto the window to validate them
 - Tools → G-code Preview: open a PDL YAML/JSON, select a hook (start, layer_change, etc.), define variables, and preview rendered G-code
 - Tools → Validate Hook Variables: open a PDL and variables JSON to scan all hooks for unresolved placeholders
+- Help → Overview: high-level concepts and UI
+- Help → G-code Help: hooks, macros, placeholders
+- Help → M-code Reference: machine-control M-codes
 
 If the app exits immediately, try:
 
 - `OPK_DEBUG=1 python -m opk.ui.main_window` (prints platform + screen count)
 - Set platform explicitly: `QT_QPA_PLATFORM=xcb` or `QT_QPA_PLATFORM=wayland`
 - Ensure you have a display/session (X11/Wayland) available
+
+### Development
+
+- Requirements: Python 3.11+ (see `pyproject.toml`)
+- Setup:
+  - `python -m venv .venv && source .venv/bin/activate`
+  - `pip install -e .`
+- Run tests: `PYTHONPATH=. pytest -q`
+- CLI help: `python -m opk.cli --help`
+- GUI: `opk-gui` or `python -m opk.ui.main_window`
 
 🧩 Features
 
