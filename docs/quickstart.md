@@ -112,4 +112,11 @@ opk gcode-preview --pdl pdl-spec/examples/prusa_mk3s.yaml --hook start --vars pd
 
 # Validate all hooks for unresolved placeholders
 opk gcode-validate --pdl pdl-spec/examples/voron_24_350.yaml --vars pdl-spec/examples/vars.sample.json
+
+## PDL Validation (Schema + Rules)
+
+```bash
+opk pdl-validate --pdl pdl-spec/examples/prusa_mk3s.yaml
+```
+Checks PDL schema and machine_control rules (e.g., ambiguous exhaust config, duplicate aux pins, missing camera command when triggers enabled).
 ```

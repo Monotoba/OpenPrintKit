@@ -106,6 +106,9 @@ def main():
     gv = sub.add_parser("gcode-validate", help="Validate all gcode hooks against provided variables")
     gv.add_argument("--pdl", required=True, help="Path to PDL file")
     gv.add_argument("--vars", dest="vars_path", required=True, help="JSON file with variables for placeholder substitution")
+
+    pv = sub.add_parser("pdl-validate", help="Validate a PDL file against schema and rules")
+    pv.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -189,6 +192,25 @@ def main():
             raise SystemExit(2)
         print(f"[SUMMARY] hooks={len(hooks)} invalid=0")
         raise SystemExit(0)
+    if args.cmd == "pdl-validate":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        # Schema
+        try:
+            S.validate("pdl", data)
+        except Exception as e:
+            print(f"[SCHEMA] FAIL: {e}")
+            raise SystemExit(2)
+        # Rules
+        from ..core.rules import validate_pdl, summarize
+        issues = validate_pdl(data or {})
+        for i in issues:
+            print(f"[{i.level.upper()}] {i.path} — {i.message}")
+        s = summarize(issues)
+        print(f"[SUMMARY] errors={s['error']} warns={s['warn']} infos={s['info']} total={s['total']}")
+        raise SystemExit(0 if s['error'] == 0 else 2)
 
 if __name__ == "__main__":
     main()

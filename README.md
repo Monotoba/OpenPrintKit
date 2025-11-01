@@ -90,6 +90,7 @@ OpenPrintKit/
 - `opk gcode-hooks --pdl PDL.yaml` — List available G-code hooks in a PDL file
 - `opk gcode-preview --pdl PDL.yaml --hook start --vars vars.json` — Render a hook with provided variables
 - `opk gcode-validate --pdl PDL.yaml --vars vars.json` — Validate all hooks for unresolved placeholders
+- `opk pdl-validate --pdl PDL.yaml` — Validate PDL schema and machine-control rules
 
 ### GUI
 

@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem, QHeaderView, QTextEdit, QGroupBox
 )
 from ..core.gcode import EXPLICIT_HOOK_KEYS
+from ..core.gcode import EXPLICIT_HOOK_KEYS
 
 
 FIRMWARES = ["marlin","klipper","reprap","rrf","smoothie","bambu","crealityos","other"]
@@ -631,15 +632,19 @@ class PDLForm(QWidget):
         # Custom Peripherals
         if hasattr(self, 't_cper'):
             self.t_cper.setRowCount(0)
-            for cp in (mc.get("custom_peripherals") or []):
-                r = self.t_cper.rowCount(); self.t_cper.insertRow(r)
-                self.t_cper.setItem(r, 0, QTableWidgetItem(str(cp.get("label") or "")))
-                hook_combo = QComboBox(); hook_combo.setEditable(True)
-                hook_combo.addItems(sorted(set(EXPLICIT_HOOK_KEYS)))
-                hook_combo.setCurrentText(str(cp.get("hook") or "start"))
-                self.t_cper.setCellWidget(r, 1, hook_combo)
-                te = QTextEdit(); te.setPlainText("\n".join(cp.get("sequence") or []))
-                self.t_cper.setCellWidget(r, 2, te)
+        # Build dynamic hook options from explicit hooks + existing gcode keys
+        hook_options = set(EXPLICIT_HOOK_KEYS)
+        hook_options.update(gc.keys())
+        hook_options.update((gc.get("hooks") or {}).keys())
+        for cp in (mc.get("custom_peripherals") or []):
+            r = self.t_cper.rowCount(); self.t_cper.insertRow(r)
+            self.t_cper.setItem(r, 0, QTableWidgetItem(str(cp.get("label") or "")))
+            hook_combo = QComboBox(); hook_combo.setEditable(True)
+            hook_combo.addItems(sorted(hook_options))
+            hook_combo.setCurrentText(str(cp.get("hook") or "start"))
+            self.t_cper.setCellWidget(r, 1, hook_combo)
+            te = QTextEdit(); te.setPlainText("\n".join(cp.get("sequence") or []))
+            self.t_cper.setCellWidget(r, 2, te)
 
         # Limits
         lim = g.get("limits") or {}
@@ -888,7 +893,8 @@ class PDLForm(QWidget):
         r = self.t_cper.rowCount(); self.t_cper.insertRow(r)
         self.t_cper.setItem(r, 0, QTableWidgetItem("Peripheral"))
         hook_combo = QComboBox(); hook_combo.setEditable(True)
-        hook_combo.addItems(sorted(set(EXPLICIT_HOOK_KEYS)))
+        for h in self._current_hook_options():
+            hook_combo.addItem(h)
         hook_combo.setCurrentText("start")
         self.t_cper.setCellWidget(r, 1, hook_combo)
         te = QTextEdit(); te.setPlaceholderText("M42 Pnn Snnn\n; or other M-code(s)")
@@ -898,3 +904,17 @@ class PDLForm(QWidget):
         rows = sorted({i.row() for i in self.t_cper.selectedItems()}, reverse=True)
         for r in rows:
             self.t_cper.removeRow(r)
+
+    def _current_hook_options(self) -> List[str]:
+        opts = set(EXPLICIT_HOOK_KEYS)
+        # include any existing hooks in g_edits (explicit)
+        opts.update(self.g_edits.keys())
+        # include any free-form hooks table entries
+        try:
+            for r in range(self.t_hooks.rowCount()):
+                it = self.t_hooks.item(r, 0)
+                if it and it.text().strip():
+                    opts.add(it.text().strip())
+        except Exception:
+            pass
+        return sorted(opts)

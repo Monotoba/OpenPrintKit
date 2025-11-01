@@ -67,3 +67,24 @@ def test_cli_install_dry_run(tmp_path: Path, capsys):
     out = capsys.readouterr().out
     assert "[ADD" in out and "[UPDATE" in out and "[SAME" in out
     assert "[SUMMARY]" in out
+
+
+def test_cli_pdl_validate(tmp_path: Path, capsys):
+    pdl = tmp_path / "test.yaml"
+    pdl.write_text("""\
+pdl_version: "1.0"
+id: test
+name: Test
+firmware: marlin
+kinematics: cartesian
+geometry:
+  bed_shape: [[0,0],[200,0],[200,200],[0,200]]
+  z_height: 200
+extruders: [{ nozzle_diameter: 0.4 }]
+machine_control:
+  camera: { use_before_snapshot: true, command: "M240" }
+""", encoding="utf-8")
+    code = run_main(["opk", "pdl-validate", "--pdl", str(pdl)])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "[SUMMARY]" in out
