@@ -95,6 +95,10 @@ class MainWindow(QMainWindow):
         help_menu.addAction(act_gcode)
         act_fwmap = QAction("Firmware Mapping…", self); act_fwmap.triggered.connect(self._help_fwmap)
         help_menu.addAction(act_fwmap)
+        act_quick = QAction("Quickstart…", self); act_quick.triggered.connect(self._help_quickstart)
+        help_menu.addAction(act_quick)
+        act_cli = QAction("CLI Reference…", self); act_cli.triggered.connect(self._help_cli_reference)
+        help_menu.addAction(act_cli)
         act_mref = QAction("M-code Reference…", self); act_mref.triggered.connect(self._mcode_ref)
         help_menu.addAction(act_mref)
         act_about = QAction("About", self); act_about.triggered.connect(self._about)
@@ -299,6 +303,34 @@ class MainWindow(QMainWindow):
             if p.exists():
                 dlg.view.setPlainText(p.read_text(encoding="utf-8"))
             dlg.setWindowTitle("Firmware Mapping")
+        except Exception:
+            pass
+        dlg.resize(800, 600)
+        dlg.exec()
+
+    def _help_quickstart(self):
+        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+        dlg = _DocDlg(self)
+        try:
+            from pathlib import Path
+            p = Path(__file__).resolve().parents[2] / "docs" / "quickstart.md"
+            if p.exists():
+                dlg.view.setPlainText(p.read_text(encoding="utf-8"))
+            dlg.setWindowTitle("Quickstart")
+        except Exception:
+            pass
+        dlg.resize(800, 600)
+        dlg.exec()
+
+    def _help_cli_reference(self):
+        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+        dlg = _DocDlg(self)
+        try:
+            from pathlib import Path
+            p = Path(__file__).resolve().parents[2] / "docs" / "cli-reference.md"
+            if p.exists():
+                dlg.view.setPlainText(p.read_text(encoding="utf-8"))
+            dlg.setWindowTitle("CLI Reference")
         except Exception:
             pass
         dlg.resize(800, 600)
