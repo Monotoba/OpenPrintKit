@@ -68,6 +68,26 @@
         }
       },
       "additionalProperties": true
+    },
+    "gcode":{
+      "type":"object",
+      "properties":{
+        "start":{"type":"array","items":{"type":"string"}},
+        "end":{"type":"array","items":{"type":"string"}},
+        "tool_change":{"type":"array","items":{"type":"string"}},
+        "layer_change":{"type":"array","items":{"type":"string"}},
+        "pause":{"type":"array","items":{"type":"string"}},
+        "resume":{"type":"array","items":{"type":"string"}},
+        "filament_change":{"type":"array","items":{"type":"string"}},
+        "macros":{
+          "type":"object",
+          "patternProperties":{
+            "^[A-Za-z_][A-Za-z0-9_-]*$": {"type":"array","items":{"type":"string"}}
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true

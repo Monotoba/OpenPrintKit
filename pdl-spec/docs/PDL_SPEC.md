@@ -34,7 +34,7 @@ Each PDL document must define:
 | `features` | object | ❌ | Auto-bed leveling and probe details |
 | `materials` | object | ❌ | Material definitions |
 | `process_defaults` | object | ❌ | Baseline print settings |
-| `gcode` | object | ❌ | Start/end scripts |
+| `gcode` | object | ❌ | Start/end/tool-change and custom macros |
 
 ---
 
@@ -93,6 +93,20 @@ The `features` object includes `auto_bed_leveling` and optional `probe` details:
 
 - `probe.type`: inductive | bltouch | crt | strain_gauge | nozzle_contact | manual | other
 - `probe.mesh_size`: [rows, cols] integer tuple
+
+### 3.4 G-code Blocks and Macros
+
+PDL captures reusable G-code sequences in the `gcode` object. The following keys are recognized:
+
+- `start`: sequence run before printing
+- `end`: sequence run after printing
+- `tool_change`: sequence run when changing tools/extruders
+- `layer_change`: sequence run at layer boundaries
+- `pause` / `resume`: sequences used when pausing/resuming a print
+- `filament_change`: sequence to handle manual filament changes
+- `macros`: a map of arbitrary macro names to sequences; use for additional hooks (e.g. `purge_line`, `bed_mesh`, `preheat`)
+
+All fields are arrays of strings (one command per entry). `macros` allows extension without schema changes.
 
 ## 4. Versioning
 
