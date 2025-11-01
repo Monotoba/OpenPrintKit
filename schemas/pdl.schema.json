@@ -169,6 +169,30 @@
         "additionalProperties": true
       }
     }
+    ,
+    "machine_control":{
+      "type":"object",
+      "properties":{
+        "psu_on_start":{"type":"boolean"},
+        "psu_off_end":{"type":"boolean"},
+        "light_on_start":{"type":"boolean"},
+        "light_off_end":{"type":"boolean"},
+        "rgb_start":{"type":"object","properties":{
+          "r":{"type":"integer","minimum":0,"maximum":255},
+          "g":{"type":"integer","minimum":0,"maximum":255},
+          "b":{"type":"integer","minimum":0,"maximum":255}
+        },"additionalProperties":false},
+        "chamber":{"type":"object","properties":{
+          "temp":{"type":"number","minimum":0,"maximum":120},
+          "wait":{"type":"boolean"}
+        },"additionalProperties":false},
+        "enable_mesh_start":{"type":"boolean"},
+        "z_offset":{"type":"number"},
+        "start_custom":{"type":"array","items":{"type":"string"}},
+        "end_custom":{"type":"array","items":{"type":"string"}}
+      },
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

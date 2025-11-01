@@ -196,3 +196,22 @@ For common machine-control M-codes (power, lighting, fans, probes, camera, safet
 - `docs/mcode-reference.md` in the repository root.
 
 PDL expresses these through G-code hooks and macros; use the hooks to place M-codes at appropriate lifecycle events (start/end, layer, tool-change, etc.).
+### 3.8 Machine Control (Structured)
+
+PDL can capture high-level machine control intent under `machine_control`. Generators translate this into G-code hooks for specific slicers or firmware:
+
+```yaml
+machine_control:
+  psu_on_start: true     # → M80 in start
+  psu_off_end: true      # → M81 in end
+  light_on_start: true   # → M355 S1 in start
+  light_off_end: true    # → M355 S0 in end
+  rgb_start: { r: 16, g: 16, b: 16 }  # → M150
+  chamber: { temp: 30, wait: true }   # → M141 / M191
+  enable_mesh_start: true             # → M420 S1
+  z_offset: -0.05                     # → M851 Z-0.05
+  start_custom: ["M117 Startup"]
+  end_custom:   ["M117 Finished"]
+```
+
+Tooling merges `machine_control` with explicit `gcode` hooks at generation time.

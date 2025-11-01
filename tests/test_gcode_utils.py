@@ -1,4 +1,4 @@
-from opk.core.gcode import find_placeholders, render_sequence, list_hooks
+from opk.core.gcode import find_placeholders, render_sequence, list_hooks, apply_machine_control
 
 
 def test_find_and_render_placeholders():
@@ -25,3 +25,25 @@ def test_list_hooks_from_gcode():
     hooks = list_hooks(g)
     assert "start" in hooks and "after_layer_change" in hooks and "monitor.progress_25" in hooks
 
+
+def test_apply_machine_control_injects_start_end():
+    pdl = {
+        "machine_control": {
+            "psu_on_start": True,
+            "psu_off_end": True,
+            "light_on_start": True,
+            "light_off_end": True,
+            "rgb_start": {"r": 1, "g": 2, "b": 3},
+            "chamber": {"temp": 30, "wait": True},
+            "enable_mesh_start": True,
+            "z_offset": 0.2,
+            "start_custom": ["M117 Hello"],
+            "end_custom": ["M117 Bye"]
+        }
+    }
+    g = apply_machine_control(pdl, {})
+    s = "\n".join(g.get("start") or [])
+    e = "\n".join(g.get("end") or [])
+    assert "M80" in s and "M81" in e and "M355 S1" in s and "M355 S0" in e
+    assert "M150" in s and "M141 S30" in s and "M191 S30" in s and "M420 S1" in s and "M851 Z0.20" in s
+    assert "M117 Hello" in s and "M117 Bye" in e

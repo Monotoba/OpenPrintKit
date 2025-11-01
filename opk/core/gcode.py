@@ -92,3 +92,48 @@ def render_sequence(seq: Iterable[str], variables: Dict[str, object]) -> Tuple[L
         out.append(r)
         missing |= miss
     return out, missing
+
+
+def apply_machine_control(pdl: Dict[str, object], base_gcode: Dict[str, List[str]] | None = None) -> Dict[str, List[str]]:
+    """Translate pdl['machine_control'] into gcode.start/end additions.
+    Returns a new gcode dict merging existing hooks with generated ones.
+    """
+    mc = (pdl or {}).get("machine_control") or {}
+    g = {k: list(v) for k, v in ((base_gcode or {}).items())}
+    start = list(g.get("start") or [])
+    end = list(g.get("end") or [])
+
+    def add(seq: List[str], cmd: str):
+        if cmd and cmd not in seq:
+            seq.append(cmd)
+
+    if mc.get("psu_on_start"): add(start, "M80")
+    if mc.get("psu_off_end"): add(end, "M81")
+    if mc.get("light_on_start"): add(start, "M355 S1")
+    if mc.get("light_off_end"): add(end, "M355 S0")
+
+    rgb = mc.get("rgb_start") or {}
+    r = int(rgb.get("r") or 0); gcol = int(rgb.get("g") or 0); b = int(rgb.get("b") or 0)
+    if any(v > 0 for v in (r, gcol, b)):
+        add(start, f"M150 R{r} U{gcol} B{b}")
+
+    ch = mc.get("chamber") or {}
+    temp = ch.get("temp")
+    if isinstance(temp, (int, float)) and temp > 0:
+        add(start, f"M141 S{int(temp)}")
+        if ch.get("wait"):
+            add(start, f"M191 S{int(temp)}")
+
+    if mc.get("enable_mesh_start"): add(start, "M420 S1")
+    if isinstance(mc.get("z_offset"), (int, float)) and mc.get("z_offset") != 0:
+        add(start, f"M851 Z{float(mc['z_offset']):.2f}")
+
+    for ln in mc.get("start_custom") or []:
+        if isinstance(ln, str) and ln.strip(): add(start, ln)
+    for ln in mc.get("end_custom") or []:
+        if isinstance(ln, str) and ln.strip(): add(end, ln)
+
+    out = dict((base_gcode or {}))
+    if start: out["start"] = start
+    if end: out["end"] = end
+    return out

@@ -39,6 +39,7 @@ class PDLForm(QWidget):
         self._init_multimaterial_tab()
         self._init_filaments_tab()
         self._init_features_tab()
+        self._init_machine_control_tab()
         self._init_gcode_tab()
 
         self.set_defaults()
@@ -173,6 +174,42 @@ class PDLForm(QWidget):
         form.addRow("Probe Active Low", self.f_probe_active_low)
         form.addRow(es)
         self.tabs.addTab(w, "Features")
+
+    # ---------- Machine Control (M-codes helper) ----------
+    def _init_machine_control_tab(self):
+        w = QWidget(); form = QFormLayout(w)
+        # PSU and Lights
+        self.mc_psu_on_start = QCheckBox(); self.mc_psu_off_end = QCheckBox()
+        self.mc_light_on_start = QCheckBox(); self.mc_light_off_end = QCheckBox()
+        # RGB color at start
+        row_rgb = QHBoxLayout();
+        self.mc_rgb_r = QSpinBox(); self.mc_rgb_r.setRange(0,255); self.mc_rgb_r.setPrefix("R:")
+        self.mc_rgb_g = QSpinBox(); self.mc_rgb_g.setRange(0,255); self.mc_rgb_g.setPrefix(" G:")
+        self.mc_rgb_b = QSpinBox(); self.mc_rgb_b.setRange(0,255); self.mc_rgb_b.setPrefix(" B:")
+        row_rgb.addWidget(self.mc_rgb_r); row_rgb.addWidget(self.mc_rgb_g); row_rgb.addWidget(self.mc_rgb_b)
+        # Chamber temperature
+        row_cht = QHBoxLayout();
+        self.mc_chamber_temp = QDoubleSpinBox(); self.mc_chamber_temp.setRange(0,120); self.mc_chamber_temp.setSuffix(" °C")
+        self.mc_chamber_wait = QCheckBox("Wait")
+        row_cht.addWidget(self.mc_chamber_temp); row_cht.addWidget(self.mc_chamber_wait)
+        # Mesh enable and Z offset
+        self.mc_enable_mesh = QCheckBox()
+        self.mc_z_offset = QDoubleSpinBox(); self.mc_z_offset.setRange(-5,5); self.mc_z_offset.setSingleStep(0.01); self.mc_z_offset.setPrefix("Z:")
+        # Custom M-codes
+        self.mc_start_custom = QTextEdit(); self.mc_start_custom.setPlaceholderText("; Custom M-codes at start\nM117 Starting…")
+        self.mc_end_custom = QTextEdit(); self.mc_end_custom.setPlaceholderText("; Custom M-codes at end\nM117 Done")
+
+        form.addRow("PSU ON at start (M80)", self.mc_psu_on_start)
+        form.addRow("PSU OFF at end (M81)", self.mc_psu_off_end)
+        form.addRow("Light ON at start (M355)", self.mc_light_on_start)
+        form.addRow("Light OFF at end (M355)", self.mc_light_off_end)
+        form.addRow("RGB at start (M150)", row_rgb)
+        form.addRow("Chamber temp at start (M141/M191)", row_cht)
+        form.addRow("Enable mesh at start (M420 S1)", self.mc_enable_mesh)
+        form.addRow("Probe Z offset (M851)", self.mc_z_offset)
+        form.addRow(QLabel("Custom start M-codes"), self.mc_start_custom)
+        form.addRow(QLabel("Custom end M-codes"), self.mc_end_custom)
+        self.tabs.addTab(w, "Machine Control")
 
     # ---------- Filaments ----------
     def _init_filaments_tab(self):
@@ -320,8 +357,27 @@ class PDLForm(QWidget):
         self.f_abl.setChecked(False)
         self.f_probe_type.setCurrentIndex(0)
         self.f_mesh_r.setValue(7); self.f_mesh_c.setValue(7)
-        self.g_start.setPlainText("")
-        self.g_end.setPlainText("")
+        # Clear all explicit gcode hooks
+        if hasattr(self, 'g_edits'):
+            for ed in self.g_edits.values():
+                ed.setPlainText("")
+        # Clear macros and additional hooks tables
+        if hasattr(self, 't_macros'):
+            self.t_macros.setRowCount(0)
+        if hasattr(self, 't_hooks'):
+            self.t_hooks.setRowCount(0)
+        # Machine control defaults
+        if hasattr(self, 'mc_psu_on_start'):
+            self.mc_psu_on_start.setChecked(False)
+            self.mc_psu_off_end.setChecked(False)
+            self.mc_light_on_start.setChecked(False)
+            self.mc_light_off_end.setChecked(False)
+            self.mc_rgb_r.setValue(0); self.mc_rgb_g.setValue(0); self.mc_rgb_b.setValue(0)
+            self.mc_chamber_temp.setValue(0); self.mc_chamber_wait.setChecked(False)
+            self.mc_enable_mesh.setChecked(False)
+            self.mc_z_offset.setValue(0)
+            self.mc_start_custom.setPlainText("")
+            self.mc_end_custom.setPlainText("")
 
     def load_pdl(self, data: Dict[str, Any]) -> None:
         self._data = data
@@ -402,6 +458,37 @@ class PDLForm(QWidget):
             self.t_hooks.setItem(r, 0, QTableWidgetItem(name))
             te = QTextEdit(); te.setPlainText("\n".join(seq or []))
             self.t_hooks.setCellWidget(r, 1, te)
+        # Machine control: infer checkboxes from start/end
+        start_seq = gc.get("start") or []
+        end_seq = gc.get("end") or []
+        def _has(prefix, seq):
+            return any(str(s).strip().upper().startswith(prefix) for s in seq)
+        self.mc_psu_on_start.setChecked(_has("M80", start_seq))
+        self.mc_psu_off_end.setChecked(_has("M81", end_seq))
+        self.mc_light_on_start.setChecked(_has("M355 S1", start_seq))
+        self.mc_light_off_end.setChecked(_has("M355 S0", end_seq))
+        # RGB M150 R,G,B
+        import re
+        m150 = next((s for s in start_seq if str(s).strip().upper().startswith("M150")), None)
+        if m150:
+            nums = {k:int(v) for k,v in re.findall(r"([RUB])\s*(\d+)", m150, flags=re.I)}
+            self.mc_rgb_r.setValue(nums.get('R',0)); self.mc_rgb_g.setValue(nums.get('U',0)); self.mc_rgb_b.setValue(nums.get('B',0))
+        # Chamber
+        m141 = next((s for s in start_seq if str(s).strip().upper().startswith("M141")), None)
+        if m141:
+            m = re.search(r"S\s*(\d+)", m141, flags=re.I)
+            if m:
+                self.mc_chamber_temp.setValue(float(m.group(1)))
+        self.mc_chamber_wait.setChecked(_has("M191", start_seq))
+        # Mesh enable
+        self.mc_enable_mesh.setChecked(any(s.strip().upper().startswith("M420 S1") for s in start_seq))
+        # Z offset
+        m851 = next((s for s in start_seq if str(s).strip().upper().startswith("M851")), None)
+        if m851:
+            m = re.search(r"Z\s*(-?\d+(?:\.\d+)?)", m851, flags=re.I)
+            if m:
+                try: self.mc_z_offset.setValue(float(m.group(1)))
+                except Exception: pass
 
         # Limits
         lim = g.get("limits") or {}
@@ -486,7 +573,7 @@ class PDLForm(QWidget):
         feat["probe"] = {"type": self.f_probe_type.currentText(), "mesh_size": [self.f_mesh_r.value(), self.f_mesh_c.value()], "active_low": self.f_probe_active_low.isChecked()}
         g["features"] = feat
 
-        # G-code explicit hooks
+        # G-code explicit hooks (stored as-is; generators will consume)
         gcode_out: Dict[str, Any] = {}
         for key, ed in self.g_edits.items():
             lines = [ln for ln in ed.toPlainText().splitlines() if ln.strip()]
@@ -514,6 +601,24 @@ class PDLForm(QWidget):
             gcode_out["hooks"] = hooks_map
         if gcode_out:
             g["gcode"] = gcode_out
+        # Store Machine Control as structured PDL; generators translate to hooks
+        mc: Dict[str, Any] = {
+            "psu_on_start": self.mc_psu_on_start.isChecked(),
+            "psu_off_end": self.mc_psu_off_end.isChecked(),
+            "light_on_start": self.mc_light_on_start.isChecked(),
+            "light_off_end": self.mc_light_off_end.isChecked(),
+            "rgb_start": {"r": self.mc_rgb_r.value(), "g": self.mc_rgb_g.value(), "b": self.mc_rgb_b.value()},
+            "chamber": {"temp": self.mc_chamber_temp.value(), "wait": self.mc_chamber_wait.isChecked()},
+            "enable_mesh_start": self.mc_enable_mesh.isChecked(),
+            "z_offset": self.mc_z_offset.value(),
+            "start_custom": [ln for ln in self.mc_start_custom.toPlainText().splitlines() if ln.strip()],
+            "end_custom": [ln for ln in self.mc_end_custom.toPlainText().splitlines() if ln.strip()],
+        }
+        # Remove empty/defaults
+        if not any((mc["psu_on_start"], mc["light_on_start"], mc["enable_mesh_start"], mc["z_offset"], mc["start_custom"])) and not any((mc["psu_off_end"], mc["light_off_end"], mc["end_custom"])) and not any((mc["rgb_start"][k] for k in ("r","g","b"))) and not mc["chamber"]["temp"]:
+            pass
+        else:
+            g["machine_control"] = mc
 
         # Limits
         lim_out: Dict[str, Any] = {}
