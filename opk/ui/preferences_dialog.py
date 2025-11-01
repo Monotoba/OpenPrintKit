@@ -1,5 +1,5 @@
 from __future__ import annotations
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog
+from ._qt_compat import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog
 
 
 class PreferencesDialog(QDialog):
@@ -32,4 +32,3 @@ class PreferencesDialog(QDialog):
     @property
     def orca_preset_dir(self) -> str:
         return self._orca.text().strip()
-

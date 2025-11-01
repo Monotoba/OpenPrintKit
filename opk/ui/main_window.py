@@ -73,8 +73,6 @@ except Exception:  # ImportError or plugin issues — provide minimal stubs for 
 from ..core.io import load_json
 from ..core import schema as S
 from ..core.bundle import build_bundle
-from .preferences_dialog import PreferencesDialog
-from .app_settings_dialog import AppSettingsDialog
 from .pdl_editor import PDLForm
 
 
@@ -247,6 +245,7 @@ class MainWindow(QMainWindow):
             self.settings.setValue("paths/orca_preset", last_dirs.get("install_dst"))
 
     def _preferences(self):
+        from .preferences_dialog import PreferencesDialog
         current = self.settings.value("paths/orca_preset", "")
         dlg = PreferencesDialog(self, orca_preset_dir=current)
         if dlg.exec():
@@ -316,6 +315,7 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def _settings(self):
+        from .app_settings_dialog import AppSettingsDialog
         dlg = AppSettingsDialog(self)
         dlg.resize(600, 400)
         dlg.exec()

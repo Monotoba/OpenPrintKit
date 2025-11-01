@@ -1,8 +1,7 @@
 from __future__ import annotations
-from PySide6.QtWidgets import (
-    QDialog, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QHBoxLayout, QFileDialog
+from ._qt_compat import (
+    QDialog, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QHBoxLayout, QFileDialog, QSettings
 )
-from PySide6.QtCore import QSettings
 
 
 class AppSettingsDialog(QDialog):
@@ -43,13 +42,11 @@ class AppSettingsDialog(QDialog):
         f.addRow(btns)
 
     def _pick_outdir(self):
-        from PySide6.QtWidgets import QFileDialog
         d = QFileDialog.getExistingDirectory(self, "Select Output Directory", self.ed_outdir.text() or "")
         if d:
             self.ed_outdir.setText(d)
 
     def _pick_vars(self):
-        from PySide6.QtWidgets import QFileDialog
         fn, _ = QFileDialog.getOpenFileName(self, "Select Variables JSON", self.ed_vars.text() or "", "JSON (*.json)")
         if fn:
             self.ed_vars.setText(fn)
@@ -72,4 +69,3 @@ class AppSettingsDialog(QDialog):
         self.s.setValue("policy/rrf/prefer_named_pins", self.ck_rrf_named.isChecked())
         self.s.setValue("policy/grbl/exhaust_mode", "M8" if self.cb_grbl_exh.currentIndex()==0 else "M7")
         super().accept()
-
