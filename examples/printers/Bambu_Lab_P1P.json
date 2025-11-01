@@ -1,0 +1,13 @@
+{
+  "type": "printer",
+  "name": "Bambu Lab P1P",
+  "firmware": "Bambu",
+  "kinematics": "corexy",
+  "nozzle_diameter": 0.4,
+  "filament_diameter": 1.75,
+  "build_volume": [256, 256, 256],
+  "heated_bed": true,
+  "auto_bed_leveling": true,
+  "comments": "Minimal P1P example profile."
+}
+

@@ -1,0 +1,13 @@
+{
+  "type": "printer",
+  "name": "Creality Ender-3 (Marlin)",
+  "firmware": "Marlin 2.x",
+  "kinematics": "cartesian",
+  "nozzle_diameter": 0.4,
+  "filament_diameter": 1.75,
+  "build_volume": [220, 220, 250],
+  "heated_bed": true,
+  "auto_bed_leveling": false,
+  "comments": "Baseline Ender-3 profile."
+}
+
