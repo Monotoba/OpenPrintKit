@@ -85,3 +85,14 @@ Available from the menu:
 - Run rule checks
 - Build Orca bundle
 - Initialize a workspace
+
+## CLI Install to Orca Presets (Optional)
+
+Dry-run a plan and then install with backup:
+
+```bash
+opk install --src ./examples --dest ~/AppData/Roaming/OrcaSlicer/user/  --dry-run   # Windows example path
+opk install --src ./examples --dest ~/.config/OrcaSlicer/user/ --backup ./backup_orca.zip
+```
+
+Note: Destination path varies by OS and Orca version. Use a dry run first to see planned changes.

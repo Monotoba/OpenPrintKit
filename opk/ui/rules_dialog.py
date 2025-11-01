@@ -12,7 +12,9 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QHeaderView,
 )
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QIcon
+from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QStyle
 from ..core.io import load_json
 from ..core.rules import validate_printer, validate_filament, validate_process, summarize
 
@@ -69,6 +71,7 @@ class RulesDialog(QDialog):
 
     def _populate(self, rows):
         self._table.setRowCount(0)
+        style = QApplication.style()
         for r, (level, target, path, msg) in enumerate(rows):
             self._table.insertRow(r)
             for c, text in enumerate((level.upper(), target, path, msg)):
@@ -76,9 +79,11 @@ class RulesDialog(QDialog):
                 if c == 0:
                     if level == "error":
                         item.setForeground(QColor("red"))
+                        item.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical))
                     elif level == "warn":
-                        item.setForeground(QColor("orange"))
+                        item.setForeground(QColor("darkorange"))
+                        item.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning))
                     else:
                         item.setForeground(QColor("gray"))
+                        item.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation))
                 self._table.setItem(r, c, item)
-

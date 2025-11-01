@@ -4,6 +4,7 @@ from pathlib import Path
 from ..core import schema as S
 from ..core.io import load_json
 from ..core.bundle import build_bundle
+from ..core.install import plan_install, perform_install
 
 
 def cmd_workspace_init(root, with_examples: bool):
@@ -78,12 +79,30 @@ def main():
     ex_group.add_argument("--examples", dest="with_examples", action="store_true", help="Include example profiles (default)")
     ex_group.add_argument("--no-examples", dest="with_examples", action="store_false", help="Do not include example profiles")
     wi.set_defaults(with_examples=True)
+
+    # install
+    ins = sub.add_parser("install", help="Install profiles to Orca presets (with optional backup)")
+    ins.add_argument("--src", required=True, help="Source directory with printers/ filaments/ processes/")
+    ins.add_argument("--dest", required=True, help="Destination Orca presets directory")
+    ins.add_argument("--backup", help="Path to backup ZIP of overwritten files")
+    ins.add_argument("--dry-run", action="store_true", help="Compute and print plan without writing files")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
     if args.cmd == "rules":    raise SystemExit(cmd_rules(args.printer, args.filament, args.process))
     if args.cmd == "workspace" and args.subcmd == "init":
         raise SystemExit(cmd_workspace_init(args.root, with_examples=args.with_examples))
+    if args.cmd == "install":
+        src = Path(args.src); dest = Path(args.dest)
+        ops = plan_install(src, dest)
+        if args.dry_run:
+            for op in ops:
+                print(f"[{op.status.upper():6}] {op.category}/{op.name} -> {op.dest}")
+            print(f"[SUMMARY] total={len(ops)} add={sum(1 for o in ops if o.status=='add')} update={sum(1 for o in ops if o.status=='update')} same={sum(1 for o in ops if o.status=='same')}")
+            raise SystemExit(0)
+        res = perform_install(ops, backup_zip=Path(args.backup) if args.backup else None)
+        print(f"[INSTALL] written={res['written']} skipped={res['skipped']} total={res['total']}")
+        raise SystemExit(0)
 
 if __name__ == "__main__":
     main()

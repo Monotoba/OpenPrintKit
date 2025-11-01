@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QAction,
 )
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QStyle
 
 from ..core.io import load_json
 from ..core import schema as S
@@ -45,11 +46,12 @@ class MainWindow(QMainWindow):
         mb = self.menuBar()
         file_menu = mb.addMenu("File")
 
-        act_validate = QAction("Validate…", self); act_validate.triggered.connect(self._validate)
-        act_rules = QAction("Run Rules…", self); act_rules.triggered.connect(self._rules)
-        act_bundle = QAction("Build Bundle…", self); act_bundle.triggered.connect(self._bundle)
-        act_ws_init = QAction("Workspace Init…", self); act_ws_init.triggered.connect(self._workspace_init)
-        act_install = QAction("Install to Orca…", self); act_install.triggered.connect(self._install)
+        style = self.style()
+        act_validate = QAction(style.standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton), "Validate…", self); act_validate.triggered.connect(self._validate)
+        act_rules = QAction(style.standardIcon(QStyle.StandardPixmap.SP_BrowserReload), "Run Rules…", self); act_rules.triggered.connect(self._rules)
+        act_bundle = QAction(style.standardIcon(QStyle.StandardPixmap.SP_DirIcon), "Build Bundle…", self); act_bundle.triggered.connect(self._bundle)
+        act_ws_init = QAction(style.standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder), "Workspace Init…", self); act_ws_init.triggered.connect(self._workspace_init)
+        act_install = QAction(style.standardIcon(QStyle.StandardPixmap.SP_ArrowDown), "Install to Orca…", self); act_install.triggered.connect(self._install)
         act_exit = QAction("Exit", self); act_exit.triggered.connect(self.close)
 
         for a in (act_validate, act_rules, act_bundle, act_ws_init, act_install):

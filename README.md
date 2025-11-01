@@ -86,6 +86,7 @@ OpenPrintKit/
 - `opk rules [--printer P] [--filament F] [--process S]` — Rule checks (warnings/errors) with summary and exit code 2 on errors
 - `opk bundle --in SRC --out OUT.orca_printer` — Build Orca bundle from `printers/`, `filaments/`, `processes/`
 - `opk workspace init ROOT [--no-examples]` — Scaffold a standard workspace
+- `opk install --src SRC --dest ORCA_PRESET_DIR [--backup BACKUP.zip] [--dry-run]` — Dry-run and install profiles to Orca presets
 
 ### GUI
 

@@ -263,6 +263,10 @@ opk bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer
 
 # Initialize a workspace (with examples by default)
 opk workspace init ./my-workspace
+
+# Install to Orca presets (dry-run and backup)
+opk install --src ./examples --dest ~/.config/OrcaSlicer/user/ --dry-run
+opk install --src ./examples --dest ~/.config/OrcaSlicer/user/ --backup ./backup_orca.zip
 ```
 
 ## K. UX Flows (Happy Paths)

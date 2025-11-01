@@ -42,3 +42,28 @@ def test_cli_workspace_init(tmp_path: Path):
     # readme scaffold exists
     assert (ws / "README.opk-workspace.md").exists()
 
+
+def test_cli_install_dry_run(tmp_path: Path, capsys):
+    # Prepare source and dest with one add, one update, one same
+    src = tmp_path / "src"; dest = tmp_path / "dest"
+    src.mkdir(parents=True, exist_ok=True); dest.mkdir(parents=True, exist_ok=True)
+    (src / "printers").mkdir(parents=True, exist_ok=True)
+    (src / "filaments").mkdir(parents=True, exist_ok=True)
+    (src / "processes").mkdir(parents=True, exist_ok=True)
+    (dest / "printers").mkdir(parents=True, exist_ok=True)
+    (dest / "filaments").mkdir(parents=True, exist_ok=True)
+
+    import json
+    (src / "printers/a.json").write_text(json.dumps({"type":"printer","name":"A","nozzle_diameter":0.4,"filament_diameter":1.75,"build_volume":[100,100,100]}), encoding="utf-8")
+    (src / "filaments/f.json").write_text(json.dumps({"type":"filament","name":"F","filament_type":"PLA","nozzle_temperature":200,"bed_temperature":60}), encoding="utf-8")
+    (src / "processes/p.json").write_text(json.dumps({"type":"process","name":"P","layer_height":0.2,"print_speed":60}), encoding="utf-8")
+    # same printer
+    (dest / "printers/a.json").write_text(json.dumps({"type":"printer","name":"A","nozzle_diameter":0.4,"filament_diameter":1.75,"build_volume":[100,100,100]}), encoding="utf-8")
+    # update filament
+    (dest / "filaments/f.json").write_text(json.dumps({"type":"filament","name":"F","filament_type":"PLA","nozzle_temperature":205,"bed_temperature":60}), encoding="utf-8")
+
+    code = run_main(["opk", "install", "--src", str(src), "--dest", str(dest), "--dry-run"])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "[ADD" in out and "[UPDATE" in out and "[SAME" in out
+    assert "[SUMMARY]" in out
