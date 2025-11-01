@@ -23,6 +23,7 @@ from .gcode_preview_dialog import GcodePreviewDialog
 from .gcode_validate_dialog import GcodeValidateDialog
 from .mcode_reference_dialog import McodeReferenceDialog
 from .gen_snippets_dialog import GenerateSnippetsDialog
+from .gen_profiles_dialog import GenerateProfilesDialog
 from PySide6.QtCore import QSettings
 from .preferences_dialog import PreferencesDialog
 from .app_settings_dialog import AppSettingsDialog
@@ -81,9 +82,11 @@ class MainWindow(QMainWindow):
         act_gcode_prev = QAction("G-code Preview…", self); act_gcode_prev.triggered.connect(self._gcode_preview)
         act_gcode_validate = QAction("Validate Hook Variables…", self); act_gcode_validate.triggered.connect(self._gcode_validate)
         act_gen_snip = QAction("Generate Snippets…", self); act_gen_snip.triggered.connect(self._gen_snippets)
+        act_gen_prof = QAction("Generate Profiles…", self); act_gen_prof.triggered.connect(self._gen_profiles)
         tools_menu.addAction(act_gcode_prev)
         tools_menu.addAction(act_gcode_validate)
         tools_menu.addAction(act_gen_snip)
+        tools_menu.addAction(act_gen_prof)
 
         help_menu = mb.addMenu("Help")
         act_overview = QAction("Overview…", self); act_overview.triggered.connect(self._help_overview)
@@ -241,6 +244,11 @@ class MainWindow(QMainWindow):
     def _gen_snippets(self):
         dlg = GenerateSnippetsDialog(self)
         dlg.resize(650, 200)
+        dlg.exec()
+
+    def _gen_profiles(self):
+        dlg = GenerateProfilesDialog(self)
+        dlg.resize(650, 240)
         dlg.exec()
 
     def _mcode_ref(self):

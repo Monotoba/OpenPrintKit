@@ -8,6 +8,7 @@ This help page summarizes OPK concepts and UI:
 - Structured `machine_control` captures high‑level intent; generators translate this per firmware.
 - Tools: G‑code Preview, Validate Hook Variables, M‑code Reference.
   - Generate Snippets: produce firmware‑ready start/end G‑code files from a PDL.
+  - Generate Profiles: produce slicer profiles for Orca, Cura, Prusa, ideaMaker, Bambu.
 - Settings: set default slicer/firmware, output directory, variables JSON, and firmware policies.
 
 See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-reference.md`.
