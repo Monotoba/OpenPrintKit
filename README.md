@@ -56,18 +56,18 @@ ls ./my-workspace
 
 ### Documentation
 
-- Overview: docs/overview.md
-- Quickstart: docs/quickstart.md
-- CLI Reference: docs/cli-reference.md
-- Firmware Mapping Guide: docs/firmware-mapping.md
-- G-code Help: docs/gcode-help.md
-- M-code Reference: docs/mcode-reference.md
-- Creator Intro: docs/OpenPrintKit_Creator_Intro.md
-- Manufacturer Intro: docs/OpenPrintKit_Manufacturer_Intro.md
-- Project Spec: docs/project-spec.md
-- Project Status: docs/project-status.md
-- Implementation Status: docs/implementation-status.md
-- System Notes: docs/system_notes.md
+- Overview: [docs/overview.md](docs/overview.md)
+- Quickstart: [docs/quickstart.md](docs/quickstart.md)
+- CLI Reference: [docs/cli-reference.md](docs/cli-reference.md)
+- Firmware Mapping Guide: [docs/firmware-mapping.md](docs/firmware-mapping.md)
+- G-code Help: [docs/gcode-help.md](docs/gcode-help.md)
+- M-code Reference: [docs/mcode-reference.md](docs/mcode-reference.md)
+- Creator Intro: [docs/OpenPrintKit_Creator_Intro.md](docs/OpenPrintKit_Creator_Intro.md)
+- Manufacturer Intro: [docs/OpenPrintKit_Manufacturer_Intro.md](docs/OpenPrintKit_Manufacturer_Intro.md)
+- Project Spec: [docs/project-spec.md](docs/project-spec.md)
+- Project Status: [docs/project-status.md](docs/project-status.md)
+- Implementation Status: [docs/implementation-status.md](docs/implementation-status.md)
+- System Notes: [docs/system_notes.md](docs/system_notes.md)
 
 🧠 Why OPK?
 
