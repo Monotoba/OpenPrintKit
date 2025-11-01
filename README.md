@@ -53,6 +53,21 @@ ls ./my-workspace
 
 ✅ Example profiles validate successfully; full test suite passes locally.
 
+### Documentation
+
+- Overview: docs/overview.md
+- Quickstart: docs/quickstart.md
+- CLI Reference: docs/cli-reference.md
+- Firmware Mapping Guide: docs/firmware-mapping.md
+- G-code Help: docs/gcode-help.md
+- M-code Reference: docs/mcode-reference.md
+- Creator Intro: docs/OpenPrintKit_Creator_Intro.md
+- Manufacturer Intro: docs/OpenPrintKit_Manufacturer_Intro.md
+- Project Spec: docs/project-spec.md
+- Project Status: docs/project-status.md
+- Implementation Status: docs/implementation-status.md
+- System Notes: docs/system_notes.md
+
 🧠 Why OPK?
 
 Problem	OPK Solution
