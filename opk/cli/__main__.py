@@ -116,37 +116,7 @@ def main():
     cv.add_argument("--in", dest="src", required=True, help="Input file or directory to convert")
     cv.add_argument("--out", dest="out", required=True, help="Output directory (printers)")
 
-    # gcode utilities
-    gh = sub.add_parser("gcode-hooks", help="List available G-code hooks in a PDL file")
-    gh.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-
-    gp = sub.add_parser("gcode-preview", help="Render a G-code hook with variables")
-    gp.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-    gp.add_argument("--hook", required=True, help="Hook name (e.g. start, before_layer_change)")
-    gp.add_argument("--vars", dest="vars_path", help="Path to JSON file with variables")
-
-    gv = sub.add_parser("gcode-validate", help="Validate variables across all G-code hooks")
-    gv.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-    gv.add_argument("--vars", dest="vars_path", required=True, help="Path to JSON file with variables")
-
-    # PDL validation and previews
-    pv = sub.add_parser("pdl-validate", help="Validate a PDL file against schema and rules")
-    pv.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-
-    tp = sub.add_parser("tag-preview", help="Preview OpenPrintTag header from PDL")
-    tp.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-
-    # Generate snippets and slicer profiles
-    gsn = sub.add_parser("gen-snippets", help="Generate start/end G-code snippets from a PDL")
-    gsn.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-    gsn.add_argument("--out-dir", dest="out_dir", required=True, help="Output directory")
-    gsn.add_argument("--firmware", choices=["marlin","klipper","rrf","reprap","duet","grbl","linuxcnc"], help="Override firmware mapping")
-
-    gen = sub.add_parser("gen", help="Generate slicer profiles from a PDL")
-    gen.add_argument("--pdl", required=True, help="Path to PDL (YAML/JSON)")
-    gen.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu"], help="Target slicer")
-    gen.add_argument("--out", required=True, help="Output directory")
-    gen.add_argument("--bundle", help="Optional bundle path (for orca)")
+    # (gcode + PDL + generators) subcommands defined below, after spool
 
     # Spool client operations (stubs)
     sp = sub.add_parser("spool", help="Spool data operations (stubs)")
