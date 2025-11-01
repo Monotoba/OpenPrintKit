@@ -27,8 +27,8 @@ Each PDL document must define:
 | `name` | string | ✅ | Human-readable name |
 | `firmware` | string | ✅ | Firmware family (`marlin`, `klipper`, etc.) |
 | `kinematics` | string | ✅ | Motion system type |
-| `geometry` | object | ✅ | Bed shape and Z height |
-| `limits` | object | ❌ | Max speeds, accelerations |
+| `geometry` | object | ✅ | Bed shape (polygon) and Z height |
+| `limits` | object | ❌ | Max speeds, travel, acceleration, jerk |
 | `extruders` | array<object> | ❌ | One or more extruders/toolheads |
 | `multi_material` | object | ❌ | Spool banks (e.g., AMS/MMU) and mixing |
 | `features` | object | ❌ | Auto-bed leveling and probe details |

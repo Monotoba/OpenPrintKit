@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QWidget, QTabWidget, QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QDoubleSpinBox, QSpinBox, QComboBox, QCheckBox, QPushButton, QTableWidget,
-    QTableWidgetItem, QHeaderView, QTextEdit
+    QTableWidgetItem, QHeaderView, QTextEdit, QGroupBox
 )
 
 
@@ -56,6 +56,28 @@ class PDLForm(QWidget):
         self.f_z = QDoubleSpinBox(); self.f_z.setRange(10, 1000); self.f_z.setDecimals(1)
         self.f_origin = QLineEdit("front_left")
 
+        # Bed shape polygon editor
+        self.t_bedshape = QTableWidget(0, 2)
+        self.t_bedshape.setHorizontalHeaderLabels(["X","Y"])
+        self.t_bedshape.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        bs_btns = QHBoxLayout()
+        bs_add = QPushButton("Add Point"); bs_add.clicked.connect(self._add_bed_point)
+        bs_del = QPushButton("Remove Point"); bs_del.clicked.connect(self._del_bed_point)
+        bs_rect = QPushButton("Make Rectangle from Width/Depth"); bs_rect.clicked.connect(self._bed_make_rect)
+        bs_btns.addWidget(bs_add); bs_btns.addWidget(bs_del); bs_btns.addWidget(bs_rect); bs_btns.addStretch(1)
+
+        # Limits group
+        limits = QGroupBox("Limits")
+        lim_form = QFormLayout(limits)
+        self.l_print_speed = QDoubleSpinBox(); self.l_print_speed.setRange(1, 1000)
+        self.l_travel_speed = QDoubleSpinBox(); self.l_travel_speed.setRange(1, 2000)
+        self.l_accel = QDoubleSpinBox(); self.l_accel.setRange(1, 50000)
+        self.l_jerk = QDoubleSpinBox(); self.l_jerk.setRange(0, 200)
+        lim_form.addRow("Print Speed Max (mm/s)", self.l_print_speed)
+        lim_form.addRow("Travel Speed Max (mm/s)", self.l_travel_speed)
+        lim_form.addRow("Acceleration Max (mm/s²)", self.l_accel)
+        lim_form.addRow("Jerk Max (mm/s)", self.l_jerk)
+
         form.addRow("PDL Version", self.f_pdl_version)
         form.addRow("ID", self.f_id)
         form.addRow("Name", self.f_name)
@@ -65,6 +87,10 @@ class PDLForm(QWidget):
         form.addRow("Depth (Y)", self.f_depth)
         form.addRow("Z Height", self.f_z)
         form.addRow("Origin", self.f_origin)
+        form.addRow(QLabel("Bed Shape (polygon)"))
+        form.addRow(self.t_bedshape)
+        form.addRow(bs_btns)
+        form.addRow(limits)
         self.tabs.addTab(w, "Build Area")
 
     # ---------- Extruders ----------
@@ -195,6 +221,9 @@ class PDLForm(QWidget):
         self.t_extruders.setRowCount(0)
         self._add_extruder()
         self.t_banks.setRowCount(0)
+        # Bed shape default rectangle
+        self.t_bedshape.setRowCount(0)
+        self._bed_make_rect()
         self.f_abl.setChecked(False)
         self.f_probe_type.setCurrentIndex(0)
         self.f_mesh_r.setValue(7); self.f_mesh_c.setValue(7)
@@ -210,10 +239,17 @@ class PDLForm(QWidget):
         fw = (g.get("firmware") or "marlin").lower(); self.f_firmware.setCurrentIndex(max(0, FIRMWARES.index(fw) if fw in FIRMWARES else 0))
         km = (g.get("kinematics") or "cartesian").lower(); self.f_kinematics.setCurrentIndex(max(0, KINEMATICS.index(km) if km in KINEMATICS else 0))
         geom = g.get("geometry") or {}
-        w, d = bed_shape_to_rect(geom.get("bed_shape") or rect_to_bed_shape(220, 220))
+        bed = geom.get("bed_shape") or rect_to_bed_shape(220, 220)
+        w, d = bed_shape_to_rect(bed)
         self.f_width.setValue(float(w)); self.f_depth.setValue(float(d))
         self.f_z.setValue(float(geom.get("z_height") or 250))
         self.f_origin.setText(geom.get("origin") or "front_left")
+        # Populate bed shape table
+        self.t_bedshape.setRowCount(0)
+        for pt in bed:
+            r = self.t_bedshape.rowCount(); self.t_bedshape.insertRow(r)
+            self.t_bedshape.setItem(r, 0, QTableWidgetItem(str(pt[0])))
+            self.t_bedshape.setItem(r, 1, QTableWidgetItem(str(pt[1])))
 
         # Extruders
         self.t_extruders.setRowCount(0)
@@ -251,6 +287,18 @@ class PDLForm(QWidget):
         self.g_start.setPlainText("\n".join(gc.get("start") or []))
         self.g_end.setPlainText("\n".join(gc.get("end") or []))
 
+        # Limits
+        lim = g.get("limits") or {}
+        if isinstance(lim, dict):
+            try: self.l_print_speed.setValue(float(lim.get("print_speed_max") or 0))
+            except Exception: pass
+            try: self.l_travel_speed.setValue(float(lim.get("travel_speed_max") or 0))
+            except Exception: pass
+            try: self.l_accel.setValue(float(lim.get("acceleration_max") or 0))
+            except Exception: pass
+            try: self.l_jerk.setValue(float(lim.get("jerk_max") or 0))
+            except Exception: pass
+
         # Filaments/Materials
         self.t_filaments.setRowCount(0)
         for m in g.get("materials") or []:
@@ -276,8 +324,22 @@ class PDLForm(QWidget):
         g["name"] = self.f_name.text().strip()
         g["firmware"] = self.f_firmware.currentText()
         g["kinematics"] = self.f_kinematics.currentText()
+        # Bed shape: prefer explicit table points if present and >=3, else rectangle
+        bed_pts = []
+        for r in range(self.t_bedshape.rowCount()):
+            try:
+                x = float(self.t_bedshape.item(r,0).text()) if self.t_bedshape.item(r,0) else None
+                y = float(self.t_bedshape.item(r,1).text()) if self.t_bedshape.item(r,1) else None
+                if x is None or y is None:
+                    continue
+                bed_pts.append([x, y])
+            except Exception:
+                continue
+        if len(bed_pts) < 3:
+            bed_pts = rect_to_bed_shape(self.f_width.value(), self.f_depth.value())
+
         g["geometry"] = {
-            "bed_shape": rect_to_bed_shape(self.f_width.value(), self.f_depth.value()),
+            "bed_shape": bed_pts,
             "z_height": self.f_z.value(),
             "origin": self.f_origin.text().strip() or "front_left",
         }
@@ -314,6 +376,15 @@ class PDLForm(QWidget):
             "end": [ln for ln in self.g_end.toPlainText().splitlines() if ln.strip()],
         }
 
+        # Limits
+        lim_out: Dict[str, Any] = {}
+        if self.l_print_speed.value(): lim_out["print_speed_max"] = self.l_print_speed.value()
+        if self.l_travel_speed.value(): lim_out["travel_speed_max"] = self.l_travel_speed.value()
+        if self.l_accel.value(): lim_out["acceleration_max"] = self.l_accel.value()
+        if self.l_jerk.value(): lim_out["jerk_max"] = self.l_jerk.value()
+        if lim_out:
+            g["limits"] = lim_out
+        
         # Materials (Filaments)
         mats: List[Dict[str, Any]] = []
         for r in range(self.t_filaments.rowCount()):
@@ -349,3 +420,23 @@ class PDLForm(QWidget):
         if mats:
             g["materials"] = mats
         return g
+
+    # --- Helpers for Bed Shape editor
+    def _add_bed_point(self):
+        r = self.t_bedshape.rowCount(); self.t_bedshape.insertRow(r)
+        self.t_bedshape.setItem(r, 0, QTableWidgetItem("0"))
+        self.t_bedshape.setItem(r, 1, QTableWidgetItem("0"))
+
+    def _del_bed_point(self):
+        rows = sorted({i.row() for i in self.t_bedshape.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_bedshape.removeRow(r)
+
+    def _bed_make_rect(self):
+        w = self.f_width.value(); d = self.f_depth.value()
+        pts = rect_to_bed_shape(w, d)
+        self.t_bedshape.setRowCount(0)
+        for x, y in pts:
+            r = self.t_bedshape.rowCount(); self.t_bedshape.insertRow(r)
+            self.t_bedshape.setItem(r, 0, QTableWidgetItem(str(x)))
+            self.t_bedshape.setItem(r, 1, QTableWidgetItem(str(y)))

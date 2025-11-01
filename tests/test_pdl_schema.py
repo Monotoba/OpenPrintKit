@@ -37,3 +37,16 @@ def test_pdl_with_materials():
         ]
     }
     S.validate("pdl", pdl)
+
+def test_pdl_with_limits():
+    pdl = {
+        "pdl_version": "1.0",
+        "id": "limits.test",
+        "name": "Limits Test",
+        "firmware": "marlin",
+        "kinematics": "cartesian",
+        "geometry": {"bed_shape": [[0,0],[220,0],[220,220],[0,220]], "z_height": 220},
+        "extruders": [{"nozzle_diameter": 0.4}],
+        "limits": {"print_speed_max": 120, "travel_speed_max": 200, "acceleration_max": 5000, "jerk_max": 8}
+    }
+    S.validate("pdl", pdl)

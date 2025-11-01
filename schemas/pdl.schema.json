@@ -18,6 +18,16 @@
         "origin":{"type":"string"}
       }
     },
+    "limits":{
+      "type":"object",
+      "properties":{
+        "print_speed_max": {"type":"number","minimum":1},
+        "travel_speed_max": {"type":"number","minimum":1},
+        "acceleration_max": {"type":"number","minimum":1},
+        "jerk_max": {"type":"number","minimum":0}
+      },
+      "additionalProperties": true
+    },
     "extruders":{
       "type":"array",
       "minItems":1,
