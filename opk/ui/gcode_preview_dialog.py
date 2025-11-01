@@ -61,6 +61,19 @@ class GcodePreviewDialog(QDialog):
         p = Path(fn)
         text = p.read_text(encoding="utf-8")
         data = json.loads(text) if p.suffix.lower() == ".json" else yaml.safe_load(text)
+        # inject policies from Settings if present
+        try:
+            from PySide6.QtCore import QSettings
+            s = QSettings("OpenPrintKit", "OPKStudio")
+            pol = {
+                'klipper': {'camera_map': bool(s.value('policy/klipper/camera_map', True, type=bool))},
+                'rrf': {'prefer_named_pins': bool(s.value('policy/rrf/prefer_named_pins', True, type=bool))},
+                'grbl': {'exhaust_mode': s.value('policy/grbl/exhaust_mode', 'M8')},
+            }
+            data = dict(data or {})
+            data['policies'] = pol
+        except Exception:
+            pass
         self._gcode = (data or {}).get("gcode") or {}
         hooks = list_hooks(self._gcode)
         self._hook.clear()
@@ -95,4 +108,3 @@ class GcodePreviewDialog(QDialog):
         if present:
             out += f"\n# Placeholders present: {', '.join(sorted(present))}"
         self._preview.setPlainText(out)
-

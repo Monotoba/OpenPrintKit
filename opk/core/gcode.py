@@ -220,8 +220,9 @@ def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
     base = (pdl or {}).get("gcode") or {}
     out = apply_machine_control(pdl, base)
     firmware = str((pdl or {}).get("firmware") or "").lower()
+    policies = (pdl or {}).get('policies') or {}
     # Klipper: prefer host/macro messages for camera trigger (M240 alternative)
-    if firmware == "klipper":
+    if firmware == "klipper" and (policies.get('klipper', {}).get('camera_map', True)):
         def _map(seq: List[str] | None) -> List[str] | None:
             if not seq: return seq
             mapped: List[str] = []
@@ -257,8 +258,8 @@ def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
         mc = (pdl or {}).get("machine_control") or {}
         ex = mc.get("exhaust") or {}
         if ex.get("enable_start"):
-            # choose flood coolant M8 for GRBL; mist M7 for LinuxCNC
-            on = "M8" if firmware == "grbl" else "M7"
+            # choose mode by policy for GRBL; default M8; LinuxCNC uses M7
+            on = policies.get('grbl', {}).get('exhaust_mode', 'M8') if firmware == 'grbl' else 'M7'
             seq = list(out.get("start") or [])
             add(seq, on)
             out["start"] = seq

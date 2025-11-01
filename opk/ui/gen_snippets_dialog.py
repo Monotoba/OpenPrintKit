@@ -61,7 +61,15 @@ class GenerateSnippetsDialog(QDialog):
             return
         fw = self.cb_fw.currentText() or None
         try:
-            start, end = generate_snippets(data or {}, firmware=fw)
+            # inject policies from Settings
+            pol = {
+                'klipper': {'camera_map': bool(self.s.value('policy/klipper/camera_map', True, type=bool))},
+                'rrf': {'prefer_named_pins': bool(self.s.value('policy/rrf/prefer_named_pins', True, type=bool))},
+                'grbl': {'exhaust_mode': self.s.value('policy/grbl/exhaust_mode', 'M8')},
+            }
+            data = dict(data or {})
+            data['policies'] = pol
+            start, end = generate_snippets(data, firmware=fw)
         except Exception as e:
             QMessageBox.critical(self, "Generate", f"Failed to generate snippets:\n{e}")
             return
@@ -75,4 +83,3 @@ class GenerateSnippetsDialog(QDialog):
             return
         QMessageBox.information(self, "Generate", f"Wrote:\n{out_dir}/{base}_start.gcode\n{out_dir}/{base}_end.gcode")
         self.accept()
-

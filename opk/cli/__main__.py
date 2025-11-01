@@ -117,6 +117,12 @@ def main():
     gs.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
     gs.add_argument("--out-dir", required=True, help="Output directory for snippets")
     gs.add_argument("--firmware", help="Override firmware for mapping (e.g., marlin, rrf, klipper, grbl, linuxcnc)")
+
+    gn = sub.add_parser("gen", help="Generate slicer profiles from PDL")
+    gn.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
+    gn.add_argument("--slicer", required=True, choices=["orca"], help="Target slicer")
+    gn.add_argument("--out", required=True, help="Output directory for profiles")
+    gn.add_argument("--bundle", help="Optional bundle output .orca_printer")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -244,6 +250,22 @@ def main():
         print(f"[WROTE] {outdir}/{base}_start.gcode")
         print(f"[WROTE] {outdir}/{base}_end.gcode")
         raise SystemExit(0)
+    if args.cmd == "gen":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        out_dir = _Path(args.out)
+        if args.slicer == 'orca':
+            from ..plugins.slicers.orca import generate_orca
+            generated = generate_orca(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_bundle
+                build_bundle(out_dir, _Path(args.bundle))
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
 
 if __name__ == "__main__":
     main()
