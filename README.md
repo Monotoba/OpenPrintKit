@@ -22,6 +22,8 @@ OPK’s schema-driven validation ensures configuration correctness, portability,
 
 ## 🚀 Quickstart
 
+For a step-by-step guide with more detail, see `docs/quickstart.md`.
+
 ```bash
 # Create a virtual environment
 python -m venv .venv
