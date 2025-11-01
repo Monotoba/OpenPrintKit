@@ -189,3 +189,10 @@ endstops:
 ```
 
 If omitted, slicers or firmware defaults apply.
+## 4. Machine-Control M-Codes (Reference)
+
+For common machine-control M-codes (power, lighting, fans, probes, camera, safety, etc.) and firmware compatibility notes, see:
+
+- `docs/mcode-reference.md` in the repository root.
+
+PDL expresses these through G-code hooks and macros; use the hooks to place M-codes at appropriate lifecycle events (start/end, layer, tool-change, etc.).

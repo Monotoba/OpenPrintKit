@@ -21,6 +21,7 @@ from .rules_dialog import RulesDialog
 from .install_wizard import InstallWizard
 from .gcode_preview_dialog import GcodePreviewDialog
 from .gcode_validate_dialog import GcodeValidateDialog
+from .mcode_reference_dialog import McodeReferenceDialog
 from PySide6.QtCore import QSettings
 from .preferences_dialog import PreferencesDialog
 from .pdl_editor import PDLForm
@@ -81,6 +82,8 @@ class MainWindow(QMainWindow):
         tools_menu.addAction(act_gcode_validate)
 
         help_menu = mb.addMenu("Help")
+        act_mref = QAction("M-code Reference…", self); act_mref.triggered.connect(self._mcode_ref)
+        help_menu.addAction(act_mref)
         act_about = QAction("About", self); act_about.triggered.connect(self._about)
         help_menu.addAction(act_about)
 
@@ -221,6 +224,11 @@ class MainWindow(QMainWindow):
     def _gcode_validate(self):
         dlg = GcodeValidateDialog(self)
         dlg.resize(700, 500)
+        dlg.exec()
+
+    def _mcode_ref(self):
+        dlg = McodeReferenceDialog(self)
+        dlg.resize(800, 600)
         dlg.exec()
 
     # Drag & drop validation
