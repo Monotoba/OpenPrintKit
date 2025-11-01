@@ -244,6 +244,27 @@ Install generated profiles to Orca user presets (with **backup** and **dry-run**
 
 ---
 
+### CLI Usage Examples
+
+```bash
+# Validate individual profiles
+opk validate examples/printers/Longer_LK5_Pro_Marlin.json \
+             examples/filaments/PLA_Baseline_LK5Pro.json \
+             examples/processes/Standard_0p20_LK5Pro.json
+
+# Run rule-based checks (heuristics beyond schema)
+opk rules \
+  --printer  examples/printers/Longer_LK5_Pro_Marlin.json \
+  --filament examples/filaments/PLA_Baseline_LK5Pro.json \
+  --process  examples/processes/Standard_0p20_LK5Pro.json
+
+# Build an Orca bundle
+opk bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer
+
+# Initialize a workspace (with examples by default)
+opk workspace init ./my-workspace
+```
+
 ## K. UX Flows (Happy Paths)
 
 ### Generate from PDL, bundle, install
