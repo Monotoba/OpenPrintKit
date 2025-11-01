@@ -106,7 +106,15 @@ PDL captures reusable G-code sequences in the `gcode` object. The following keys
 - `filament_change`: sequence to handle manual filament changes
 - `macros`: a map of arbitrary macro names to sequences; use for additional hooks (e.g. `purge_line`, `bed_mesh`, `preheat`)
 
-All fields are arrays of strings (one command per entry). `macros` allows extension without schema changes.
+All fields are arrays of strings (one command per entry). `macros` allows named reusable sequences.
+
+For comprehensive lifecycle coverage, PDL additionally supports both explicit fields and a generic `hooks` map:
+
+- Explicit optional fields include: `before_tool_change`, `after_tool_change`, `before_layer_change`, `after_layer_change`, `before_object`, `after_object`, `before_region`, `after_region`, `retraction`, `unretraction`, `travel_start`, `travel_end`, `bridge_start`, `bridge_end`, `top_layer_start`, `bottom_layer_start`, `support_interface_start`, `support_interface_end`, `before_heating`, `after_heating`, `before_cooling`, `on_abort`, `on_progress_percent`, `on_layer_interval`, `on_time_interval`, `before_snapshot`, `after_snapshot`, `power_loss_resume`, `auto_shutdown`.
+
+- `hooks` is a free-form map: keys are lower-case identifiers (letters, digits, `_.-`) and values are command sequences. This supports future or custom events without schema changes. Example keys: `monitor.progress_25`, `env.lights_on`, `timelapse.before_snapshot`.
+
+Tip: Use conditional templating and variables provided by your slicer (e.g., `{if ...}`, `{layer_z}`, `{filament_diameter[0]}`) inside sequences for dynamic behavior.
 
 ## 4. Versioning
 

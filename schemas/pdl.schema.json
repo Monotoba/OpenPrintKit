@@ -75,14 +75,50 @@
         "start":{"type":"array","items":{"type":"string"}},
         "end":{"type":"array","items":{"type":"string"}},
         "tool_change":{"type":"array","items":{"type":"string"}},
+        "before_tool_change":{"type":"array","items":{"type":"string"}},
+        "after_tool_change":{"type":"array","items":{"type":"string"}},
         "layer_change":{"type":"array","items":{"type":"string"}},
+        "before_layer_change":{"type":"array","items":{"type":"string"}},
+        "after_layer_change":{"type":"array","items":{"type":"string"}},
         "pause":{"type":"array","items":{"type":"string"}},
         "resume":{"type":"array","items":{"type":"string"}},
         "filament_change":{"type":"array","items":{"type":"string"}},
+        "before_object":{"type":"array","items":{"type":"string"}},
+        "after_object":{"type":"array","items":{"type":"string"}},
+        "before_region":{"type":"array","items":{"type":"string"}},
+        "after_region":{"type":"array","items":{"type":"string"}},
+        "retraction":{"type":"array","items":{"type":"string"}},
+        "unretraction":{"type":"array","items":{"type":"string"}},
+        "travel_start":{"type":"array","items":{"type":"string"}},
+        "travel_end":{"type":"array","items":{"type":"string"}},
+        "bridge_start":{"type":"array","items":{"type":"string"}},
+        "bridge_end":{"type":"array","items":{"type":"string"}},
+        "top_layer_start":{"type":"array","items":{"type":"string"}},
+        "bottom_layer_start":{"type":"array","items":{"type":"string"}},
+        "support_interface_start":{"type":"array","items":{"type":"string"}},
+        "support_interface_end":{"type":"array","items":{"type":"string"}},
+        "before_heating":{"type":"array","items":{"type":"string"}},
+        "after_heating":{"type":"array","items":{"type":"string"}},
+        "before_cooling":{"type":"array","items":{"type":"string"}},
+        "on_abort":{"type":"array","items":{"type":"string"}},
+        "on_progress_percent":{"type":"array","items":{"type":"string"}},
+        "on_layer_interval":{"type":"array","items":{"type":"string"}},
+        "on_time_interval":{"type":"array","items":{"type":"string"}},
+        "before_snapshot":{"type":"array","items":{"type":"string"}},
+        "after_snapshot":{"type":"array","items":{"type":"string"}},
+        "power_loss_resume":{"type":"array","items":{"type":"string"}},
+        "auto_shutdown":{"type":"array","items":{"type":"string"}},
         "macros":{
           "type":"object",
           "patternProperties":{
             "^[A-Za-z_][A-Za-z0-9_-]*$": {"type":"array","items":{"type":"string"}}
+          },
+          "additionalProperties": true
+        },
+        "hooks":{
+          "type":"object",
+          "patternProperties":{
+            "^[a-z0-9_.-]+$": {"type":"array","items":{"type":"string"}}
           },
           "additionalProperties": true
         }
