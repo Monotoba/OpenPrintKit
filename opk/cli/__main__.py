@@ -102,6 +102,10 @@ def main():
     gp.add_argument("--pdl", required=True, help="Path to PDL file")
     gp.add_argument("--hook", required=True, help="Hook name (e.g., start, before_layer_change, monitor.progress_25)")
     gp.add_argument("--vars", dest="vars_path", help="JSON file with variables for placeholder substitution")
+
+    gv = sub.add_parser("gcode-validate", help="Validate all gcode hooks against provided variables")
+    gv.add_argument("--pdl", required=True, help="Path to PDL file")
+    gv.add_argument("--vars", dest="vars_path", required=True, help="JSON file with variables for placeholder substitution")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -160,6 +164,29 @@ def main():
         print("\n".join(rendered))
         if missing:
             print(f"\n[WARN] Unresolved placeholders: {', '.join(sorted(missing))}")
+        raise SystemExit(0)
+    if args.cmd == "gcode-validate":
+        from pathlib import Path as _Path
+        import json as _json, yaml as _yaml
+        text = _Path(args.pdl).read_text(encoding="utf-8")
+        data = _json.loads(text) if args.pdl.endswith((".json", ".JSON")) else _yaml.safe_load(text)
+        gcode = (data or {}).get("gcode") or {}
+        hooks = gc_list_hooks(gcode)
+        vars_obj = _json.loads(_Path(args.vars_path).read_text(encoding="utf-8"))
+        total_missing = {}
+        for h in hooks:
+            seq = gcode.get(h) if h in gcode else gcode.get("hooks", {}).get(h)
+            if not isinstance(seq, list):
+                continue
+            _, missing = gc_render(seq, vars_obj)
+            if missing:
+                total_missing[h] = sorted(missing)
+        if total_missing:
+            for h, miss in total_missing.items():
+                print(f"[MISS] {h}: {', '.join(miss)}")
+            print(f"[SUMMARY] hooks={len(hooks)} invalid={len(total_missing)}")
+            raise SystemExit(2)
+        print(f"[SUMMARY] hooks={len(hooks)} invalid=0")
         raise SystemExit(0)
 
 if __name__ == "__main__":

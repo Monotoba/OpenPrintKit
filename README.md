@@ -89,6 +89,7 @@ OpenPrintKit/
 - `opk install --src SRC --dest ORCA_PRESET_DIR [--backup BACKUP.zip] [--dry-run]` — Dry-run and install profiles to Orca presets
 - `opk gcode-hooks --pdl PDL.yaml` — List available G-code hooks in a PDL file
 - `opk gcode-preview --pdl PDL.yaml --hook start --vars vars.json` — Render a hook with provided variables
+- `opk gcode-validate --pdl PDL.yaml --vars vars.json` — Validate all hooks for unresolved placeholders
 
 ### GUI
 
@@ -97,6 +98,7 @@ OpenPrintKit/
 - Toolbar with quick-access icons for common actions
 - Drag-and-drop `.json` files onto the window to validate them
 - Tools → G-code Preview: open a PDL YAML/JSON, select a hook (start, layer_change, etc.), define variables, and preview rendered G-code
+- Tools → Validate Hook Variables: open a PDL and variables JSON to scan all hooks for unresolved placeholders
 
 🧩 Features
 

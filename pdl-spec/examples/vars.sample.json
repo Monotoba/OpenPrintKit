@@ -1,0 +1,11 @@
+{
+  "nozzle": 205,
+  "bed": 60,
+  "layer": 1,
+  "tool": 0,
+  "printer": {
+    "name": "Sample Printer"
+  },
+  "filament_diameter": [1.75, 2.85]
+}
+

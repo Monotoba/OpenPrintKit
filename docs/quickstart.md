@@ -87,6 +87,8 @@ Available from the menu:
 - Initialize a workspace
 - Set default Orca presets path in Preferences
 - Drag-and-drop `.json` files onto the window to validate
+- Tools → G-code Preview: pick a hook and render with `pdl-spec/examples/vars.sample.json`
+- Tools → Validate Hook Variables: scan all hooks for unresolved placeholders
 
 ## CLI Install to Orca Presets (Optional)
 
@@ -98,3 +100,16 @@ opk install --src ./examples --dest ~/.config/OrcaSlicer/user/ --backup ./backup
 ```
 
 Note: Destination path varies by OS and Orca version. Use a dry run first to see planned changes.
+
+## G-code Helpers (Optional)
+
+```bash
+# List hooks in a PDL
+opk gcode-hooks --pdl pdl-spec/examples/prusa_mk3s.yaml
+
+# Render a hook with variables
+opk gcode-preview --pdl pdl-spec/examples/prusa_mk3s.yaml --hook start --vars pdl-spec/examples/vars.sample.json
+
+# Validate all hooks for unresolved placeholders
+opk gcode-validate --pdl pdl-spec/examples/voron_24_350.yaml --vars pdl-spec/examples/vars.sample.json
+```
