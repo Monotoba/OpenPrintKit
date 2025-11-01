@@ -199,14 +199,92 @@ class PDLForm(QWidget):
 
     # ---------- G-code (Start/End) ----------
     def _init_gcode_tab(self):
-        w = QWidget(); v = QVBoxLayout(w)
-        v.addWidget(QLabel("Start G-code"))
-        self.g_start = QTextEdit(); self.g_start.setPlaceholderText("M104 S{nozzle}\nM140 S{bed}\nG28")
-        v.addWidget(self.g_start)
-        v.addWidget(QLabel("End G-code"))
-        self.g_end = QTextEdit(); self.g_end.setPlaceholderText("M104 S0\nM140 S0\nM84")
-        v.addWidget(self.g_end)
+        w = QWidget(); outer = QVBoxLayout(w)
+
+        # Hook categories and fields (explicit hooks)
+        self.g_edits: Dict[str, QTextEdit] = {}
+        hook_tabs = QTabWidget()
+        categories = {
+            "Lifecycle": [
+                "start","end","on_abort","pause","resume","power_loss_resume","auto_shutdown"
+            ],
+            "Layers": [
+                "before_layer_change","layer_change","after_layer_change","top_layer_start","bottom_layer_start"
+            ],
+            "Tools & Filament": [
+                "before_tool_change","tool_change","after_tool_change","filament_change"
+            ],
+            "Objects & Regions": [
+                "before_object","after_object","before_region","after_region","support_interface_start","support_interface_end"
+            ],
+            "Motion": [
+                "retraction","unretraction","travel_start","travel_end","bridge_start","bridge_end"
+            ],
+            "Temperature & Env": [
+                "before_heating","after_heating","before_cooling"
+            ],
+            "Monitoring & Timelapse": [
+                "on_progress_percent","on_layer_interval","on_time_interval","before_snapshot","after_snapshot"
+            ],
+        }
+        for cat, fields in categories.items():
+            pg = QWidget(); fl = QFormLayout(pg)
+            for f in fields:
+                ed = QTextEdit(); ed.setPlaceholderText("; one command per line")
+                self.g_edits[f] = ed
+                fl.addRow(f.replace('_',' ').title(), ed)
+            hook_tabs.addTab(pg, cat)
+        outer.addWidget(hook_tabs)
+
+        # Macros table (name + script)
+        outer.addWidget(QLabel("Macros (name → sequence)"))
+        self.t_macros = QTableWidget(0, 2)
+        self.t_macros.setHorizontalHeaderLabels(["Name","Script (one command per line)"])
+        self.t_macros.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.t_macros.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        outer.addWidget(self.t_macros)
+        rowm = QHBoxLayout();
+        m_add = QPushButton("Add Macro"); m_add.clicked.connect(self._add_macro)
+        m_del = QPushButton("Remove Macro"); m_del.clicked.connect(self._del_macro)
+        rowm.addWidget(m_add); rowm.addWidget(m_del); rowm.addStretch(1)
+        outer.addLayout(rowm)
+
+        # Additional hooks (free-form gcode.hooks map)
+        outer.addWidget(QLabel("Additional Hooks (gcode.hooks)"))
+        self.t_hooks = QTableWidget(0, 2)
+        self.t_hooks.setHorizontalHeaderLabels(["Hook Name","Script (one command per line)"])
+        self.t_hooks.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.t_hooks.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        outer.addWidget(self.t_hooks)
+        rowh = QHBoxLayout();
+        h_add = QPushButton("Add Hook"); h_add.clicked.connect(self._add_hook)
+        h_del = QPushButton("Remove Hook"); h_del.clicked.connect(self._del_hook)
+        rowh.addWidget(h_add); rowh.addWidget(h_del); rowh.addStretch(1)
+        outer.addLayout(rowh)
+
         self.tabs.addTab(w, "G-code")
+
+    def _add_macro(self):
+        r = self.t_macros.rowCount(); self.t_macros.insertRow(r)
+        self.t_macros.setItem(r, 0, QTableWidgetItem("macro_name"))
+        te = QTextEdit(); te.setPlaceholderText("G92 E0\nG1 E10 F300")
+        self.t_macros.setCellWidget(r, 1, te)
+
+    def _del_macro(self):
+        rows = sorted({i.row() for i in self.t_macros.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_macros.removeRow(r)
+
+    def _add_hook(self):
+        r = self.t_hooks.rowCount(); self.t_hooks.insertRow(r)
+        self.t_hooks.setItem(r, 0, QTableWidgetItem("monitor.progress_25"))
+        te = QTextEdit(); te.setPlaceholderText("M117 25%")
+        self.t_hooks.setCellWidget(r, 1, te)
+
+    def _del_hook(self):
+        rows = sorted({i.row() for i in self.t_hooks.selectedItems()}, reverse=True)
+        for r in rows:
+            self.t_hooks.removeRow(r)
 
     # ---------- Data IO ----------
     def set_defaults(self):
@@ -282,10 +360,24 @@ class PDLForm(QWidget):
         self.f_mesh_r.setValue(int(mesh[0] if len(mesh) > 0 else 7))
         self.f_mesh_c.setValue(int(mesh[1] if len(mesh) > 1 else 7))
 
-        # G-code
+        # G-code explicit hooks
         gc = g.get("gcode") or {}
-        self.g_start.setPlainText("\n".join(gc.get("start") or []))
-        self.g_end.setPlainText("\n".join(gc.get("end") or []))
+        for key, ed in self.g_edits.items():
+            ed.setPlainText("\n".join(gc.get(key) or []))
+        # Macros
+        self.t_macros.setRowCount(0)
+        for name, seq in (gc.get("macros") or {}).items():
+            r = self.t_macros.rowCount(); self.t_macros.insertRow(r)
+            self.t_macros.setItem(r, 0, QTableWidgetItem(name))
+            te = QTextEdit(); te.setPlainText("\n".join(seq or []))
+            self.t_macros.setCellWidget(r, 1, te)
+        # Additional hooks
+        self.t_hooks.setRowCount(0)
+        for name, seq in (gc.get("hooks") or {}).items():
+            r = self.t_hooks.rowCount(); self.t_hooks.insertRow(r)
+            self.t_hooks.setItem(r, 0, QTableWidgetItem(name))
+            te = QTextEdit(); te.setPlainText("\n".join(seq or []))
+            self.t_hooks.setCellWidget(r, 1, te)
 
         # Limits
         lim = g.get("limits") or {}
@@ -370,11 +462,34 @@ class PDLForm(QWidget):
         feat["probe"] = {"type": self.f_probe_type.currentText(), "mesh_size": [self.f_mesh_r.value(), self.f_mesh_c.value()]}
         g["features"] = feat
 
-        # G-code
-        g["gcode"] = {
-            "start": [ln for ln in self.g_start.toPlainText().splitlines() if ln.strip()],
-            "end": [ln for ln in self.g_end.toPlainText().splitlines() if ln.strip()],
-        }
+        # G-code explicit hooks
+        gcode_out: Dict[str, Any] = {}
+        for key, ed in self.g_edits.items():
+            lines = [ln for ln in ed.toPlainText().splitlines() if ln.strip()]
+            if lines:
+                gcode_out[key] = lines
+        # Macros
+        macros: Dict[str, List[str]] = {}
+        for r in range(self.t_macros.rowCount()):
+            name = self.t_macros.item(r,0).text().strip() if self.t_macros.item(r,0) else ""
+            te = self.t_macros.cellWidget(r,1)
+            seq = [ln for ln in (te.toPlainText() if isinstance(te, QTextEdit) else "").splitlines() if ln.strip()]
+            if name and seq:
+                macros[name] = seq
+        if macros:
+            gcode_out["macros"] = macros
+        # Additional hooks
+        hooks_map: Dict[str, List[str]] = {}
+        for r in range(self.t_hooks.rowCount()):
+            name = self.t_hooks.item(r,0).text().strip() if self.t_hooks.item(r,0) else ""
+            te = self.t_hooks.cellWidget(r,1)
+            seq = [ln for ln in (te.toPlainText() if isinstance(te, QTextEdit) else "").splitlines() if ln.strip()]
+            if name and seq:
+                hooks_map[name] = seq
+        if hooks_map:
+            gcode_out["hooks"] = hooks_map
+        if gcode_out:
+            g["gcode"] = gcode_out
 
         # Limits
         lim_out: Dict[str, Any] = {}
