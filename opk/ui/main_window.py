@@ -86,6 +86,8 @@ class MainWindow(QMainWindow):
         help_menu.addAction(act_overview)
         act_gcode = QAction("G-code Help…", self); act_gcode.triggered.connect(self._help_gcode)
         help_menu.addAction(act_gcode)
+        act_fwmap = QAction("Firmware Mapping…", self); act_fwmap.triggered.connect(self._help_fwmap)
+        help_menu.addAction(act_fwmap)
         act_mref = QAction("M-code Reference…", self); act_mref.triggered.connect(self._mcode_ref)
         help_menu.addAction(act_mref)
         act_about = QAction("About", self); act_about.triggered.connect(self._about)
@@ -259,6 +261,20 @@ class MainWindow(QMainWindow):
             if p.exists():
                 dlg.view.setPlainText(p.read_text(encoding="utf-8"))
             dlg.setWindowTitle("G-code Help")
+        except Exception:
+            pass
+        dlg.resize(800, 600)
+        dlg.exec()
+
+    def _help_fwmap(self):
+        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+        dlg = _DocDlg(self)
+        try:
+            from pathlib import Path
+            p = Path(__file__).resolve().parents[2] / "docs" / "firmware-mapping.md"
+            if p.exists():
+                dlg.view.setPlainText(p.read_text(encoding="utf-8"))
+            dlg.setWindowTitle("Firmware Mapping")
         except Exception:
             pass
         dlg.resize(800, 600)

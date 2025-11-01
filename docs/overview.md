@@ -13,3 +13,14 @@ See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-refer
 ## OpenPrintTag
 
 Embed metadata in start G-code as comments for downstream tools. Configure under the OpenPrintTag tab; the generator inserts a `;BEGIN:OPENPRINTTAG` block with a JSON payload.
+
+## Firmware-Specific Tips
+
+The GUI surfaces firmware‑aware tips in the Peripherals tab based on the selected firmware:
+
+- RRF: SD logging uses M929; named pins supported (use string pin names). Prefer M106/M107 P index for fans.
+- Klipper: Camera M240 maps to `M118 TIMELAPSE_TAKE_FRAME` by default; customize camera command or use macros.
+- GRBL: Exhaust maps to M8 (on)/M9 (off).
+- LinuxCNC: Exhaust maps to M7 (on)/M9 (off).
+
+See “Firmware Mapping” in the Help menu for details.

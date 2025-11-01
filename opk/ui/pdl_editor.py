@@ -56,6 +56,7 @@ class PDLForm(QWidget):
         self.f_id.setToolTip("Unique printer identifier")
         self.f_name = QLineEdit(); self.f_name.setToolTip("Human-readable name")
         self.f_firmware = QComboBox(); self.f_firmware.addItems(FIRMWARES); self.f_firmware.setToolTip("Target firmware (affects mapping)")
+        self.f_firmware.currentIndexChanged.connect(self._update_firmware_tips)
         self.f_kinematics = QComboBox(); self.f_kinematics.addItems(KINEMATICS); self.f_kinematics.setToolTip("Motion system type")
         self.f_width = QDoubleSpinBox(); self.f_width.setRange(10, 1000); self.f_width.setDecimals(1); self.f_width.setToolTip("Bed width (X)")
         self.f_depth = QDoubleSpinBox(); self.f_depth.setRange(10, 1000); self.f_depth.setDecimals(1); self.f_depth.setToolTip("Bed depth (Y)")
@@ -204,6 +205,8 @@ class PDLForm(QWidget):
     # ---------- Peripherals (Lights, Camera, Fans, SD) ----------
     def _init_peripherals_tab(self):
         w = QWidget(); form = QFormLayout(w)
+        self.lb_fw_tip = QLabel(""); self.lb_fw_tip.setWordWrap(True)
+        form.addRow(self.lb_fw_tip)
         # Lights
         self.pr_light_on_start = QCheckBox(); self.pr_light_on_start.setToolTip("M355 S1 at start")
         self.pr_light_off_end = QCheckBox(); self.pr_light_off_end.setToolTip("M355 S0 at end")
@@ -289,6 +292,7 @@ class PDLForm(QWidget):
         rowcp.addWidget(cp_add); rowcp.addWidget(cp_del); rowcp.addStretch(1)
         form.addRow(rowcp)
         self.tabs.addTab(w, "Peripherals")
+        self._update_firmware_tips()
 
     # ---------- OpenPrintTag ----------
     def _init_openprinttag_tab(self):
@@ -932,6 +936,28 @@ class PDLForm(QWidget):
         rows = sorted({i.row() for i in self.t_opt_data.selectedItems()}, reverse=True)
         for r in rows:
             self.t_opt_data.removeRow(r)
+
+    # --- Firmware-specific tips ---
+    def _update_firmware_tips(self):
+        fw = (self.f_firmware.currentText() or "").lower()
+        tip = ""
+        if fw in ("rrf","reprap","reprapfirmware","duet"):
+            tip = "RRF: SD logging uses M929; named pins allowed (use string pin names). Fans prefer M106/M107 with P index."
+            self.pr_sd_enable.setToolTip("Start SD logging (RRF uses M929)")
+            self.pr_sd_file.setToolTip("RRF: M929 P\"filename\" S1")
+            self.pr_exhaust_pin.setToolTip("RRF: you can use named pins (e.g., out1) as string")
+            self.pr_camera_cmd.setToolTip("RRF: use M240 if configured, or M42 with named pin")
+        elif fw == "klipper":
+            tip = "Klipper: camera M240 maps to M118 TIMELAPSE_TAKE_FRAME by default; consider macros for lights/fans."
+            self.pr_camera_cmd.setToolTip("Klipper: override default with your macro command")
+        elif fw == "grbl":
+            tip = "GRBL: Exhaust mapped to M8 (on) / M9 (off). Use Custom Peripherals for other IO."
+        elif fw == "linuxcnc":
+            tip = "LinuxCNC: Exhaust mapped to M7 (on) / M9 (off). Use Custom Peripherals for HAL outputs."
+        else:
+            tip = "Marlin-like: standard M-codes supported; see M-code Reference."
+        if hasattr(self, 'lb_fw_tip'):
+            self.lb_fw_tip.setText(tip)
 
     # --- Helpers for Bed Shape editor
     def _add_bed_point(self):
