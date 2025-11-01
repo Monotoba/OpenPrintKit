@@ -17,13 +17,22 @@ from PySide6.QtGui import QIcon
 from ..core.io import load_json
 from ..core import schema as S
 from ..core.bundle import build_bundle
+from .rules_dialog import RulesDialog
+from .install_wizard import InstallWizard
+from PySide6.QtCore import QSettings
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("OpenPrintKit")
+        self.settings = QSettings("OpenPrintKit", "OPKStudio")
         self._init_ui()
+        # Restore geometry/state
+        if (geo := self.settings.value("window/geometry")):
+            self.restoreGeometry(geo)
+        if (state := self.settings.value("window/state")):
+            self.restoreState(state)
 
     def _init_ui(self):
         w = QWidget(); lay = QVBoxLayout(w)
@@ -40,9 +49,10 @@ class MainWindow(QMainWindow):
         act_rules = QAction("Run Rules…", self); act_rules.triggered.connect(self._rules)
         act_bundle = QAction("Build Bundle…", self); act_bundle.triggered.connect(self._bundle)
         act_ws_init = QAction("Workspace Init…", self); act_ws_init.triggered.connect(self._workspace_init)
+        act_install = QAction("Install to Orca…", self); act_install.triggered.connect(self._install)
         act_exit = QAction("Exit", self); act_exit.triggered.connect(self.close)
 
-        for a in (act_validate, act_rules, act_bundle, act_ws_init):
+        for a in (act_validate, act_rules, act_bundle, act_ws_init, act_install):
             file_menu.addAction(a)
         file_menu.addSeparator(); file_menu.addAction(act_exit)
 
@@ -75,29 +85,17 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Validation", "Some files failed validation. See log.")
 
     def _rules(self):
-        # Prompt for each file; user can cancel to skip any category
-        pr, _ = QFileDialog.getOpenFileName(self, "Select Printer JSON (optional)", "", "JSON (*.json)")
-        fi, _ = QFileDialog.getOpenFileName(self, "Select Filament JSON (optional)", "", "JSON (*.json)")
-        ps, _ = QFileDialog.getOpenFileName(self, "Select Process JSON (optional)", "", "JSON (*.json)")
-        from ..core.rules import validate_printer, validate_filament, validate_process, summarize
-        prd = load_json(pr) if pr else {}
-        fid = load_json(fi) if fi else {}
-        psd = load_json(ps) if ps else {}
-        ip = validate_printer(prd) if prd else []
-        ifi = validate_filament(fid) if fid else []
-        ips = validate_process(psd, prd if prd else None) if psd else []
-        for label, issues in (("printer", ip), ("filament", ifi), ("process", ips)):
-            for i in issues:
-                self.log(f"[{i.level.upper():5}] {label}:{i.path} — {i.message}")
-        s = summarize(ip, ifi, ips)
-        self.log(f"[SUMMARY] errors={s['error']} warns={s['warn']} infos={s['info']} total={s['total']}")
-        if s["error"]:
-            QMessageBox.warning(self, "Rules", "Completed with errors. See log.")
-        else:
-            QMessageBox.information(self, "Rules", "No rule errors detected.")
+        last_dirs = {
+            "rules": self.settings.value("dirs/rules", "")
+        }
+        dlg = RulesDialog(self, last_dirs=last_dirs)
+        dlg.exec()
+        # persist directory
+        self.settings.setValue("dirs/rules", last_dirs.get("rules", ""))
 
     def _bundle(self):
-        src = QFileDialog.getExistingDirectory(self, "Select Source Directory (with printers/ filaments/ processes/)")
+        start = self.settings.value("dirs/src", "")
+        src = QFileDialog.getExistingDirectory(self, "Select Source Directory (with printers/ filaments/ processes/)", start)
         if not src:
             return
         out, _ = QFileDialog.getSaveFileName(self, "Save Bundle As", "", "OPK Bundle (*.orca_printer)")
@@ -114,9 +112,11 @@ class MainWindow(QMainWindow):
         else:
             self.log(f"[BUNDLE] Wrote {outp}")
             QMessageBox.information(self, "Bundle", f"Wrote: {outp}")
+            self.settings.setValue("dirs/src", src)
 
     def _workspace_init(self):
-        root = QFileDialog.getExistingDirectory(self, "Select Workspace Directory (will be created if missing)")
+        start = self.settings.value("dirs/ws", "")
+        root = QFileDialog.getExistingDirectory(self, "Select Workspace Directory (will be created if missing)", start)
         if not root:
             return
         from ..workspace.scaffold import init_workspace
@@ -128,6 +128,17 @@ class MainWindow(QMainWindow):
         else:
             self.log(f"[WS] Initialized at {p}")
             QMessageBox.information(self, "Workspace", f"Initialized at:\n{p}")
+            self.settings.setValue("dirs/ws", root)
+
+    def _install(self):
+        last_dirs = {
+            "install_src": self.settings.value("dirs/install_src", ""),
+            "install_dst": self.settings.value("dirs/install_dst", ""),
+        }
+        dlg = InstallWizard(self, last_dirs=last_dirs)
+        dlg.exec()
+        self.settings.setValue("dirs/install_src", last_dirs.get("install_src", ""))
+        self.settings.setValue("dirs/install_dst", last_dirs.get("install_dst", ""))
 
     def _about(self):
         QMessageBox.information(self, "About OpenPrintKit", "OpenPrintKit — Validate, bundle, and manage printer profiles.")
@@ -136,4 +147,8 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     m = MainWindow(); m.resize(800, 480); m.show()
-    sys.exit(app.exec())
+    ret = app.exec()
+    # Save window state
+    m.settings.setValue("window/geometry", m.saveGeometry())
+    m.settings.setValue("window/state", m.saveState())
+    sys.exit(ret)
