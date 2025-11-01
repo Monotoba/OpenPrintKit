@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Any, List, Tuple
 from pathlib import Path
-from PySide6.QtWidgets import (
+from ._qt_compat import (
     QWidget, QTabWidget, QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QDoubleSpinBox, QSpinBox, QComboBox, QCheckBox, QPushButton, QTableWidget,
     QTableWidgetItem, QHeaderView, QTextEdit, QGroupBox

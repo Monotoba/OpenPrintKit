@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QMessageBox
+from ._qt_compat import QDialog, QVBoxLayout, QTextEdit, QMessageBox
 
 
 CONTENT_FALLBACK = """
@@ -43,4 +43,3 @@ class McodeReferenceDialog(QDialog):
             except Exception:
                 pass
         self.view.setPlainText(CONTENT_FALLBACK)
-

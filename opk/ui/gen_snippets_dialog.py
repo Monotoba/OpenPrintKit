@@ -1,10 +1,9 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from PySide6.QtWidgets import (
-    QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QMessageBox
+from ._qt_compat import (
+    QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QMessageBox, QSettings
 )
-from PySide6.QtCore import QSettings
 from ..core.gcode import generate_snippets
 
 

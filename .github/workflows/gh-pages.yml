@@ -47,3 +47,4 @@ jobs:
       - name: Deploy to GitHub Pages (only on 3.12)
         if: ${{ matrix.python-version == '3.12' }}
         uses: actions/deploy-pages@v4
+        continue-on-error: true

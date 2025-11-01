@@ -10,8 +10,10 @@ from ..core.gcode import list_hooks as gc_list_hooks, render_sequence as gc_rend
 
 def cmd_workspace_init(root, with_examples: bool):
   from pathlib import Path
-  from ..workspace.scaffold import init_workspace
-  p = init_workspace(Path(root), with_examples=with_examples)
+  import importlib
+  mod = importlib.import_module("opk.workspace.scaffold")
+  init_ws = getattr(mod, "init_workspace")
+  p = init_ws(Path(root), with_examples=with_examples)
   print(f"[OK] Initialized workspace at: {p}")
   return 0
 

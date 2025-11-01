@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from PySide6.QtWidgets import (
+from ._qt_compat import (
     QDialog,
     QVBoxLayout,
     QHBoxLayout,
@@ -11,10 +11,11 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QHeaderView,
+    QApplication,
+    QStyle,
+    QColor,
+    QIcon,
 )
-from PySide6.QtGui import QColor, QIcon
-from PySide6.QtWidgets import QApplication
-from PySide6.QtWidgets import QStyle
 from ..core.io import load_json
 from ..core.rules import validate_printer, validate_filament, validate_process, summarize
 
