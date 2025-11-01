@@ -322,6 +322,16 @@ class PDLForm(QWidget):
         rem = QPushButton("Remove Data"); rem.clicked.connect(self._opt_del)
         row.addWidget(add); row.addWidget(rem); row.addStretch(1)
         form.addRow(row)
+        # NFC and DB buttons
+        row2 = QHBoxLayout();
+        b_read = QPushButton("Read NFC"); b_read.clicked.connect(self._opt_nfc_read)
+        b_write = QPushButton("Write NFC"); b_write.clicked.connect(self._opt_nfc_write)
+        b_save = QPushButton("Save to DB"); b_save.clicked.connect(self._opt_db_save)
+        b_load = QPushButton("Load from DB"); b_load.clicked.connect(self._opt_db_load)
+        b_search = QPushButton("Search Online"); b_search.clicked.connect(self._opt_remote_search)
+        b_sync = QPushButton("Sync Online"); b_sync.clicked.connect(self._opt_remote_sync)
+        for b in (b_read, b_write, b_save, b_load, b_search, b_sync): row2.addWidget(b)
+        form.addRow(row2)
         self.tabs.addTab(w, "OpenPrintTag")
 
     # ---------- Filaments ----------
@@ -936,6 +946,128 @@ class PDLForm(QWidget):
         rows = sorted({i.row() for i in self.t_opt_data.selectedItems()}, reverse=True)
         for r in rows:
             self.t_opt_data.removeRow(r)
+
+    # --- OpenPrintTag NFC/DB/Remote ---
+    def _collect_opt(self) -> Dict[str, Any]:
+        data: Dict[str, Any] = {}
+        if self.opt_id.text().strip(): data['id'] = self.opt_id.text().strip()
+        if self.opt_version.text().strip(): data['version'] = self.opt_version.text().strip()
+        if self.opt_url.text().strip(): data['url'] = self.opt_url.text().strip()
+        if self.opt_manu.text().strip(): data['manufacturer'] = self.opt_manu.text().strip()
+        if self.opt_model.text().strip(): data['model'] = self.opt_model.text().strip()
+        if self.opt_serial.text().strip(): data['serial'] = self.opt_serial.text().strip()
+        if self.opt_notes.toPlainText().strip(): data['notes'] = self.opt_notes.toPlainText().strip()
+        dmap = {}
+        for r in range(self.t_opt_data.rowCount()):
+            k = self.t_opt_data.item(r,0).text().strip() if self.t_opt_data.item(r,0) else ""
+            v = self.t_opt_data.item(r,1).text().strip() if self.t_opt_data.item(r,1) else ""
+            if k: dmap[k] = v
+        if dmap:
+            data['data'] = dmap
+        return data
+
+    def _apply_opt(self, data: Dict[str, Any]):
+        self.opt_id.setText(str(data.get('id') or ''))
+        self.opt_version.setText(str(data.get('version') or ''))
+        self.opt_url.setText(str(data.get('url') or ''))
+        self.opt_manu.setText(str(data.get('manufacturer') or ''))
+        self.opt_model.setText(str(data.get('model') or ''))
+        self.opt_serial.setText(str(data.get('serial') or ''))
+        self.opt_notes.setPlainText(str(data.get('notes') or ''))
+        self.t_opt_data.setRowCount(0)
+        for k, v in (data.get('data') or {}).items():
+            r = self.t_opt_data.rowCount(); self.t_opt_data.insertRow(r)
+            self.t_opt_data.setItem(r, 0, QTableWidgetItem(str(k)))
+            self.t_opt_data.setItem(r, 1, QTableWidgetItem(str(v)))
+
+    def _opt_nfc_read(self):
+        from ..integrations import nfc as nfc_mod
+        from PySide6.QtWidgets import QMessageBox
+        if not nfc_mod.nfc_available():
+            QMessageBox.warning(self, "NFC", "nfcpy not installed or NFC device unavailable.")
+            return
+        try:
+            payload = nfc_mod.read_tag()
+        except Exception as e:
+            QMessageBox.critical(self, "NFC", f"Failed to read tag:\n{e}")
+            return
+        if payload:
+            self._apply_opt(payload)
+            QMessageBox.information(self, "NFC", "Loaded data from NFC tag.")
+        else:
+            QMessageBox.information(self, "NFC", "No OpenPrintTag payload found.")
+
+    def _opt_nfc_write(self):
+        from ..integrations import nfc as nfc_mod
+        from PySide6.QtWidgets import QMessageBox
+        if not nfc_mod.nfc_available():
+            QMessageBox.warning(self, "NFC", "nfcpy not installed or NFC device unavailable.")
+            return
+        try:
+            nfc_mod.write_tag(self._collect_opt())
+        except Exception as e:
+            QMessageBox.critical(self, "NFC", f"Failed to write tag:\n{e}")
+            return
+        QMessageBox.information(self, "NFC", "Wrote OpenPrintTag payload to NFC tag.")
+
+    def _opt_db_save(self):
+        from ..integrations import db
+        from PySide6.QtWidgets import QMessageBox
+        from PySide6.QtCore import QSettings
+        s = QSettings("OpenPrintKit", "OPKStudio")
+        db_path = Path(s.value("app/opt_db_path", str(Path.home() / ".opk" / "openprinttag.sqlite")))
+        try:
+            con = db.connect(db_path)
+            db.save_tag(con, self._collect_opt())
+            con.close()
+        except Exception as e:
+            QMessageBox.critical(self, "Database", f"Failed to save tag to DB:\n{e}")
+            return
+        QMessageBox.information(self, "Database", f"Saved to {db_path}")
+
+    def _opt_db_load(self):
+        from ..integrations import db
+        from PySide6.QtWidgets import QMessageBox, QInputDialog
+        from PySide6.QtCore import QSettings
+        s = QSettings("OpenPrintKit", "OPKStudio")
+        db_path = Path(s.value("app/opt_db_path", str(Path.home() / ".opk" / "openprinttag.sqlite")))
+        tag_id, ok = QInputDialog.getText(self, "Load from DB", "Tag ID:")
+        if not ok or not tag_id: return
+        try:
+            con = db.connect(db_path)
+            tag = db.load_tag(con, tag_id)
+            con.close()
+        except Exception as e:
+            QMessageBox.critical(self, "Database", f"Failed to load tag from DB:\n{e}")
+            return
+        if tag:
+            self._apply_opt(tag)
+        else:
+            QMessageBox.information(self, "Database", "No record found.")
+
+    def _opt_remote_search(self):
+        from ..integrations import spool_sources as sources
+        from PySide6.QtWidgets import QInputDialog, QMessageBox
+        q, ok = QInputDialog.getText(self, "Search Online", "Query:")
+        if not ok or not q: return
+        # try each source (stubbed)
+        results_total = 0
+        for src in sources.list_sources():
+            items = sources.search_remote(src, q)
+            results_total += len(items)
+        QMessageBox.information(self, "Online Search", f"Found {results_total} matches across sources (stubs).")
+
+    def _opt_remote_sync(self):
+        from ..integrations import spool_sources as sources
+        from PySide6.QtWidgets import QMessageBox
+        # attempt sync (stub)
+        ok_any = False
+        for src in sources.list_sources():
+            ok_any = sources.sync_remote(src, self._collect_opt()) or ok_any
+        if ok_any:
+            QMessageBox.information(self, "Online Sync", "Sync completed (stub).")
+        else:
+            QMessageBox.information(self, "Online Sync", "No remote sync performed (stubs only).")
 
     # --- Firmware-specific tips ---
     def _update_firmware_tips(self):
