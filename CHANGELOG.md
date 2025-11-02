@@ -21,6 +21,10 @@ The format is inspired by Keep a Changelog. Dates are YYYY-MM-DD.
   - Build menu (Validate, Run Rules, Build Bundle) with keyboard shortcuts and tooltips.
   - Generate Profiles dialog supports in‑editor PDL, multi‑file Preview, and bundle summary with open‑folder.
   - Extensive field tooltips and status tips; Restore Defaults + Help buttons in key tabs.
+  - Issues tab with inline rules validation (Refresh/Copy) and status bar issue counts; editor wrapped in scroll area to reduce height.
+- Rules:
+  - Firmware guidance: GRBL/LinuxCNC coolant mapping (M7/M8/M9), Klipper camera mapping info, RRF SD logging mapping/filename spacing and named pin suggestion, Marlin numeric pin requirement.
+  - Sanity checks for process_defaults (layer heights vs nozzle, cooling fan percent range and min layer time, non‑negative per‑section accelerations).
 - Docs:
   - MkDocs site for pdl‑spec; docs added/updated (Overview, Firmware Mapping, G‑code Help, CLI Reference).
   - README badges and links (Build, Docs website).
@@ -35,8 +39,7 @@ The format is inspired by Keep a Changelog. Dates are YYYY-MM-DD.
 - Docs build matrix (3.10–3.14) and deploy on 3.12 (GitHub Pages).
 
 ### Tests
-- Coverage expanded to 42 tests including generators (process/limits/overrides), CLI, firmware mapping, GUI import smokes.
+- Coverage expanded to 46 tests including generators (process/limits/overrides), CLI (overrides), firmware mapping/rules, GUI import smokes.
 
 ## [0.1.0] – 2025-10-28
 - Initial public baseline: core schemas, CLI, basic GUI, and tests.
-

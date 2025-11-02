@@ -46,10 +46,17 @@ This document captures key decisions, changes, and notes from the current develo
   - Help: Overview, G-code Help, M-code Reference, Firmware Mapping.
   - Settings dialog (default slicer/firmware, output dir, variables JSON, policy toggles) via QSettings.
   - Dynamic firmware tips shown in Peripherals tab; targeted tooltips added throughout (RGB/chamber/camera/fans/exhaust/materials).
+  - Added Issues tab with inline rule validation (Refresh/Copy), and status bar issue counts; editor wrapped in scroll area to reduce height.
   - Improved headless import robustness: centralized PySide6 compatibility stubs; lazy-imported subdialogs.
 
 - Rules & Validation
   - `pdl-validate` adds checks: exhaust pin vs fan ambiguity, camera triggers without command, duplicate aux pins, malformed custom_peripherals entries.
+  - Firmware guidance:
+    - GRBL/LinuxCNC: coolant mapping (M7/M8/M9), recommend off_at_end; raw pin ignored for exhaust.
+    - Klipper: camera M240 mapping info to TIMELAPSE_TAKE_FRAME.
+    - RRF: SD logging mapped to M929 with quoted filename; warn about spaces; prefer named pins; aux fan needs off_at_end.
+    - Marlin: M42 requires numeric pin, warn on string pins in exhaust.
+  - Process defaults sanity checks: layer heights vs nozzle, cooling fan range and min layer time, non‑negative per‑section accelerations.
 
 - Docs
   - Added pages: Firmware Mapping, Overview, G-code Help, CLI Reference (updated with bundling and overrides), M-code Reference (expanded), System Notes, Implementation Status.
@@ -58,7 +65,7 @@ This document captures key decisions, changes, and notes from the current develo
   - README updated with Docs badge, website link, and documentation links.
 
 - Tests
-  - Expanded coverage to 42 tests: schema, bundles, CLI, generators (process/limits/overrides), firmware mapping, OpenPrintTag, G-code utils, GUI import smokes.
+  - Expanded coverage to 46 tests: schema, bundles, CLI (including overrides), generators (process/limits/overrides), firmware mapping, OpenPrintTag, G‑code utils, GUI import smokes, firmware rules.
 
 - CI/CD
   - CI matrix expanded to Python 3.10–3.14 on Ubuntu/Windows (exclude Windows+3.13/3.14 due to PySide6 wheels); QT_QPA_PLATFORM=offscreen.
@@ -82,3 +89,44 @@ This document captures key decisions, changes, and notes from the current develo
 - Implement PDL→slicer generators (Orca, Cura, Prusa, Bambu): emit full profiles and bundles.
 - Expand printer examples (Prusa XL, Voron variants, Bambu X1C, etc.) with matching filaments/processes.
 - CI enhancements, packaging, and distribution notes.
+
+---
+
+## Session Timeline (2025-11-01 → 2025-11-02)
+
+2025-11-02
+- ui: Help menu shortcuts (F1/F2/F3), Restore Defaults + Help per tab, broad tooltips and status tips. [8f8636e]
+- ui: Build menu introduced; moved Validate/Rules/Bundle; shortcuts for Snippets/Profiles; tooltips. [9d2c80c]
+- docs(system-notes) backfilled with full session updates. [71dd84e]
+ - ui: Issues tab with inline rule validation + status bar counts; scrollable editor. [54a1fad]
+ - rules: firmware guidance (RRF, Marlin) and process_defaults sanity checks; tests added. [4aeda7a]
+
+2025-11-01
+- Generators: process_defaults mapping (layers/speeds), extrusion multiplier, cooling, limits; per-section accelerations; multi-file preview; bundling (Cura/Prusa/ideaMaker). [028e098, 75a358c, 17c5c1b, d50a072]
+- CLI: fine-grained `--acc-*` overrides; argparse conflicts resolved. [027d134, d50a072]
+- GUI: headless-safe imports; profile preview; bundle summary. [0eb2d59, d50a072]
+- Docs: mkdocs setup for pdl-spec, requirements, schema/getting-started; README docs badge + website link. [cf59d28, 976843f, c5abe7d, bbac34d, 4342f1a]
+- CI: expand Python matrix to 3.10–3.14 with exclusions; offscreen Qt; docs build matrix and deploy on 3.12. [2d49b73, 5fc7f99]
+
+## Recent Commits
+
+- 71dd84e (2025-11-02) docs(system-notes): backfill session updates (generators, CLI bundling/overrides, GUI menus/preview, docs site, CI matrix, tests)
+- 8f8636e (2025-11-02) ui: Help menu shortcuts (F1/F2/F3), status tips; add Restore Defaults + Help buttons in Build Area, Machine Control, Peripherals; add more field tooltips
+- 9d2c80c (2025-11-02) ui: Build menu shortcuts, status tips; add tooltips across tabs (materials, camera, fans, RGB, chamber, exhaust); shortcuts for Snippets/Profiles
+- 693364d (2025-11-02) feat(GUI): richer Preview (size/modified) and bundle summary; test(CLI): verify --acc-* overrides; docs(PDL): document accelerations_mms2 and extended speeds_mms
+- d50a072 (2025-11-01) feat: multi-file preview in GUI; bundle summary with open-folder; CLI gen: add fine-grained acceleration overrides; expand generator per-section mappings
+- 17c5c1b (2025-11-01) feat(generators): support ext/top/bottom speeds and per-section accelerations; GUI: multi-file Preview and bundling preview; docs: mapping details
+- 75a358c (2025-11-01) feat(generators): map extrusion multiplier + cooling and acceleration/jerk (Cura) and acceleration (Prusa/Bambu); GUI: add Preview in Generate Profiles; docs: update overview with mapping highlights
+- 028e098 (2025-11-01) feat(generators): map process_defaults into Cura/Prusa/Bambu; add tests; ui: clarify Endstops label '(Checked = Active Low)'
+- 4342f1a (2025-11-01) docs(README): add website link in Documentation section
+- bbac34d (2025-11-01) docs(README): add docs badge linking to published site (GitHub Pages)
+- c5abe7d (2025-11-01) docs(pages): remove deploy continue-on-error; set mkdocs site_url/repo_url to Monotoba/OpenPrintKit
+- 027d134 (2025-11-01) fix(cli): remove duplicate gcode/PDL subparser registrations causing argparse conflicts
+- ddadeb1 (2025-11-01) ci(headless): use Qt compat layer in preferences/app settings dialogs; lazy-import these in main_window to avoid headless import failures
+- 85d6efa (2025-11-01) ci: make UI subdialog imports lazy in main_window; add workspace init fallback to support 3.10 source runs
+- 0eb2d59 (2025-11-01) ci(headless): centralize PySide6 stubs (_qt_compat) and use in UI modules; fix workspace init import; make docs deploy non-blocking if Pages disabled
+- 5fc7f99 (2025-11-01) docs(ci): add Python version matrix (3.10–3.14) to docs build; deploy only on 3.12
+- 976843f (2025-11-01) docs(pdl-spec): add mkdocs requirements and missing docs files (schema/, getting-started.md); fix nav targets
+- cf59d28 (2025-11-01) docs(ci): fix docs build by adding mkdocs dependencies and schema path; pin docs workflow to Python 3.12
+- 2d49b73 (2025-11-01) ci: expand matrix to Python 3.10–3.14; use source-run deps for edge versions; set PYTHONPATH for module runs; keep Qt offscreen
+- 7bfa8d9 (2025-11-01) ci(headless): add Qt import stubs in main_window to allow import-only tests without Qt plugins; stabilizes CI on headless runners
