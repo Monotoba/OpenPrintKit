@@ -20,4 +20,14 @@ Commands:
 - `opk gen --pdl PDL.yaml --slicer ideamaker --out OUTDIR` — Generate a minimal ideaMaker `.cfg` profile.
 - `opk gen --pdl PDL.yaml --slicer bambu --out OUTDIR` — Generate a minimal Bambu Studio `.ini`-style profile.
 
+### Advanced Overrides
+
+- `opk gen ... [--bundle OUT.zip]` — For cura/prusa/ideamaker, bundles generated files with a manifest (use `.zip`).
+- Acceleration overrides (merged into `process_defaults.accelerations_mms2`):
+  - `--acc-perimeter N` — perimeter acceleration (mm/s²)
+  - `--acc-infill N` — infill acceleration (mm/s²)
+  - `--acc-external N` — external perimeter acceleration (mm/s²)
+  - `--acc-top N` — top solid infill acceleration (mm/s²)
+  - `--acc-bottom N` — bottom solid infill acceleration (mm/s²)
+
 See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.

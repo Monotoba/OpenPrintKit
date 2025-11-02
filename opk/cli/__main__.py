@@ -156,7 +156,13 @@ def main():
     gn.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
     gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu"], help="Target slicer")
     gn.add_argument("--out", required=True, help="Output directory for profiles")
-    gn.add_argument("--bundle", help="Optional bundle output .orca_printer")
+    gn.add_argument("--bundle", help="Optional bundle output (for orca/cura/prusa/ideamaker)")
+    # Fine-grained acceleration overrides
+    gn.add_argument("--acc-perimeter", type=int, help="Override perimeter acceleration (mm/s^2)")
+    gn.add_argument("--acc-infill", type=int, help="Override infill acceleration (mm/s^2)")
+    gn.add_argument("--acc-external", type=int, help="Override external perimeter acceleration (mm/s^2)")
+    gn.add_argument("--acc-top", type=int, help="Override top solid acceleration (mm/s^2)")
+    gn.add_argument("--acc-bottom", type=int, help="Override bottom solid acceleration (mm/s^2)")
     args = ap.parse_args()
     if args.cmd == "validate": raise SystemExit(cmd_validate(args.paths))
     if args.cmd == "bundle":   raise SystemExit(cmd_bundle(args.src, args.out))
@@ -319,6 +325,21 @@ def main():
         except Exception:
             pass
         out_dir = _Path(args.out)
+        # Apply CLI acceleration overrides into process_defaults
+        overrides = {k: v for k, v in {
+            'perimeter': getattr(args, 'acc_perimeter', None),
+            'infill': getattr(args, 'acc_infill', None),
+            'external_perimeter': getattr(args, 'acc_external', None),
+            'top': getattr(args, 'acc_top', None),
+            'bottom': getattr(args, 'acc_bottom', None),
+        }.items() if v is not None}
+        if overrides:
+            pd = dict((data or {}).get('process_defaults') or {})
+            acc = dict(pd.get('accelerations_mms2') or {})
+            acc.update(overrides)
+            pd['accelerations_mms2'] = acc
+            data = dict(data or {})
+            data['process_defaults'] = pd
         if args.slicer == 'orca':
             from ..plugins.slicers.orca import generate_orca
             generated = generate_orca(data or {}, out_dir)
@@ -327,6 +348,36 @@ def main():
             if args.bundle:
                 from ..core.bundle import build_bundle
                 build_bundle(out_dir, _Path(args.bundle))
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
+        if args.slicer == 'cura':
+            from ..plugins.slicers.cura import generate_cura
+            generated = generate_cura(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_profile_bundle
+                build_profile_bundle(generated, _Path(args.bundle), 'cura')
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
+        if args.slicer == 'prusa':
+            from ..plugins.slicers.prusa import generate_prusa
+            generated = generate_prusa(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_profile_bundle
+                build_profile_bundle(generated, _Path(args.bundle), 'prusa')
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
+        if args.slicer == 'ideamaker':
+            from ..plugins.slicers.ideamaker import generate_ideamaker
+            generated = generate_ideamaker(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_profile_bundle
+                build_profile_bundle(generated, _Path(args.bundle), 'ideamaker')
                 print(f"[BUNDLE] {args.bundle}")
             raise SystemExit(0)
     if args.cmd == "spool":

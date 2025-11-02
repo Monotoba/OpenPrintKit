@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from ._qt_compat import (
-    QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QMessageBox, QCheckBox
+    QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QMessageBox, QCheckBox, QTextEdit, QVBoxLayout, QLabel
 )
 from ..core.project import find_project_file, load_project_config, merge_policies
 
@@ -83,25 +83,33 @@ class GenerateProfilesDialog(QDialog):
                 out = generate_orca(data or {}, out_dir)
                 if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
                     from ..core.bundle import build_bundle
-                    build_bundle(out_dir, Path(self.ed_bundle.text().strip()))
+                    bundle_path = Path(self.ed_bundle.text().strip())
+                    build_bundle(out_dir, bundle_path)
+                    self._show_bundle_summary(bundle_path)
             elif slicer == 'cura':
                 from ..plugins.slicers.cura import generate_cura
                 out = generate_cura(data or {}, out_dir)
                 if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
                     from ..core.bundle import build_profile_bundle
-                    build_profile_bundle(out, Path(self.ed_bundle.text().strip()), 'cura')
+                    bundle_path = Path(self.ed_bundle.text().strip())
+                    build_profile_bundle(out, bundle_path, 'cura')
+                    self._show_bundle_summary(bundle_path)
             elif slicer == 'prusa':
                 from ..plugins.slicers.prusa import generate_prusa
                 out = generate_prusa(data or {}, out_dir)
                 if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
                     from ..core.bundle import build_profile_bundle
-                    build_profile_bundle(out, Path(self.ed_bundle.text().strip()), 'prusa')
+                    bundle_path = Path(self.ed_bundle.text().strip())
+                    build_profile_bundle(out, bundle_path, 'prusa')
+                    self._show_bundle_summary(bundle_path)
             elif slicer == 'ideamaker':
                 from ..plugins.slicers.ideamaker import generate_ideamaker
                 out = generate_ideamaker(data or {}, out_dir)
                 if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
                     from ..core.bundle import build_profile_bundle
-                    build_profile_bundle(out, Path(self.ed_bundle.text().strip()), 'ideamaker')
+                    bundle_path = Path(self.ed_bundle.text().strip())
+                    build_profile_bundle(out, bundle_path, 'ideamaker')
+                    self._show_bundle_summary(bundle_path)
             elif slicer == 'bambu':
                 from ..plugins.slicers.bambu import generate_bambu
                 out = generate_bambu(data or {}, out_dir)
@@ -113,8 +121,40 @@ class GenerateProfilesDialog(QDialog):
         QMessageBox.information(self, "Generate", f"Wrote {len(out)} file(s) to {out_dir}")
         self.accept()
 
+    def _show_bundle_summary(self, path: Path) -> None:
+        # Open bundle and show manifest, with option to open folder
+        info = []
+        try:
+            import zipfile, json
+            with zipfile.ZipFile(path, 'r') as zf:
+                if 'manifest.json' in zf.namelist():
+                    manifest = json.loads(zf.read('manifest.json').decode('utf-8'))
+                    if manifest.get('slicer'):
+                        info.append(f"slicer: {manifest.get('slicer')}")
+                    if 'files' in manifest:
+                        info.append(f"files: {', '.join(manifest['files'])}")
+                    if 'printer_count' in manifest:
+                        info.append(f"printers: {manifest['printer_count']} filaments: {manifest['filament_count']} processes: {manifest['process_count']}")
+        except Exception:
+            pass
+        msg = f"Bundle written:\n{path}\n\n" + ("\n".join(info) if info else "")
+        box = QMessageBox(self)
+        box.setWindowTitle("Bundle Summary")
+        box.setText(msg)
+        open_btn = box.addButton("Open Folder", QMessageBox.ButtonRole.ActionRole)
+        box.addButton("Close", QMessageBox.ButtonRole.RejectRole)
+        box.exec()
+        if box.clickedButton() == open_btn:
+            try:
+                # Try to open folder in OS file manager
+                from PySide6.QtGui import QDesktopServices
+                from PySide6.QtCore import QUrl
+                QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.parent)))
+            except Exception:
+                pass
+
     def _preview(self):
-        # Generate to a temporary directory and show the first file's contents
+        # Generate to a temporary directory and show the generated file(s)
         import tempfile
         out_dir = Path(self.ed_out.text().strip() or ".")
         # Source PDL same logic as _gen
@@ -160,21 +200,32 @@ class GenerateProfilesDialog(QDialog):
                     out = generate_bambu(data or {}, tdp)
                 else:
                     out = {}
-                first = next(iter(out.values()), None)
-                if not first:
+                items = [(k, Path(p)) for k, p in out.items() if Path(p).exists()]
+                if not items:
                     QMessageBox.information(self, "Preview", "No files generated.")
                     return
-                text = Path(first).read_text(encoding='utf-8')
         except Exception as e:
             QMessageBox.critical(self, "Preview", f"Failed to generate preview:\n{e}")
             return
-        # Show text in a simple viewer
-        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
-        dlg = _DocDlg(self)
-        dlg.setWindowTitle("Generated Profile Preview")
-        try:
-            dlg.view.setPlainText(text)
-        except Exception:
-            pass
-        dlg.resize(800, 600)
-        dlg.exec()
+        # Show text in a simple viewer with file selector
+        class _Preview(QDialog):
+            def __init__(self, parent, files: list[tuple[str, Path]]):
+                super().__init__(parent)
+                self.setWindowTitle("Generated Profile Preview")
+                lay = QVBoxLayout(self)
+                self.sel = QComboBox(); self.view = QTextEdit(readOnly=True)
+                lay.addWidget(QLabel("Select file:")); lay.addWidget(self.sel); lay.addWidget(self.view)
+                for k, p in files:
+                    self.sel.addItem(f"{k}: {p.name}", str(p))
+                self.sel.currentIndexChanged.connect(self._load)
+                self._load()
+
+            def _load(self):
+                try:
+                    p = Path(self.sel.currentData() or "")
+                    if p.exists():
+                        self.view.setPlainText(p.read_text(encoding='utf-8'))
+                except Exception:
+                    pass
+
+        _Preview(self, items).exec()
