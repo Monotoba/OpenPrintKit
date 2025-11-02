@@ -48,9 +48,66 @@ class PDLForm(QWidget):
 
         self.set_defaults()
 
+    # --- Helpers: Docs openers and resets ---
+    def _open_doc(self, rel: str, title: str) -> None:
+        try:
+            from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+            dlg = _DocDlg(self)
+            p = Path(__file__).resolve().parents[2] / rel
+            if p.exists():
+                dlg.view.setPlainText(p.read_text(encoding="utf-8"))
+            dlg.setWindowTitle(title)
+            dlg.resize(800, 600)
+            dlg.exec()
+        except Exception:
+            pass
+
+    def _reset_build_area_defaults(self) -> None:
+        self.f_pdl_version.setText("1.0")
+        self.f_origin.setText("front_left")
+        # regenerate bed polygon from width/depth
+        try:
+            w = float(self.f_width.value() or 200); d = float(self.f_depth.value() or 200)
+        except Exception:
+            w, d = 200.0, 200.0
+        shape = rect_to_bed_shape(w, d)
+        self.t_bedshape.setRowCount(0)
+        for x, y in shape:
+            r = self.t_bedshape.rowCount(); self.t_bedshape.insertRow(r)
+            self.t_bedshape.setItem(r, 0, QTableWidgetItem(f"{x}"))
+            self.t_bedshape.setItem(r, 1, QTableWidgetItem(f"{y}"))
+        # reset limits
+        self.l_print_speed.setValue(0); self.l_travel_speed.setValue(0); self.l_accel.setValue(0); self.l_jerk.setValue(0)
+
+    def _reset_machine_control_defaults(self) -> None:
+        self.mc_psu_on_start.setChecked(False)
+        self.mc_psu_off_end.setChecked(False)
+        self.mc_enable_mesh.setChecked(False)
+        self.mc_z_offset.setValue(0.0)
+        self.mc_start_custom.clear(); self.mc_end_custom.clear()
+
+    def _reset_peripherals_defaults(self) -> None:
+        # Lights/RGB
+        self.pr_light_on_start.setChecked(False); self.pr_light_off_end.setChecked(False)
+        self.pr_rgb_r.setValue(0); self.pr_rgb_g.setValue(0); self.pr_rgb_b.setValue(0)
+        # Chamber
+        self.pr_chamber_temp.setValue(0); self.pr_chamber_wait.setChecked(False)
+        # Camera
+        self.pr_camera_before.setChecked(False); self.pr_camera_after.setChecked(False); self.pr_camera_cmd.setText("M240")
+        # Fans
+        self.pr_fan_part.setValue(0); self.pr_fan_aux_idx.setValue(0); self.pr_fan_aux.setValue(0)
+        # Exhaust
+        self.pr_exhaust_enable.setChecked(False); self.pr_exhaust_speed.setValue(0); self.pr_exhaust_pin.setValue(0); self.pr_exhaust_fan.setValue(0); self.pr_exhaust_off.setChecked(False)
+
     # ---------- Build Area ----------
     def _init_build_area_tab(self):
         w = QWidget(); form = QFormLayout(w)
+        # Actions row
+        row_actions = QHBoxLayout()
+        btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Reset common fields to sensible defaults")
+        btn_help = QPushButton("Help…"); btn_help.setToolTip("Open overview documentation")
+        btn_reset.clicked.connect(self._reset_build_area_defaults); btn_help.clicked.connect(lambda: self._open_doc("docs/overview.md", "Overview"))
+        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addStretch(1)
         self.f_pdl_version = QLineEdit("1.0"); self.f_pdl_version.setToolTip("PDL schema version")
         self.f_id = QLineEdit()
         self.f_id.setToolTip("Unique printer identifier")
@@ -85,6 +142,7 @@ class PDLForm(QWidget):
         lim_form.addRow("Acceleration Max (mm/s²)", self.l_accel)
         lim_form.addRow("Jerk Max (mm/s)", self.l_jerk)
 
+        form.addRow(row_actions)
         form.addRow("PDL Version", self.f_pdl_version)
         form.addRow("ID", self.f_id)
         form.addRow("Name", self.f_name)
@@ -184,6 +242,11 @@ class PDLForm(QWidget):
     # ---------- Machine Control (M-codes helper) ----------
     def _init_machine_control_tab(self):
         w = QWidget(); form = QFormLayout(w)
+        row_actions = QHBoxLayout();
+        btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Clear machine control to defaults")
+        btn_help = QPushButton("Help…"); btn_help.setToolTip("Open M-code reference")
+        btn_reset.clicked.connect(self._reset_machine_control_defaults); btn_help.clicked.connect(lambda: self._open_doc("docs/mcode-reference.md", "M-code Reference"))
+        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addStretch(1)
         # PSU controls (standard)
         self.mc_psu_on_start = QCheckBox(); self.mc_psu_on_start.setToolTip("Insert M80 into start")
         self.mc_psu_off_end = QCheckBox(); self.mc_psu_off_end.setToolTip("Insert M81 into end")
@@ -194,6 +257,7 @@ class PDLForm(QWidget):
         self.mc_start_custom = QTextEdit(); self.mc_start_custom.setPlaceholderText("; Custom M-codes at start\nM117 Starting…")
         self.mc_end_custom = QTextEdit(); self.mc_end_custom.setPlaceholderText("; Custom M-codes at end\nM117 Done")
 
+        form.addRow(row_actions)
         form.addRow("PSU ON at start (M80)", self.mc_psu_on_start)
         form.addRow("PSU OFF at end (M81)", self.mc_psu_off_end)
         form.addRow("Enable mesh at start (M420 S1)", self.mc_enable_mesh)
@@ -205,6 +269,12 @@ class PDLForm(QWidget):
     # ---------- Peripherals (Lights, Camera, Fans, SD) ----------
     def _init_peripherals_tab(self):
         w = QWidget(); form = QFormLayout(w)
+        row_actions = QHBoxLayout()
+        btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Clear peripherals to defaults")
+        btn_help = QPushButton("Help…"); btn_help.setToolTip("Open firmware mapping documentation")
+        btn_reset.clicked.connect(self._reset_peripherals_defaults); btn_help.clicked.connect(lambda: self._open_doc("docs/firmware-mapping.md", "Firmware Mapping"))
+        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addStretch(1)
+        form.addRow(row_actions)
         self.lb_fw_tip = QLabel(""); self.lb_fw_tip.setWordWrap(True)
         form.addRow(self.lb_fw_tip)
         # Lights
