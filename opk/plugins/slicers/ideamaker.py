@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Any
+from ...core.gcode import render_hooks_with_firmware
 
 
 def _ensure_dir(p: Path) -> None:
@@ -32,6 +33,9 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     mat_dia = _num(mat0.get('filament_diameter') or 1.75)
     noz_temp = _num(mat0.get('nozzle_temperature') or 205)
     bed_temp = _num(mat0.get('bed_temperature') or 60)
+    hooks = render_hooks_with_firmware(pdl or {})
+    start_g = '\n'.join(hooks.get('start') or [])
+    end_g = '\n'.join(hooks.get('end') or [])
     lines = [
         f'machineWidth = {int(w)}',
         f'machineDepth = {int(d)}',
@@ -42,6 +46,8 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f'bedTemperature = {bed_temp:.0f}',
         f'layerHeight = {0.2}',
         f'firstLayerHeight = {0.28}',
+        f'startGcode = {start_g}',
+        f'endGcode = {end_g}',
     ]
     outdir = out_dir / 'ideamaker'
     _ensure_dir(outdir)
@@ -49,4 +55,3 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     cfg.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = cfg
     return out
-

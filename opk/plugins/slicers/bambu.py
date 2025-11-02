@@ -34,6 +34,14 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     noz_temp = _num(mat0.get('nozzle_temperature') or 205)
     bed_temp = _num(mat0.get('bed_temperature') or 60)
     hooks = render_hooks_with_firmware(pdl or {})
+    # Process defaults
+    proc = (pdl.get('process_defaults') or {})
+    lh = _num(proc.get('layer_height_mm') or 0.2)
+    flh = _num(proc.get('first_layer_mm') or 0.28)
+    spd = proc.get('speeds_mms') or {}
+    per_spd = _num(spd.get('perimeter') or 40)
+    inf_spd = _num(spd.get('infill') or 60)
+    trav_spd = _num(spd.get('travel') or 150)
     start_g = '\n'.join(hooks.get('start') or [])
     end_g = '\n'.join(hooks.get('end') or [])
     bdir = out_dir / 'bambu'
@@ -52,6 +60,13 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f"filament_diameter = {mat_dia:.2f}",
         f"temperature = {noz_temp:.0f}",
         f"bed_temperature = {bed_temp:.0f}",
+        "",
+        f"[print:Standard]",
+        f"layer_height = {lh}",
+        f"first_layer_height = {flh}",
+        f"perimeter_speed = {per_spd}",
+        f"infill_speed = {inf_spd}",
+        f"travel_speed = {trav_spd}",
     ]
     ini.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = ini

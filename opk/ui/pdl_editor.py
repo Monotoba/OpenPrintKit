@@ -162,7 +162,7 @@ class PDLForm(QWidget):
         self.f_mesh_c = QSpinBox(); self.f_mesh_c.setRange(1, 20)
         self.f_probe_active_low = QCheckBox()
         # Endstops group
-        es = QGroupBox("Endstops Polarity (Active Low)")
+        es = QGroupBox("Endstops Polarity (Checked = Active Low)")
         es_form = QFormLayout(es)
         self.es_x_min = QCheckBox(); self.es_x_max = QCheckBox()
         self.es_y_min = QCheckBox(); self.es_y_max = QCheckBox()

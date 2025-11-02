@@ -33,7 +33,18 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     mat_dia = _num(mat0.get('filament_diameter') or 1.75)
     noz_temp = _num(mat0.get('nozzle_temperature') or 205)
     bed_temp = _num(mat0.get('bed_temperature') or 60)
-    process_speed = 60.0
+    # Process defaults (optional)
+    proc = (pdl.get('process_defaults') or {})
+    lh = _num(proc.get('layer_height_mm') or 0.2)
+    flh = _num(proc.get('first_layer_mm') or 0.28)
+    spd = proc.get('speeds_mms') or {}
+    speed_print = _num(spd.get('infill') or spd.get('perimeter') or 60)
+    speed_travel = _num(spd.get('travel') or 150)
+    # Retraction (optional)
+    retract_len = _num(proc.get('retract_mm') or 0.0)
+    retract_spd = _num(proc.get('retract_speed_mms') or 35.0)
+    # Adhesion (optional)
+    adhesion = proc.get('adhesion') or ''
     # path
     cdir = out_dir / 'cura'
     _ensure_dir(cdir)
@@ -46,11 +57,21 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f'material_diameter = {mat_dia:.2f}',
         f'material_print_temperature = {noz_temp:.0f}',
         f'material_bed_temperature = {bed_temp:.0f}',
-        f'layer_height = {0.2}',
+        f'layer_height = {lh}',
+        f'initial_layer_height = {flh}',
         f'line_width = {nozzle:.2f}',
-        f'speed_print = {process_speed:.0f}',
+        f'speed_print = {speed_print:.0f}',
+        f'speed_travel = {speed_travel:.0f}',
+        f'speed_infill = {speed_print:.0f}',
+        f'speed_wall = {speed_print:.0f}',
+        f'speed_wall_0 = {speed_print:.0f}',
+        f'speed_wall_x = {speed_print:.0f}',
+        f'retraction_enable = {1 if retract_len>0 else 0}',
+        f'retraction_amount = {retract_len:.2f}',
+        f'retraction_speed = {retract_spd:.0f}',
     ]
+    if adhesion in ("skirt","brim","raft"):
+        lines.append(f'adhesion_type = {adhesion}')
     cfg.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = cfg
     return out
-

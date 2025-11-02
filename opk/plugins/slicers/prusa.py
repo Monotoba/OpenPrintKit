@@ -33,7 +33,15 @@ def generate_prusa(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     name = str(pdl.get('name') or 'OPK_Prusa').replace(' ', '_')
     geom = pdl.get('geometry') or {}
     bed = geom.get('bed_shape') or [[0,0],[200,0],[200,200],[0,200]]
-    lh = 0.2
+    # Process defaults
+    proc = (pdl.get('process_defaults') or {})
+    lh = _num(proc.get('layer_height_mm') or 0.2)
+    flh = _num(proc.get('first_layer_mm') or 0.28)
+    spd = proc.get('speeds_mms') or {}
+    per_spd = _num(spd.get('perimeter') or 40)
+    inf_spd = _num(spd.get('infill') or 60)
+    trav_spd = _num(spd.get('travel') or 150)
+    adhesion = (proc.get('adhesion') or '').lower()
     ex0 = (pdl.get('extruders') or [{}])[0]
     nozzle = _num(ex0.get('nozzle_diameter') or 0.4)
     mat0 = (pdl.get('materials') or [{}])[0]
@@ -65,8 +73,16 @@ def generate_prusa(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         "",
         f"[print:Standard]",
         f"layer_height = {lh}",
-        f"first_layer_height = 0.28",
+        f"first_layer_height = {flh}",
+        f"perimeter_speed = {per_spd}",
+        f"infill_speed = {inf_spd}",
+        f"travel_speed = {trav_spd}",
     ]
+    # Adhesion mapping: simple starter values
+    if adhesion == 'brim':
+        lines.append('brim_width = 5')
+    elif adhesion == 'skirt':
+        lines.append('skirts = 1')
     ini_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = ini_path
     return out
