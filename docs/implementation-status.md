@@ -37,7 +37,8 @@ This document tracks major features, their implementation status, and next steps
   - [x] G-code tools (Preview, Validate)
   - [x] Settings dialog (defaults + policies)
   - [x] Help pages (Overview, G-code Help, Firmware Mapping, M-code Reference)
-  - [ ] Tools → Generate Snippets… (invoke CLI core with defaults)
+  - [x] Tools → Generate Snippets… (invoke CLI core with defaults)
+  - [x] Generate Profiles dialog persistence (slicer/out dir/PDL/bundle) and bundle UX improvements
   - [ ] Project-level config management (optional)
 
 - Rules & Validation

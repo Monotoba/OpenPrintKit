@@ -150,10 +150,16 @@ class MainWindow(QMainWindow):
         act_gen_snip.setToolTip("Generate start/end G-code files from PDL"); act_gen_snip.setShortcut("Ctrl+Shift+N")
         act_gen_prof = QAction("Generate Profiles…", self); act_gen_prof.triggered.connect(self._gen_profiles)
         act_gen_prof.setToolTip("Generate and preview slicer profiles"); act_gen_prof.setShortcut("Ctrl+Shift+P")
+        act_slice = QAction("Slice (CLI)…", self); act_slice.triggered.connect(self._slice_cli)
+        act_slice.setToolTip("Slice via external CLI (Slic3r family / CuraEngine)")
+        act_shots = QAction("Capture Screenshots…", self); act_shots.triggered.connect(self._capture_shots)
+        act_shots.setToolTip("Capture UI screenshots (offscreen)")
         tools_menu.addAction(act_gcode_prev)
         tools_menu.addAction(act_gcode_validate)
         tools_menu.addAction(act_gen_snip)
         tools_menu.addAction(act_gen_prof)
+        tools_menu.addAction(act_slice)
+        tools_menu.addAction(act_shots)
         # Status tips for toolbar/status bar
         for a in (act_validate, act_rules, act_bundle, act_ws_init, act_install, act_open_pdl, act_save_pdl, act_exit,
                   act_gcode_prev, act_gcode_validate, act_gen_snip, act_gen_prof):
@@ -237,7 +243,8 @@ class MainWindow(QMainWindow):
         src = QFileDialog.getExistingDirectory(self, "Select Source Directory (with printers/ filaments/ processes/)", start)
         if not src:
             return
-        out, _ = QFileDialog.getSaveFileName(self, "Save Bundle As", "", "OPK Bundle (*.orca_printer)")
+        last_bundle = self.settings.value("paths/last_bundle", "")
+        out, _ = QFileDialog.getSaveFileName(self, "Save Bundle As", last_bundle or "", "OPK Bundle (*.orca_printer)")
         if not out:
             return
         outp = Path(out)
@@ -252,6 +259,7 @@ class MainWindow(QMainWindow):
             self.log(f"[BUNDLE] Wrote {outp}")
             QMessageBox.information(self, "Bundle", f"Wrote: {outp}")
             self.settings.setValue("dirs/src", src)
+            self.settings.setValue("paths/last_bundle", str(outp))
 
     def _workspace_init(self):
         start = self.settings.value("dirs/ws", "")
@@ -364,6 +372,19 @@ class MainWindow(QMainWindow):
         dlg = AppSettingsDialog(self)
         dlg.resize(600, 400)
         dlg.exec()
+
+    def _slice_cli(self):
+        from .slice_dialog import SliceDialog
+        dlg = SliceDialog(self); dlg.resize(760, 520); dlg.exec()
+
+    def _capture_shots(self):
+        from .screenshot import capture
+        out = QFileDialog.getExistingDirectory(self, "Select output directory for screenshots", "")
+        if not out:
+            return
+        targets = ['main','rules','profiles','snippets','settings','preferences']
+        wrote = capture(targets, Path(out))
+        self.log(f"[SHOTS] wrote {len(wrote)} file(s) to {out}")
 
     def _help_overview(self):
         from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg

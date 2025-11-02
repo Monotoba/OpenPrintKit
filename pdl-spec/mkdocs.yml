@@ -39,6 +39,7 @@ nav:
   - Schema:
       - pdl.schema.json: schema/pdl.schema.json
   - Changelog: changelog.md
+  - Slicer Support: slicer-support.md
   - Contributing: contributing.md
   - License: license.md
 

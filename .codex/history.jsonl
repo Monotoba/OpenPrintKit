@@ -110,3 +110,6 @@
 {"session_id":"97b66f6c-a160-40e0-bd0f-1fdcbbb9498b","ts":1762096284,"text":"What slicers are supported by our software now?"}
 {"session_id":"97b66f6c-a160-40e0-bd0f-1fdcbbb9498b","ts":1762096553,"text":"Is it possible to add support for Simplify3D, KISSlicer, Pathio, Slic3r, MatterControl, IceSL, Craftware, FlashPrint, QidiPrint, Creality Print, Snapmaker Luban, CuraEngine, Slic3r CLI, SuperSlicer CLI, PrusaSlicer CLI, and Kiri:Moto, if appropriate?"}
 {"session_id":"97b66f6c-a160-40e0-bd0f-1fdcbbb9498b","ts":1762097083,"text":"Ok, for those you feel we have adiquate access to information on, add support for both inporting and exporting settings/configuration files. Use your suggested approach, those that require propriatary licensing we must omit. After each device is added, update the changelog and system_notes.md files, help files, and commit changes as you go. Also, make any changes needed to the matrix."}
+{"session_id":"97b66f6c-a160-40e0-bd0f-1fdcbbb9498b","ts":1762098308,"text":"I pushed the changes manually. continue with next options."}
+{"session_id":"97b66f6c-a160-40e0-bd0f-1fdcbbb9498b","ts":1762099009,"text":"continue with all"}
+{"session_id":"97b66f6c-a160-40e0-bd0f-1fdcbbb9498b","ts":1762100088,"text":"yes"}

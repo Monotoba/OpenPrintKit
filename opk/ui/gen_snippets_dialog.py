@@ -36,7 +36,9 @@ class GenerateSnippetsDialog(QDialog):
 
     def _load_defaults(self):
         self.cb_fw.setCurrentText(self.s.value("app/default_firmware", "marlin"))
-        self.ed_out.setText(self.s.value("app/out_dir", ""))
+        # Prefer dialog-specific out_dir if present, else app default
+        self.ed_out.setText(self.s.value("gen_snippets/out_dir", self.s.value("app/out_dir", "")))
+        self.ed_pdl.setText(self.s.value("gen_snippets/pdl_path", ""))
 
     def _pick_pdl(self):
         fn, _ = QFileDialog.getOpenFileName(self, "Select PDL (YAML/JSON)", "", "PDL (*.yaml *.yml *.json)")
@@ -50,13 +52,13 @@ class GenerateSnippetsDialog(QDialog):
         pdl_path = Path(self.ed_pdl.text().strip())
         out_dir = Path(self.ed_out.text().strip() or ".")
         if not pdl_path.exists():
-            QMessageBox.warning(self, "Generate", "Please select a valid PDL file.")
+            QMessageBox.warning(self, "Generate", "Please select a valid PDL file (YAML/JSON).")
             return
         try:
             text = pdl_path.read_text(encoding="utf-8")
             data = json.loads(text) if pdl_path.suffix.lower()==".json" else __import__("yaml").safe_load(text)
         except Exception as e:
-            QMessageBox.critical(self, "Generate", f"Failed to read PDL:\n{e}")
+            QMessageBox.critical(self, "Generate", f"Failed to read PDL at {pdl_path.name}:\n{e}")
             return
         fw = self.cb_fw.currentText() or None
         try:
@@ -80,5 +82,13 @@ class GenerateSnippetsDialog(QDialog):
         except Exception as e:
             QMessageBox.critical(self, "Generate", f"Failed to write snippets:\n{e}")
             return
+        # Persist last-used inputs
+        try:
+            self.s.setValue("gen_snippets/pdl_path", str(pdl_path))
+            self.s.setValue("gen_snippets/out_dir", str(out_dir))
+            # Also refresh app default out_dir for convenience
+            self.s.setValue("app/out_dir", str(out_dir))
+        except Exception:
+            pass
         QMessageBox.information(self, "Generate", f"Wrote:\n{out_dir}/{base}_start.gcode\n{out_dir}/{base}_end.gcode")
         self.accept()

@@ -23,6 +23,7 @@ Commands:
 - `opk gen --pdl PDL.yaml --slicer ideamaker --out OUTDIR` — Generate a minimal ideaMaker `.cfg` profile.
 - `opk gen --pdl PDL.yaml --slicer bambu --out OUTDIR` — Generate a minimal Bambu Studio `.ini`-style profile.
 - `opk gen --pdl PDL.yaml --slicer superslicer --out OUTDIR` — Generate a minimal SuperSlicer `.ini` profile.
+- `opk gen --pdl PDL.yaml --slicer kisslicer --out OUTDIR` — Generate a minimal KISSlicer `.ini` profile (best‑effort).
 
 ### Advanced Overrides
 
@@ -35,3 +36,4 @@ Commands:
   - `--acc-bottom N` — bottom solid infill acceleration (mm/s²)
 
 See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.
+- `opk slice --slicer slic3r|prusaslicer|superslicer|curaengine --model MODEL.stl --profile PROFILE.ini --out OUT.gcode [--flags "..."]` — Slice via external CLI (binary must be on PATH; CuraEngine requires `--flags` with `-j` and settings).

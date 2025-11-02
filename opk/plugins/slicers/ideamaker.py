@@ -44,6 +44,13 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     per_spd = _num(spd.get('perimeter') or 40)
     inf_spd = _num(spd.get('infill') or 60)
     trav_spd = _num(spd.get('travel') or 150)
+    # Optional: retraction and cooling
+    retr_len = _num((pdl.get('process_defaults') or {}).get('retract_mm') or 0.0)
+    retr_spd = _num((pdl.get('process_defaults') or {}).get('retract_speed_mms') or 35.0)
+    cooling = (pdl.get('process_defaults') or {}).get('cooling') or {}
+    min_layer_time = int(cooling.get('min_layer_time_s') or 0)
+    fan_min = int(cooling.get('fan_min_percent') or 0)
+    fan_max = int(cooling.get('fan_max_percent') or 0)
     lines = [
         f'machineWidth = {int(w)}',
         f'machineDepth = {int(d)}',
@@ -57,6 +64,10 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f'perimeterSpeed = {int(per_spd)}',
         f'infillSpeed = {int(inf_spd)}',
         f'travelSpeed = {int(trav_spd)}',
+        # Retraction and cooling (best-effort field names)
+        *( [f'retractionDistance = {retr_len:.2f}', f'retractionSpeed = {int(retr_spd)}'] if retr_len else [] ),
+        *( [f'minLayerTime = {min_layer_time}'] if min_layer_time else [] ),
+        *( [f'fanMin = {fan_min}', f'fanMax = {fan_max}'] if (fan_min or fan_max) else [] ),
         f'startGcode = {start_g}',
         f'endGcode = {end_g}',
     ]

@@ -112,7 +112,7 @@ def main():
 
     # convert
     cv = sub.add_parser("convert", help="Convert from other formats")
-    cv.add_argument("--from", dest="from_fmt", required=True, choices=["cura","prusa","superslicer","ideamaker"], help="Source format")
+    cv.add_argument("--from", dest="from_fmt", required=True, choices=["cura","prusa","superslicer","ideamaker","kisslicer"], help="Source format")
     cv.add_argument("--in", dest="src", required=True, help="Input file or directory to convert")
     cv.add_argument("--out", dest="out", required=True, help="Output directory (printers)")
 
@@ -154,7 +154,7 @@ def main():
 
     gn = sub.add_parser("gen", help="Generate slicer profiles from PDL")
     gn.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
-    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu","superslicer"], help="Target slicer")
+    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu","superslicer","kisslicer"], help="Target slicer")
     gn.add_argument("--out", required=True, help="Output directory for profiles")
     gn.add_argument("--bundle", help="Optional bundle output (for orca/cura/prusa/ideamaker)")
     # screenshot
@@ -227,6 +227,29 @@ def main():
             print(f"[SHOT] {p}")
         print(f"[SUMMARY] shots={len(wrote)} out={outd}")
         raise SystemExit(0)
+    if args.cmd == "slice":
+        import shutil, subprocess
+        slicer = args.slicer
+        bin_name = slicer if slicer != 'curaengine' else 'CuraEngine'
+        exe = shutil.which(bin_name)
+        if not exe:
+            print(f"[ERROR] slicer not found: {bin_name}")
+            raise SystemExit(2)
+        if slicer in ('slic3r','prusaslicer','superslicer'):
+            cmd = [exe, '--load', str(Path(args.profile)), '--export-gcode', '-o', str(Path(args.out)), str(Path(args.model))]
+        elif slicer == 'curaengine':
+            extra = (args.flags or '').split()
+            cmd = [exe, 'slice', '-o', str(Path(args.out)), '-l', str(Path(args.model))] + extra
+        else:
+            print(f"[ERROR] unsupported slicer for CLI slicing: {slicer}")
+            raise SystemExit(2)
+        try:
+            print('[RUN]', ' '.join(cmd))
+            res = subprocess.run(cmd, check=False)
+            raise SystemExit(res.returncode)
+        except Exception as e:
+            print(f"[ERROR] failed: {e}")
+            raise SystemExit(2)
     if args.cmd == "gcode-hooks":
         from pathlib import Path as _Path
         import json as _json, yaml as _yaml
@@ -386,6 +409,26 @@ def main():
             if args.bundle:
                 from ..core.bundle import build_bundle
                 build_bundle(out_dir, _Path(args.bundle))
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
+        if args.slicer == 'superslicer':
+            from ..plugins.slicers.superslicer import generate_superslicer
+            generated = generate_superslicer(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_profile_bundle
+                build_profile_bundle(generated, _Path(args.bundle), 'superslicer')
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
+        if args.slicer == 'kisslicer':
+            from ..plugins.slicers.kisslicer import generate_kisslicer
+            generated = generate_kisslicer(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_profile_bundle
+                build_profile_bundle(generated, _Path(args.bundle), 'kisslicer')
                 print(f"[BUNDLE] {args.bundle}")
             raise SystemExit(0)
         if args.slicer == 'cura':

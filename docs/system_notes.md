@@ -29,7 +29,7 @@ This document captures key decisions, changes, and notes from the current develo
     - Map `limits` acceleration/jerk (Cura: acceleration/jerk enabled + values; Prusa/Bambu: max_print/travel acceleration).
     - Per-section accelerations via `process_defaults.accelerations_mms2` (perimeter/infill/external/top/bottom) to slicer-specific keys.
   - Added `build_profile_bundle(files, out, slicer)` to package generated profiles (Cura/Prusa/ideaMaker) with a manifest.
-  - Added import converters for Prusa/SuperSlicer INI and ideaMaker CFG to OPK printer JSON (minimal mapping).
+  - Added import converters for Prusa/SuperSlicer INI, ideaMaker CFG, and KISSlicer INI (best‑effort) to OPK printer JSON.
   - G-code renderer supports dotted/array placeholders in preview.
 
 - CLI
@@ -43,8 +43,14 @@ This document captures key decisions, changes, and notes from the current develo
 - GUI
   - Tabbed PDL editor with tabs: Build Area (polygon bed + limits), Extruders, Multi-Material, Filaments, Features (probe active_low + endstops), Machine Control (standard lifecycle), Peripherals (lights, RGB, chamber, camera, fans, SD, exhaust, Aux Outputs, Custom Peripherals), OpenPrintTag, Logs.
   - Build menu added (Validate, Run Rules, Build Bundle). Keyboard shortcuts and tooltips/status tips added across menus.
-  - Tools: G-code Preview; Validate Hook Variables; Generate Snippets; Generate Profiles (with Preview before write).
+  - Tools: G-code Preview; Validate Hook Variables; Generate Snippets; Generate Profiles (with Preview before write); Slice (CLI) with QSettings‑persisted last selections; Capture Screenshots.
   - Generate Profiles dialog: supports in-editor PDL (no need to save); multi-file preview; bundle summary with open-folder.
+  - GUI polish: Persist last-used fields and improve UX
+    - Persist bundle path, out dir, and slicer selection in Generate Profiles (QSettings under gen_profiles/*).
+    - Auto-suggest bundle filenames when empty (Orca: .orca_printer; Cura/Prusa/ideaMaker: .zip) and enforce suffixes.
+    - Enable bundle path only for supported slicers; dynamic placeholder updates.
+    - Persist PDL path and out dir in Generate Snippets (gen_snippets/*), and improve invalid-PDL messages.
+    - Remember last bundle save path in main window Build Bundle (paths/last_bundle).
   - Help: Overview, G-code Help, M-code Reference, Firmware Mapping.
   - Settings dialog (default slicer/firmware, output dir, variables JSON, policy toggles) via QSettings.
   - Dynamic firmware tips shown in Peripherals tab; targeted tooltips added throughout (RGB/chamber/camera/fans/exhaust/materials).
@@ -65,6 +71,7 @@ This document captures key decisions, changes, and notes from the current develo
   - pdl-spec: added mkdocs site with Material theme; requirements pinned; added missing schema and getting-started docs.
   - pdl-spec: documented `process_defaults.accelerations_mms2` and extended `speeds_mms` keys.
   - README updated with Docs badge, website link, and documentation links.
+  - Added Slicer Support Matrix page; CLI reference updated with new converters (Prusa/SuperSlicer/ideaMaker/KISSlicer) and slicing command.
 
 - Tests
   - Expanded coverage to 51 tests: schema, bundles, CLI (including overrides and converters), generators (process/limits/overrides), firmware mapping, OpenPrintTag, G‑code utils, GUI import smokes, firmware rules.

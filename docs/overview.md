@@ -13,6 +13,10 @@ This help page summarizes OPK concepts and UI:
 
 See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-reference.md`.
 
+### Slicer Support
+
+For a summary of supported slicers, import/export coverage, and mapping depth, see `docs/slicer-support.md`.
+
 ## PDL → Slicer Mapping (Highlights)
 
 - process_defaults.layer_height_mm → slicer layer height

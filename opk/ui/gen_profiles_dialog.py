@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from ._qt_compat import (
-    QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QMessageBox, QCheckBox, QTextEdit, QVBoxLayout, QLabel
+    QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QMessageBox, QCheckBox, QTextEdit, QVBoxLayout, QLabel, QSettings
 )
 from ..core.project import find_project_file, load_project_config, merge_policies
 
@@ -12,7 +12,9 @@ class GenerateProfilesDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Generate Slicer Profiles")
         self._pdl_data = pdl_data or None
+        self.s = QSettings("OpenPrintKit", "OPKStudio")
         self._build()
+        self._load_defaults()
 
     def _build(self):
         f = QFormLayout(self)
@@ -25,6 +27,15 @@ class GenerateProfilesDialog(QDialog):
         row_out = QHBoxLayout(); row_out.addWidget(self.ed_out); row_out.addWidget(b_out)
         self.ck_bundle = QCheckBox("Bundle (Orca/Cura/Prusa/ideaMaker)")
         self.ed_bundle = QLineEdit(); self.ed_bundle.setPlaceholderText("OUT.orca_printer")
+        # Toggle bundle path enablement and placeholder per slicer
+        def _update_bundle_enabled():
+            slicer = self.cb_slicer.currentText()
+            bundlable = slicer in ("orca","cura","prusa","ideamaker")
+            self.ck_bundle.setEnabled(bundlable)
+            self.ed_bundle.setEnabled(bundlable and self.ck_bundle.isChecked())
+            self.ed_bundle.setPlaceholderText("OUT.orca_printer" if slicer == 'orca' else "OUT.zip")
+        self.ck_bundle.toggled.connect(lambda *_: _update_bundle_enabled())
+        self.cb_slicer.currentIndexChanged.connect(lambda *_: _update_bundle_enabled())
         if self._pdl_data is None:
             f.addRow("PDL file", row_pdl)
         else:
@@ -43,6 +54,23 @@ class GenerateProfilesDialog(QDialog):
         btns.addWidget(go); btns.addWidget(cancel)
         f.addRow(btns)
 
+    def _load_defaults(self):
+        # Default slicer and remembered fields
+        try:
+            self.cb_slicer.setCurrentText(self.s.value("app/default_slicer", "orca"))
+        except Exception:
+            pass
+        self.ed_out.setText(self.s.value("gen_profiles/out_dir", self.s.value("app/out_dir", "")))
+        self.ed_bundle.setText(self.s.value("gen_profiles/bundle_path", ""))
+        self.ck_bundle.setChecked(self.s.value("gen_profiles/bundle_enabled", True, type=bool))
+        if self._pdl_data is None:
+            self.ed_pdl.setText(self.s.value("gen_profiles/pdl_path", ""))
+        # Sync enablement state
+        try:
+            self.cb_slicer.currentIndexChanged.emit(self.cb_slicer.currentIndex())  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
     def _pick_pdl(self):
         fn, _ = QFileDialog.getOpenFileName(self, "Select PDL (YAML/JSON)", "", "PDL (*.yaml *.yml *.json)")
         if fn: self.ed_pdl.setText(fn)
@@ -60,13 +88,13 @@ class GenerateProfilesDialog(QDialog):
         else:
             pdl_path = Path(self.ed_pdl.text().strip())
             if not pdl_path.exists():
-                QMessageBox.warning(self, "Generate", "Please select a valid PDL file.")
+                QMessageBox.warning(self, "Generate", "Please select a valid PDL file (YAML/JSON).")
                 return
             try:
                 text = pdl_path.read_text(encoding="utf-8")
                 data = json.loads(text) if pdl_path.suffix.lower()==".json" else __import__("yaml").safe_load(text)
             except Exception as e:
-                QMessageBox.critical(self, "Generate", f"Failed to read PDL:\n{e}")
+                QMessageBox.critical(self, "Generate", f"Failed to read PDL at {pdl_path.name}:\n{e}")
                 return
         try:
             src_dir = Path(".") if isinstance(self._pdl_data, dict) else pdl_path.parent
@@ -81,33 +109,65 @@ class GenerateProfilesDialog(QDialog):
             if slicer == 'orca':
                 from ..plugins.slicers.orca import generate_orca
                 out = generate_orca(data or {}, out_dir)
-                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                if self.ck_bundle.isChecked():
                     from ..core.bundle import build_bundle
-                    bundle_path = Path(self.ed_bundle.text().strip())
+                    bundle_text = self.ed_bundle.text().strip()
+                    if not bundle_text:
+                        base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
+                        bundle_text = str((out_dir / f"{base}.orca_printer"))
+                        self.ed_bundle.setText(bundle_text)
+                    bundle_path = Path(bundle_text)
+                    if not bundle_path.suffix:
+                        bundle_path = bundle_path.with_suffix('.orca_printer')
+                    bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_bundle(out_dir, bundle_path)
                     self._show_bundle_summary(bundle_path)
             elif slicer == 'cura':
                 from ..plugins.slicers.cura import generate_cura
                 out = generate_cura(data or {}, out_dir)
-                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                if self.ck_bundle.isChecked():
                     from ..core.bundle import build_profile_bundle
-                    bundle_path = Path(self.ed_bundle.text().strip())
+                    bundle_text = self.ed_bundle.text().strip()
+                    if not bundle_text:
+                        base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
+                        bundle_text = str((out_dir / f"{base}_cura.zip"))
+                        self.ed_bundle.setText(bundle_text)
+                    bundle_path = Path(bundle_text)
+                    if not bundle_path.suffix:
+                        bundle_path = bundle_path.with_suffix('.zip')
+                    bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_profile_bundle(out, bundle_path, 'cura')
                     self._show_bundle_summary(bundle_path)
             elif slicer == 'prusa':
                 from ..plugins.slicers.prusa import generate_prusa
                 out = generate_prusa(data or {}, out_dir)
-                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                if self.ck_bundle.isChecked():
                     from ..core.bundle import build_profile_bundle
-                    bundle_path = Path(self.ed_bundle.text().strip())
+                    bundle_text = self.ed_bundle.text().strip()
+                    if not bundle_text:
+                        base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
+                        bundle_text = str((out_dir / f"{base}_prusa.zip"))
+                        self.ed_bundle.setText(bundle_text)
+                    bundle_path = Path(bundle_text)
+                    if not bundle_path.suffix:
+                        bundle_path = bundle_path.with_suffix('.zip')
+                    bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_profile_bundle(out, bundle_path, 'prusa')
                     self._show_bundle_summary(bundle_path)
             elif slicer == 'ideamaker':
                 from ..plugins.slicers.ideamaker import generate_ideamaker
                 out = generate_ideamaker(data or {}, out_dir)
-                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                if self.ck_bundle.isChecked():
                     from ..core.bundle import build_profile_bundle
-                    bundle_path = Path(self.ed_bundle.text().strip())
+                    bundle_text = self.ed_bundle.text().strip()
+                    if not bundle_text:
+                        base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
+                        bundle_text = str((out_dir / f"{base}_ideamaker.zip"))
+                        self.ed_bundle.setText(bundle_text)
+                    bundle_path = Path(bundle_text)
+                    if not bundle_path.suffix:
+                        bundle_path = bundle_path.with_suffix('.zip')
+                    bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_profile_bundle(out, bundle_path, 'ideamaker')
                     self._show_bundle_summary(bundle_path)
             elif slicer == 'bambu':
@@ -116,9 +176,19 @@ class GenerateProfilesDialog(QDialog):
             else:
                 out = {}
         except Exception as e:
-            QMessageBox.critical(self, "Generate", f"Failed to generate profiles:\n{e}")
+            QMessageBox.critical(self, "Generate", f"Failed to generate profiles for '{slicer}':\n{e}")
             return
-        QMessageBox.information(self, "Generate", f"Wrote {len(out)} file(s) to {out_dir}")
+        # Persist last-used state
+        try:
+            self.s.setValue("gen_profiles/out_dir", str(out_dir))
+            self.s.setValue("gen_profiles/bundle_enabled", self.ck_bundle.isChecked())
+            if self.ed_bundle.text().strip():
+                self.s.setValue("gen_profiles/bundle_path", self.ed_bundle.text().strip())
+            if self._pdl_data is None:
+                self.s.setValue("gen_profiles/pdl_path", self.ed_pdl.text().strip())
+        except Exception:
+            pass
+        QMessageBox.information(self, "Generate", f"Wrote {len(out)} file(s) to:\n{out_dir}")
         self.accept()
 
     def _show_bundle_summary(self, path: Path) -> None:
