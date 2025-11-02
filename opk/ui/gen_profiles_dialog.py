@@ -27,8 +27,20 @@ class GenerateProfilesDialog(QDialog):
         row_out = QHBoxLayout(); row_out.addWidget(self.ed_out); row_out.addWidget(b_out)
         self.ck_bundle = QCheckBox("Bundle (Orca/Cura/Prusa/ideaMaker)")
         self.ed_bundle = QLineEdit(); self.ed_bundle.setPlaceholderText("OUT.orca_printer")
+        try:
+            self.ed_bundle.textChanged.connect(lambda *_: self._validate_bundle_suffix_inline())
+        except Exception:
+            pass
         self._btn_bundle = QPushButton("…"); self._btn_bundle.setToolTip("Choose bundle output file")
         self._btn_bundle.clicked.connect(self._pick_bundle)
+        # Recent bundles dropdown + clear
+        self._recent_bundles = QComboBox(); self._recent_bundles.setEditable(False)
+        try:
+            self._recent_bundles.activated.connect(self._choose_recent_bundle)
+        except Exception:
+            pass
+        self._btn_clear_recent = QPushButton("Clear"); self._btn_clear_recent.setToolTip("Clear recent bundle paths")
+        self._btn_clear_recent.clicked.connect(self._clear_recent_bundles)
         # Toggle bundle path enablement and placeholder per slicer
         def _update_bundle_enabled():
             slicer = self.cb_slicer.currentText()
@@ -36,10 +48,14 @@ class GenerateProfilesDialog(QDialog):
             self.ck_bundle.setEnabled(bundlable)
             self.ed_bundle.setEnabled(bundlable and self.ck_bundle.isChecked())
             try:
-                self._btn_bundle.setEnabled(bundlable and self.ck_bundle.isChecked())
+                enabled = bundlable and self.ck_bundle.isChecked()
+                self._btn_bundle.setEnabled(enabled)
+                self._recent_bundles.setEnabled(enabled)
+                self._btn_clear_recent.setEnabled(enabled)
             except Exception:
                 pass
             self.ed_bundle.setPlaceholderText("OUT.orca_printer" if slicer == 'orca' else "OUT.zip")
+            self._validate_bundle_suffix_inline()
         self.ck_bundle.toggled.connect(lambda *_: _update_bundle_enabled())
         self.cb_slicer.currentIndexChanged.connect(lambda *_: _update_bundle_enabled())
         if self._pdl_data is None:
@@ -50,8 +66,16 @@ class GenerateProfilesDialog(QDialog):
         f.addRow("Slicer", self.cb_slicer)
         f.addRow("Output dir", row_out)
         f.addRow(self.ck_bundle)
-        row_bundle = QHBoxLayout(); row_bundle.addWidget(self.ed_bundle); row_bundle.addWidget(self._btn_bundle)
+        row_bundle = QHBoxLayout();
+        row_bundle.addWidget(self.ed_bundle)
+        row_bundle.addWidget(self._btn_bundle)
+        row_bundle.addWidget(QLabel("Recent:"))
+        row_bundle.addWidget(self._recent_bundles)
+        row_bundle.addWidget(self._btn_clear_recent)
         f.addRow("Bundle output", row_bundle)
+        # Inline hint label
+        self._bundle_hint = QLabel("")
+        f.addRow(self._bundle_hint)
         # Buttons
         btns = QHBoxLayout();
         prev = QPushButton("Preview…"); prev.clicked.connect(self._preview)
@@ -77,6 +101,12 @@ class GenerateProfilesDialog(QDialog):
             self.cb_slicer.currentIndexChanged.emit(self.cb_slicer.currentIndex())  # type: ignore[attr-defined]
         except Exception:
             pass
+        # Populate recents and inline validate
+        try:
+            self._refresh_recent_bundles()
+            self._validate_bundle_suffix_inline()
+        except Exception:
+            pass
 
     def _pick_pdl(self):
         fn, _ = QFileDialog.getOpenFileName(self, "Select PDL (YAML/JSON)", "", "PDL (*.yaml *.yml *.json)")
@@ -97,8 +127,107 @@ class GenerateProfilesDialog(QDialog):
             self.ed_bundle.setText(fn)
             try:
                 self.s.setValue("gen_profiles/bundle_path", fn)
+                self._push_recent_bundle(fn)
+                self._refresh_recent_bundles()
             except Exception:
                 pass
+
+    # --- Recents helpers ---
+    def _recents_max(self) -> int:
+        try:
+            n = int(self.s.value("ui/recents_max", 10))
+            return max(1, min(n, 50))
+        except Exception:
+            return 10
+
+    def _get_recent_bundles(self) -> list:
+        import json as _json
+        try:
+            raw = self.s.value("gen_profiles/recent_bundles", "[]")
+            if isinstance(raw, str):
+                return list(_json.loads(raw) or [])
+            if isinstance(raw, list):
+                return raw
+        except Exception:
+            pass
+        return []
+
+    def _set_recent_bundles(self, items: list) -> None:
+        import json as _json
+        try:
+            self.s.setValue("gen_profiles/recent_bundles", _json.dumps(items[: self._recents_max()]))
+        except Exception:
+            pass
+
+    def _push_recent_bundle(self, path: str) -> None:
+        items = [i for i in self._get_recent_bundles() if i != path]
+        items.insert(0, path)
+        self._set_recent_bundles(items)
+
+    def _refresh_recent_bundles(self) -> None:
+        items = [i for i in self._get_recent_bundles() if Path(i).exists()]
+        self._set_recent_bundles(items)
+        try:
+            self._recent_bundles.blockSignals(True)
+        except Exception:
+            pass
+        self._recent_bundles.clear()
+        for it in items:
+            self._recent_bundles.addItem(it)
+        try:
+            self._recent_bundles.blockSignals(False)
+        except Exception:
+            pass
+
+    def _choose_recent_bundle(self) -> None:
+        try:
+            text = self._recent_bundles.currentText().strip()
+        except Exception:
+            text = ""
+        if text:
+            self.ed_bundle.setText(text)
+
+    def _clear_recent_bundles(self) -> None:
+        self._set_recent_bundles([])
+        self._refresh_recent_bundles()
+
+    # --- Inline validation ---
+    def _required_bundle_suffix(self) -> str:
+        return ".orca_printer" if self.cb_slicer.currentText() == 'orca' else ".zip"
+
+    def _ensure_required_suffix(self, path_str: str) -> str:
+        req = self._required_bundle_suffix()
+        p = Path(path_str)
+        # If already matches (case-insensitive), return as-is; else replace suffix
+        if str(path_str).lower().endswith(req):
+            return path_str
+        try:
+            return str(p.with_suffix(req))
+        except Exception:
+            return path_str + req
+
+    def _validate_bundle_suffix_inline(self) -> None:
+        try:
+            enabled = self.ck_bundle.isChecked() and self.ck_bundle.isEnabled()
+            if not enabled:
+                self._bundle_hint.setText("")
+                self.ed_bundle.setStyleSheet("")
+                return
+            req = self._required_bundle_suffix()
+            path = self.ed_bundle.text().strip()
+            if not path:
+                self._bundle_hint.setText(f"Required suffix: {req}")
+                self.ed_bundle.setStyleSheet("")
+                return
+            ok = path.lower().endswith(req)
+            if ok:
+                self._bundle_hint.setText("")
+                self.ed_bundle.setStyleSheet("")
+            else:
+                self._bundle_hint.setText(f"Required suffix: {req}")
+                self.ed_bundle.setStyleSheet("QLineEdit { border: 1px solid #cc8800; }")
+        except Exception:
+            pass
 
     def _gen(self):
         out_dir = Path(self.ed_out.text().strip() or ".")
@@ -132,14 +261,12 @@ class GenerateProfilesDialog(QDialog):
                 out = generate_orca(data or {}, out_dir)
                 if self.ck_bundle.isChecked():
                     from ..core.bundle import build_bundle
-                    bundle_text = self.ed_bundle.text().strip()
+                    bundle_text = self._ensure_required_suffix(self.ed_bundle.text().strip())
                     if not bundle_text:
                         base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
                         bundle_text = str((out_dir / f"{base}.orca_printer"))
                         self.ed_bundle.setText(bundle_text)
                     bundle_path = Path(bundle_text)
-                    if not bundle_path.suffix:
-                        bundle_path = bundle_path.with_suffix('.orca_printer')
                     bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_bundle(out_dir, bundle_path)
                     self._show_bundle_summary(bundle_path)
@@ -148,14 +275,12 @@ class GenerateProfilesDialog(QDialog):
                 out = generate_cura(data or {}, out_dir)
                 if self.ck_bundle.isChecked():
                     from ..core.bundle import build_profile_bundle
-                    bundle_text = self.ed_bundle.text().strip()
+                    bundle_text = self._ensure_required_suffix(self.ed_bundle.text().strip())
                     if not bundle_text:
                         base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
                         bundle_text = str((out_dir / f"{base}_cura.zip"))
                         self.ed_bundle.setText(bundle_text)
                     bundle_path = Path(bundle_text)
-                    if not bundle_path.suffix:
-                        bundle_path = bundle_path.with_suffix('.zip')
                     bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_profile_bundle(out, bundle_path, 'cura')
                     self._show_bundle_summary(bundle_path)
@@ -164,14 +289,12 @@ class GenerateProfilesDialog(QDialog):
                 out = generate_prusa(data or {}, out_dir)
                 if self.ck_bundle.isChecked():
                     from ..core.bundle import build_profile_bundle
-                    bundle_text = self.ed_bundle.text().strip()
+                    bundle_text = self._ensure_required_suffix(self.ed_bundle.text().strip())
                     if not bundle_text:
                         base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
                         bundle_text = str((out_dir / f"{base}_prusa.zip"))
                         self.ed_bundle.setText(bundle_text)
                     bundle_path = Path(bundle_text)
-                    if not bundle_path.suffix:
-                        bundle_path = bundle_path.with_suffix('.zip')
                     bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_profile_bundle(out, bundle_path, 'prusa')
                     self._show_bundle_summary(bundle_path)
@@ -180,14 +303,12 @@ class GenerateProfilesDialog(QDialog):
                 out = generate_ideamaker(data or {}, out_dir)
                 if self.ck_bundle.isChecked():
                     from ..core.bundle import build_profile_bundle
-                    bundle_text = self.ed_bundle.text().strip()
+                    bundle_text = self._ensure_required_suffix(self.ed_bundle.text().strip())
                     if not bundle_text:
                         base = (Path(self.ed_pdl.text()).stem if not isinstance(self._pdl_data, dict) else (data.get('name') or 'opk')).replace(' ', '_')
                         bundle_text = str((out_dir / f"{base}_ideamaker.zip"))
                         self.ed_bundle.setText(bundle_text)
                     bundle_path = Path(bundle_text)
-                    if not bundle_path.suffix:
-                        bundle_path = bundle_path.with_suffix('.zip')
                     bundle_path.parent.mkdir(parents=True, exist_ok=True)
                     build_profile_bundle(out, bundle_path, 'ideamaker')
                     self._show_bundle_summary(bundle_path)
