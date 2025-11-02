@@ -72,6 +72,7 @@ def summarize(*issue_lists: List[Issue]) -> Dict[str, int]:
 def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
     issues: List[Issue] = []
     mc = (pdl or {}).get("machine_control") or {}
+    fw = str((pdl or {}).get("firmware") or "").lower()
     # Exhaust: warn if both pin and fan_index set (ambiguous)
     ex = mc.get("exhaust") or {}
     if ex.get("pin") is not None and ex.get("fan_index") is not None:
@@ -96,4 +97,44 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
             issues.append(Issue("warn", "Custom peripheral hook should be a non-empty string", f"machine_control.custom_peripherals[{idx}].hook"))
         if not isinstance(cp.get("sequence"), list) or not cp.get("sequence"):
             issues.append(Issue("warn", "Custom peripheral sequence should be a non-empty list", f"machine_control.custom_peripherals[{idx}].sequence"))
+    # Firmware-specific guidance
+    if fw in ("grbl", "linuxcnc"):
+        if (ex.get("enable_start")) and not ex.get("off_at_end"):
+            issues.append(Issue("warn", "GRBL/LinuxCNC exhaust maps to coolant (M8 on/M9 off); set off_at_end to ensure M9 is emitted", "machine_control.exhaust.off_at_end"))
+        if ex.get("pin") is not None and ex.get("pin") != "":
+            issues.append(Issue("info", "GRBL/LinuxCNC ignores raw pin control for exhaust; using M7/M8/M9 coolant mapping instead", "machine_control.exhaust.pin"))
+    if fw == "klipper":
+        cam_cmd = (cam.get("command") or "").strip().upper()
+        if (cam.get("use_before_snapshot") or cam.get("use_after_snapshot")) and cam_cmd.startswith("M240"):
+            issues.append(Issue("info", "Klipper: camera M240 will be mapped to 'M118 TIMELAPSE_TAKE_FRAME' by policy", "machine_control.camera.command"))
+
+    # PDL-level process defaults checks (if present)
+    pd = (pdl or {}).get("process_defaults") or {}
+    # Layer heights vs nozzle (use first extruder if present)
+    try:
+        ex0 = ((pdl or {}).get("extruders") or [{}])[0]
+    except Exception:
+        ex0 = {}
+    nz = _num(ex0.get("nozzle_diameter"))
+    lh = _num(pd.get("layer_height_mm"))
+    flh = _num(pd.get("first_layer_mm"))
+    if nz and lh and lh > 0.8 * nz:
+        issues.append(Issue("warn", f"layer_height_mm {lh} > 80% of nozzle {nz}", "process_defaults.layer_height_mm"))
+    if nz and flh and flh > 0.8 * nz:
+        issues.append(Issue("warn", f"first_layer_mm {flh} > 80% of nozzle {nz}", "process_defaults.first_layer_mm"))
+    # Cooling sanity
+    cool = pd.get("cooling") or {}
+    for k in ("fan_min_percent", "fan_max_percent"):
+        v = _num(cool.get(k))
+        if v is not None and not (0 <= v <= 100):
+            issues.append(Issue("warn", f"{k} must be between 0 and 100", f"process_defaults.cooling.{k}"))
+    mlt = _num(cool.get("min_layer_time_s"))
+    if mlt is not None and mlt < 0:
+        issues.append(Issue("warn", "min_layer_time_s should be >= 0", "process_defaults.cooling.min_layer_time_s"))
+    # Accelerations non-negative
+    acc = pd.get("accelerations_mms2") or {}
+    for k, v in acc.items():
+        vv = _num(v)
+        if vv is not None and vv < 0:
+            issues.append(Issue("warn", f"Acceleration '{k}' should be >= 0", f"process_defaults.accelerations_mms2.{k}"))
     return issues
