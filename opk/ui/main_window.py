@@ -101,19 +101,29 @@ class MainWindow(QMainWindow):
         # Menus
         mb = self.menuBar()
         file_menu = mb.addMenu("File")
+        build_menu = mb.addMenu("Build")
 
         style = self.style()
         act_validate = QAction(style.standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton), "Validate…", self); act_validate.triggered.connect(self._validate)
+        act_validate.setToolTip("Validate JSON profiles against schema"); act_validate.setShortcut("Ctrl+Shift+V")
         act_rules = QAction(style.standardIcon(QStyle.StandardPixmap.SP_BrowserReload), "Run Rules…", self); act_rules.triggered.connect(self._rules)
+        act_rules.setToolTip("Run rule-based checks across printer/filament/process"); act_rules.setShortcut("Ctrl+Shift+R")
         act_bundle = QAction(style.standardIcon(QStyle.StandardPixmap.SP_DirIcon), "Build Bundle…", self); act_bundle.triggered.connect(self._bundle)
+        act_bundle.setToolTip("Build an .orca_printer bundle from a profiles directory"); act_bundle.setShortcut("Ctrl+B")
         act_ws_init = QAction(style.standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder), "Workspace Init…", self); act_ws_init.triggered.connect(self._workspace_init)
+        act_ws_init.setToolTip("Initialize a workspace with profiles/ bundles/ logs/"); act_ws_init.setShortcut("Ctrl+Shift+I")
         act_install = QAction(style.standardIcon(QStyle.StandardPixmap.SP_ArrowDown), "Install to Orca…", self); act_install.triggered.connect(self._install)
-        act_exit = QAction("Exit", self); act_exit.triggered.connect(self.close)
-        act_open_pdl = QAction("Open PDL…", self); act_open_pdl.triggered.connect(self._open_pdl)
-        act_save_pdl = QAction("Save PDL As…", self); act_save_pdl.triggered.connect(self._save_pdl)
+        act_install.setToolTip("Install profiles to Orca presets directory"); act_install.setShortcut("Ctrl+Shift+D")
+        act_exit = QAction("Exit", self); act_exit.triggered.connect(self.close); act_exit.setShortcut("Ctrl+Q")
+        act_open_pdl = QAction("Open PDL…", self); act_open_pdl.triggered.connect(self._open_pdl); act_open_pdl.setShortcut("Ctrl+O"); act_open_pdl.setToolTip("Open PDL (YAML/JSON)")
+        act_save_pdl = QAction("Save PDL As…", self); act_save_pdl.triggered.connect(self._save_pdl); act_save_pdl.setShortcut("Ctrl+S"); act_save_pdl.setToolTip("Save PDL as YAML/JSON")
 
-        for a in (act_open_pdl, act_save_pdl, act_validate, act_rules, act_bundle, act_ws_init, act_install):
+        # File menu: open/save and workspace/install
+        for a in (act_open_pdl, act_save_pdl, act_ws_init, act_install):
             file_menu.addAction(a)
+        # Build menu: validation, rules, bundle
+        for a in (act_validate, act_rules, act_bundle):
+            build_menu.addAction(a)
         file_menu.addSeparator(); file_menu.addAction(act_exit)
 
         # Toolbar
@@ -126,13 +136,21 @@ class MainWindow(QMainWindow):
 
         tools_menu = mb.addMenu("Tools")
         act_gcode_prev = QAction("G-code Preview…", self); act_gcode_prev.triggered.connect(self._gcode_preview)
+        act_gcode_prev.setToolTip("Render a G-code hook with variables"); act_gcode_prev.setShortcut("Ctrl+G")
         act_gcode_validate = QAction("Validate Hook Variables…", self); act_gcode_validate.triggered.connect(self._gcode_validate)
+        act_gcode_validate.setToolTip("Validate hooks for unresolved placeholders")
         act_gen_snip = QAction("Generate Snippets…", self); act_gen_snip.triggered.connect(self._gen_snippets)
+        act_gen_snip.setToolTip("Generate start/end G-code files from PDL"); act_gen_snip.setShortcut("Ctrl+Shift+N")
         act_gen_prof = QAction("Generate Profiles…", self); act_gen_prof.triggered.connect(self._gen_profiles)
+        act_gen_prof.setToolTip("Generate and preview slicer profiles"); act_gen_prof.setShortcut("Ctrl+Shift+P")
         tools_menu.addAction(act_gcode_prev)
         tools_menu.addAction(act_gcode_validate)
         tools_menu.addAction(act_gen_snip)
         tools_menu.addAction(act_gen_prof)
+        # Status tips for toolbar/status bar
+        for a in (act_validate, act_rules, act_bundle, act_ws_init, act_install, act_open_pdl, act_save_pdl, act_exit,
+                  act_gcode_prev, act_gcode_validate, act_gen_snip, act_gen_prof):
+            a.setStatusTip(a.toolTip() or a.text())
 
         help_menu = mb.addMenu("Help")
         act_overview = QAction("Overview…", self); act_overview.triggered.connect(self._help_overview)
@@ -304,7 +322,11 @@ class MainWindow(QMainWindow):
 
     def _gen_profiles(self):
         from .gen_profiles_dialog import GenerateProfilesDialog
-        dlg = GenerateProfilesDialog(self)
+        try:
+            data = self.editor.dump_pdl()
+        except Exception:
+            data = None
+        dlg = GenerateProfilesDialog(self, pdl_data=data)
         dlg.resize(650, 240)
         dlg.exec()
 

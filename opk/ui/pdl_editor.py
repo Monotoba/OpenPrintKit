@@ -68,18 +68,18 @@ class PDLForm(QWidget):
         self.t_bedshape.setHorizontalHeaderLabels(["X","Y"])
         self.t_bedshape.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         bs_btns = QHBoxLayout()
-        bs_add = QPushButton("Add Point"); bs_add.clicked.connect(self._add_bed_point)
-        bs_del = QPushButton("Remove Point"); bs_del.clicked.connect(self._del_bed_point)
-        bs_rect = QPushButton("Make Rectangle from Width/Depth"); bs_rect.clicked.connect(self._bed_make_rect)
+        bs_add = QPushButton("Add Point"); bs_add.setToolTip("Add a new vertex to bed shape"); bs_add.clicked.connect(self._add_bed_point)
+        bs_del = QPushButton("Remove Point"); bs_del.setToolTip("Remove selected vertices"); bs_del.clicked.connect(self._del_bed_point)
+        bs_rect = QPushButton("Make Rectangle from Width/Depth"); bs_rect.setToolTip("Fill polygon from width/depth"); bs_rect.clicked.connect(self._bed_make_rect)
         bs_btns.addWidget(bs_add); bs_btns.addWidget(bs_del); bs_btns.addWidget(bs_rect); bs_btns.addStretch(1)
 
         # Limits group
         limits = QGroupBox("Limits")
         lim_form = QFormLayout(limits)
         self.l_print_speed = QDoubleSpinBox(); self.l_print_speed.setRange(1, 1000); self.l_print_speed.setToolTip("Max print speed")
-        self.l_travel_speed = QDoubleSpinBox(); self.l_travel_speed.setRange(1, 2000)
-        self.l_accel = QDoubleSpinBox(); self.l_accel.setRange(1, 50000)
-        self.l_jerk = QDoubleSpinBox(); self.l_jerk.setRange(0, 200)
+        self.l_travel_speed = QDoubleSpinBox(); self.l_travel_speed.setRange(1, 2000); self.l_travel_speed.setToolTip("Max travel speed")
+        self.l_accel = QDoubleSpinBox(); self.l_accel.setRange(1, 50000); self.l_accel.setToolTip("Global max acceleration")
+        self.l_jerk = QDoubleSpinBox(); self.l_jerk.setRange(0, 200); self.l_jerk.setToolTip("Jerk (Cura)")
         lim_form.addRow("Print Speed Max (mm/s)", self.l_print_speed)
         lim_form.addRow("Travel Speed Max (mm/s)", self.l_travel_speed)
         lim_form.addRow("Acceleration Max (mm/s²)", self.l_accel)
@@ -98,7 +98,7 @@ class PDLForm(QWidget):
         form.addRow(self.t_bedshape)
         form.addRow(bs_btns)
         form.addRow(limits)
-        self.tabs.addTab(w, "Build Area")
+        idx = self.tabs.addTab(w, "Build Area"); self.tabs.setTabToolTip(idx, "Bed, geometry, and limits")
 
     # ---------- Extruders ----------
     def _init_extruders_tab(self):
@@ -112,7 +112,7 @@ class PDLForm(QWidget):
         btn_del = QPushButton("Remove"); btn_del.clicked.connect(self._del_extruder)
         row.addWidget(btn_add); row.addWidget(btn_del); row.addStretch(1)
         v.addLayout(row)
-        self.tabs.addTab(w, "Extruders")
+        idx = self.tabs.addTab(w, "Extruders"); self.tabs.setTabToolTip(idx, "Extruder/nozzle/toolhead configuration")
 
     def _add_extruder(self):
         r = self.t_extruders.rowCount(); self.t_extruders.insertRow(r)
@@ -141,7 +141,7 @@ class PDLForm(QWidget):
         btn_del = QPushButton("Remove"); btn_del.clicked.connect(self._del_bank)
         row.addWidget(btn_add); row.addWidget(btn_del); row.addStretch(1)
         v.addLayout(row)
-        self.tabs.addTab(w, "Multi-Material")
+        idx = self.tabs.addTab(w, "Multi-Material"); self.tabs.setTabToolTip(idx, "Spool banks/carousels (AMS/MMU)")
 
     def _add_bank(self):
         r = self.t_banks.rowCount(); self.t_banks.insertRow(r)
@@ -179,7 +179,7 @@ class PDLForm(QWidget):
         form.addRow("Mesh Size (C)", self.f_mesh_c)
         form.addRow("Probe Active Low", self.f_probe_active_low)
         form.addRow(es)
-        self.tabs.addTab(w, "Features")
+        idx = self.tabs.addTab(w, "Features"); self.tabs.setTabToolTip(idx, "ABL, probe, endstops")
 
     # ---------- Machine Control (M-codes helper) ----------
     def _init_machine_control_tab(self):
@@ -200,7 +200,7 @@ class PDLForm(QWidget):
         form.addRow("Probe Z offset (M851)", self.mc_z_offset)
         form.addRow(QLabel("Custom start M-codes"), self.mc_start_custom)
         form.addRow(QLabel("Custom end M-codes"), self.mc_end_custom)
-        self.tabs.addTab(w, "Machine Control")
+        idx = self.tabs.addTab(w, "Machine Control"); self.tabs.setTabToolTip(idx, "Lifecycle M-codes and custom sequences")
 
     # ---------- Peripherals (Lights, Camera, Fans, SD) ----------
     def _init_peripherals_tab(self):
@@ -211,26 +211,26 @@ class PDLForm(QWidget):
         self.pr_light_on_start = QCheckBox(); self.pr_light_on_start.setToolTip("M355 S1 at start")
         self.pr_light_off_end = QCheckBox(); self.pr_light_off_end.setToolTip("M355 S0 at end")
         row_rgb = QHBoxLayout();
-        self.pr_rgb_r = QSpinBox(); self.pr_rgb_r.setRange(0,255); self.pr_rgb_r.setPrefix("R:")
-        self.pr_rgb_g = QSpinBox(); self.pr_rgb_g.setRange(0,255); self.pr_rgb_g.setPrefix(" G:")
-        self.pr_rgb_b = QSpinBox(); self.pr_rgb_b.setRange(0,255); self.pr_rgb_b.setPrefix(" B:")
+        self.pr_rgb_r = QSpinBox(); self.pr_rgb_r.setRange(0,255); self.pr_rgb_r.setPrefix("R:"); self.pr_rgb_r.setToolTip("RGB red component (0-255)")
+        self.pr_rgb_g = QSpinBox(); self.pr_rgb_g.setRange(0,255); self.pr_rgb_g.setPrefix(" G:"); self.pr_rgb_g.setToolTip("RGB green component (0-255)")
+        self.pr_rgb_b = QSpinBox(); self.pr_rgb_b.setRange(0,255); self.pr_rgb_b.setPrefix(" B:"); self.pr_rgb_b.setToolTip("RGB blue component (0-255)")
         row_rgb.addWidget(self.pr_rgb_r); row_rgb.addWidget(self.pr_rgb_g); row_rgb.addWidget(self.pr_rgb_b)
         # Chamber
         row_cht = QHBoxLayout();
-        self.pr_chamber_temp = QDoubleSpinBox(); self.pr_chamber_temp.setRange(0,120); self.pr_chamber_temp.setSuffix(" °C")
-        self.pr_chamber_wait = QCheckBox("Wait")
+        self.pr_chamber_temp = QDoubleSpinBox(); self.pr_chamber_temp.setRange(0,120); self.pr_chamber_temp.setSuffix(" °C"); self.pr_chamber_temp.setToolTip("Chamber temperature target")
+        self.pr_chamber_wait = QCheckBox("Wait"); self.pr_chamber_wait.setToolTip("Wait for chamber to reach target (M191)")
         row_cht.addWidget(self.pr_chamber_temp); row_cht.addWidget(self.pr_chamber_wait)
         # Camera
         self.pr_camera_before = QCheckBox("Trigger before snapshot"); self.pr_camera_before.setToolTip("Adds camera command to before_snapshot hook")
-        self.pr_camera_after = QCheckBox("Trigger after snapshot")
-        self.pr_camera_cmd = QLineEdit("M240")
+        self.pr_camera_after = QCheckBox("Trigger after snapshot"); self.pr_camera_after.setToolTip("Adds camera command to after_snapshot hook")
+        self.pr_camera_cmd = QLineEdit("M240"); self.pr_camera_cmd.setToolTip("Snapshot command (e.g., M240 or macro)")
         # Fans
         row_part = QHBoxLayout();
-        self.pr_fan_part = QSpinBox(); self.pr_fan_part.setRange(0,100); self.pr_fan_part.setSuffix(" %")
+        self.pr_fan_part = QSpinBox(); self.pr_fan_part.setRange(0,100); self.pr_fan_part.setSuffix(" %"); self.pr_fan_part.setToolTip("Part cooling fan at start")
         row_part.addWidget(QLabel("Part fan:")); row_part.addWidget(self.pr_fan_part)
         row_aux = QHBoxLayout();
-        self.pr_fan_aux_idx = QSpinBox(); self.pr_fan_aux_idx.setRange(0,9)
-        self.pr_fan_aux = QSpinBox(); self.pr_fan_aux.setRange(0,100); self.pr_fan_aux.setSuffix(" %")
+        self.pr_fan_aux_idx = QSpinBox(); self.pr_fan_aux_idx.setRange(0,9); self.pr_fan_aux_idx.setToolTip("Aux fan index (P)")
+        self.pr_fan_aux = QSpinBox(); self.pr_fan_aux.setRange(0,100); self.pr_fan_aux.setSuffix(" %"); self.pr_fan_aux.setToolTip("Aux fan speed at start")
         row_aux.addWidget(QLabel("Aux fan P:")); row_aux.addWidget(self.pr_fan_aux_idx); row_aux.addWidget(self.pr_fan_aux)
         self.pr_fans_off_end = QCheckBox("Fans off at end"); self.pr_fans_off_end.setToolTip("Insert M107 at end")
         # SD logging
@@ -255,12 +255,12 @@ class PDLForm(QWidget):
         # Exhaust controls
         ex_row1 = QHBoxLayout();
         self.pr_exhaust_enable = QCheckBox("Enable at start"); self.pr_exhaust_enable.setToolTip("Enable exhaust at start via M42 or M106")
-        self.pr_exhaust_speed = QSpinBox(); self.pr_exhaust_speed.setRange(0,100); self.pr_exhaust_speed.setSuffix(" %")
+        self.pr_exhaust_speed = QSpinBox(); self.pr_exhaust_speed.setRange(0,100); self.pr_exhaust_speed.setSuffix(" %"); self.pr_exhaust_speed.setToolTip("Exhaust speed percent")
         ex_row1.addWidget(self.pr_exhaust_enable); ex_row1.addWidget(self.pr_exhaust_speed)
         ex_row2 = QHBoxLayout();
-        self.pr_exhaust_pin = QSpinBox(); self.pr_exhaust_pin.setRange(0,999); self.pr_exhaust_pin.setPrefix("Pin P:")
-        self.pr_exhaust_fan = QSpinBox(); self.pr_exhaust_fan.setRange(0,9); self.pr_exhaust_fan.setPrefix(" Fan P:")
-        self.pr_exhaust_off = QCheckBox("Off at end")
+        self.pr_exhaust_pin = QSpinBox(); self.pr_exhaust_pin.setRange(0,999); self.pr_exhaust_pin.setPrefix("Pin P:"); self.pr_exhaust_pin.setToolTip("GPIO pin (M42 P) or use policy for named pins")
+        self.pr_exhaust_fan = QSpinBox(); self.pr_exhaust_fan.setRange(0,9); self.pr_exhaust_fan.setPrefix(" Fan P:"); self.pr_exhaust_fan.setToolTip("Fan index (M106/M107 P)")
+        self.pr_exhaust_off = QCheckBox("Off at end"); self.pr_exhaust_off.setToolTip("Turn exhaust off at end")
         ex_row2.addWidget(self.pr_exhaust_pin); ex_row2.addWidget(self.pr_exhaust_fan); ex_row2.addWidget(self.pr_exhaust_off)
         form.addRow(QLabel("Exhaust (choose Pin or Fan)"))
         form.addRow(ex_row1)
@@ -291,7 +291,7 @@ class PDLForm(QWidget):
         cp_del = QPushButton("Remove Peripheral"); cp_del.clicked.connect(self._del_cper)
         rowcp.addWidget(cp_add); rowcp.addWidget(cp_del); rowcp.addStretch(1)
         form.addRow(rowcp)
-        self.tabs.addTab(w, "Peripherals")
+        idx = self.tabs.addTab(w, "Peripherals"); self.tabs.setTabToolTip(idx, "Lights, camera, fans, SD logging, exhaust")
         self._update_firmware_tips()
 
     # ---------- OpenPrintTag ----------
@@ -332,7 +332,7 @@ class PDLForm(QWidget):
         b_sync = QPushButton("Sync Online"); b_sync.clicked.connect(self._opt_remote_sync)
         for b in (b_read, b_write, b_save, b_load, b_search, b_sync): row2.addWidget(b)
         form.addRow(row2)
-        self.tabs.addTab(w, "OpenPrintTag")
+        idx = self.tabs.addTab(w, "OpenPrintTag"); self.tabs.setTabToolTip(idx, "Embed metadata tag in start G-code")
 
     # ---------- Filaments ----------
     def _init_filaments_tab(self):
@@ -342,10 +342,11 @@ class PDLForm(QWidget):
             "Name","Type","Dia","Nozzle °C","Bed °C","Retract Len","Retract Spd","Fan %","Color"
         ])
         self.t_filaments.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.t_filaments.setToolTip("Materials table: name/type/diameter/temperatures/retraction/fan/color")
         v.addWidget(self.t_filaments)
         row = QHBoxLayout()
-        btn_add = QPushButton("Add"); btn_add.clicked.connect(self._add_filament)
-        btn_del = QPushButton("Remove"); btn_del.clicked.connect(self._del_filament)
+        btn_add = QPushButton("Add"); btn_add.setToolTip("Add a filament preset"); btn_add.clicked.connect(self._add_filament)
+        btn_del = QPushButton("Remove"); btn_del.setToolTip("Remove selected presets"); btn_del.clicked.connect(self._del_filament)
         row.addWidget(btn_add); row.addWidget(btn_del); row.addStretch(1)
         v.addLayout(row)
         self.tabs.addTab(w, "Filaments")
@@ -437,7 +438,7 @@ class PDLForm(QWidget):
         rowh.addWidget(h_add); rowh.addWidget(h_del); rowh.addStretch(1)
         outer.addLayout(rowh)
 
-        self.tabs.addTab(w, "G-code")
+        idx = self.tabs.addTab(w, "G-code"); self.tabs.setTabToolTip(idx, "Hooks and macros")
 
     def _add_macro(self):
         r = self.t_macros.rowCount(); self.t_macros.insertRow(r)
