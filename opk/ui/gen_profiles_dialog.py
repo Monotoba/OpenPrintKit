@@ -213,8 +213,8 @@ class GenerateProfilesDialog(QDialog):
                 super().__init__(parent)
                 self.setWindowTitle("Generated Profile Preview")
                 lay = QVBoxLayout(self)
-                self.sel = QComboBox(); self.view = QTextEdit(readOnly=True)
-                lay.addWidget(QLabel("Select file:")); lay.addWidget(self.sel); lay.addWidget(self.view)
+                self.sel = QComboBox(); self.meta = QLabel(); self.view = QTextEdit(readOnly=True)
+                lay.addWidget(QLabel("Select file:")); lay.addWidget(self.sel); lay.addWidget(self.meta); lay.addWidget(self.view)
                 for k, p in files:
                     self.sel.addItem(f"{k}: {p.name}", str(p))
                 self.sel.currentIndexChanged.connect(self._load)
@@ -224,6 +224,14 @@ class GenerateProfilesDialog(QDialog):
                 try:
                     p = Path(self.sel.currentData() or "")
                     if p.exists():
+                        try:
+                            sz = p.stat().st_size
+                            mtime = p.stat().st_mtime
+                            import datetime
+                            ts = datetime.datetime.fromtimestamp(mtime)
+                            self.meta.setText(f"{p.name} — {sz} bytes — modified {ts:%Y-%m-%d %H:%M:%S}")
+                        except Exception:
+                            self.meta.setText(p.name)
                         self.view.setPlainText(p.read_text(encoding='utf-8'))
                 except Exception:
                     pass

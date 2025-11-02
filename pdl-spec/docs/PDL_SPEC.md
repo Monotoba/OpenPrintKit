@@ -153,6 +153,30 @@ gcode:
     purge_line: ["G92 E0", "G1 X0 Y0 F6000", "G1 E10 F300", "G92 E0"]
 ```
 
+### 3.5 Process Defaults
+
+Keys under `process_defaults` include:
+
+- `layer_height_mm`, `first_layer_mm`
+- `speeds_mms`: object of speeds (mm/s)
+  - `perimeter`, `infill`, `travel`
+  - optional: `external_perimeter`, `top`, `bottom`
+- `accelerations_mms2`: object of accelerations (mm/s²)
+  - optional: `perimeter`, `infill`, `external_perimeter`, `top`, `bottom`
+- `extrusion_multiplier`: scalar where 1.0 = 100%
+- `cooling`:
+  - `min_layer_time_s`: integer seconds
+  - `fan_min_percent`, `fan_max_percent`: 0–100
+  - `fan_always_on`: boolean
+
+### 3.6 Limits
+
+Top-level machine limits that may guide generator outputs:
+
+- `acceleration_max` (mm/s²), `jerk_max` (Cura)
+
+---
+
 ## 4. Versioning
 
 - PDL follows Semantic Versioning (SemVer):
