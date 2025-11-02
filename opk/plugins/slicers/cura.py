@@ -45,6 +45,17 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     retract_spd = _num(proc.get('retract_speed_mms') or 35.0)
     # Adhesion (optional)
     adhesion = proc.get('adhesion') or ''
+    # Extrusion multiplier (flow) optional
+    ext_mult = proc.get('extrusion_multiplier')
+    try:
+        flow_pct = max(1, int(round(float(ext_mult) * 100))) if ext_mult is not None else None
+    except Exception:
+        flow_pct = None
+    # Cooling (optional)
+    cooling = proc.get('cooling') or {}
+    min_layer_time = int(cooling.get('min_layer_time_s') or 0)
+    fan_min = int(cooling.get('fan_min_percent') or 0)
+    fan_max = int(cooling.get('fan_max_percent') or fan_min)
     # path
     cdir = out_dir / 'cura'
     _ensure_dir(cdir)
@@ -72,6 +83,35 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     ]
     if adhesion in ("skirt","brim","raft"):
         lines.append(f'adhesion_type = {adhesion}')
+    if flow_pct is not None:
+        lines.append(f'material_flow = {flow_pct}')
+    if min_layer_time > 0:
+        lines.append(f'cool_min_layer_time = {min_layer_time}')
+    # Cura uses 0-100 fan percent
+    if fan_min or fan_max:
+        lines.append('cool_fan_enabled = True')
+        lines.append(f'cool_fan_speed = {fan_max}')
+        # Provide a minimum as well if different
+        if fan_min != fan_max:
+            lines.append(f'cool_fan_speed_min = {fan_min}')
+    # Limits (acceleration/jerk)
+    lim = (pdl.get('limits') or {})
+    try:
+        amax = int(float(lim.get('acceleration_max') or 0))
+    except Exception:
+        amax = 0
+    try:
+        jmax = int(float(lim.get('jerk_max') or 0))
+    except Exception:
+        jmax = 0
+    if amax:
+        lines.append('acceleration_enabled = True')
+        lines.append(f'acceleration_print = {amax}')
+        lines.append(f'acceleration_travel = {amax}')
+    if jmax:
+        lines.append('jerk_enabled = True')
+        lines.append(f'jerk_print = {jmax}')
+        lines.append(f'jerk_travel = {jmax}')
     cfg.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = cfg
     return out

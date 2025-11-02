@@ -33,6 +33,10 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     mat_dia = _num(mat0.get('filament_diameter') or 1.75)
     noz_temp = _num(mat0.get('nozzle_temperature') or 205)
     bed_temp = _num(mat0.get('bed_temperature') or 60)
+    # Process defaults
+    proc = (pdl.get('process_defaults') or {})
+    # Extrusion multiplier
+    ext_mult = proc.get('extrusion_multiplier')
     hooks = render_hooks_with_firmware(pdl or {})
     # Process defaults
     proc = (pdl.get('process_defaults') or {})
@@ -60,6 +64,7 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f"filament_diameter = {mat_dia:.2f}",
         f"temperature = {noz_temp:.0f}",
         f"bed_temperature = {bed_temp:.0f}",
+        *( [f"extrusion_multiplier = {float(ext_mult):.2f}"] if isinstance(ext_mult, (int,float)) else [] ),
         "",
         f"[print:Standard]",
         f"layer_height = {lh}",
@@ -68,6 +73,27 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f"infill_speed = {inf_spd}",
         f"travel_speed = {trav_spd}",
     ]
+    lim = (pdl.get('limits') or {})
+    try:
+        amax = int(float(lim.get('acceleration_max') or 0))
+    except Exception:
+        amax = 0
+    if amax:
+        lines.append(f'max_print_acceleration = {amax}')
+        lines.append(f'max_travel_acceleration = {amax}')
+    cooling = proc.get('cooling') or {}
+    mlt = int(cooling.get('min_layer_time_s') or 0)
+    fmin = int(cooling.get('fan_min_percent') or 0)
+    fmax = int(cooling.get('fan_max_percent') or 0)
+    always = bool(cooling.get('fan_always_on') or False)
+    if mlt:
+        lines.append(f'min_layer_time = {mlt}')
+    if fmin or fmax or always:
+        lines.append(f'fan_always_on = {1 if always else 0}')
+    if fmin:
+        lines.append(f'min_fan_speed = {fmin}')
+    if fmax:
+        lines.append(f'max_fan_speed = {fmax}')
     ini.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = ini
     return out
