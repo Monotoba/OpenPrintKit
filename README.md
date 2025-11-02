@@ -126,6 +126,17 @@ OpenPrintKit/
 - Help → G-code Help: hooks, macros, placeholders
 - Help → M-code Reference: machine-control M-codes
 
+#### GUI Tips
+
+- Dialogs remember last-used paths and fields (QSettings):
+  - Generate Profiles: slicer, output dir, PDL path (when applicable), and bundle settings.
+  - Generate Snippets: PDL path and output dir.
+  - Build Bundle: last bundle save location.
+- Bundling from Generate Profiles:
+  - Supported for Orca, Cura, Prusa, ideaMaker; auto-suggests a filename if empty.
+  - Suffix is added automatically (`.orca_printer` for Orca, `.zip` for others).
+  - Use the “…” button to pick a bundle path directly.
+
 If the app exits immediately, try:
 
 - `OPK_DEBUG=1 python -m opk.ui.main_window` (prints platform + screen count)

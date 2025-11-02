@@ -4,6 +4,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView
 )
+from PySide6.QtCore import QSettings
 import yaml
 from ..core.gcode import list_hooks, render_sequence
 
@@ -15,6 +16,7 @@ class GcodeValidateDialog(QDialog):
         self._gcode = {}
         self._pdl_path: Path | None = None
         self._vars = {}
+        self.s = QSettings("OpenPrintKit", "OPKStudio")
         self._build_ui()
 
     def _build_ui(self):
@@ -40,7 +42,8 @@ class GcodeValidateDialog(QDialog):
         lay.addWidget(self._table)
 
     def _open_pdl(self):
-        fn, _ = QFileDialog.getOpenFileName(self, "Open PDL (YAML/JSON)", "", "PDL (*.yaml *.yml *.json)")
+        start = self.s.value("gcode_validate/pdl_path", "")
+        fn, _ = QFileDialog.getOpenFileName(self, "Open PDL (YAML/JSON)", start or "", "PDL (*.yaml *.yml *.json)")
         if not fn: return
         p = Path(fn)
         text = p.read_text(encoding="utf-8")
@@ -48,13 +51,22 @@ class GcodeValidateDialog(QDialog):
         self._gcode = (data or {}).get("gcode") or {}
         self._pdl_path = p
         self._pdl_label.setText(str(p))
+        try:
+            self.s.setValue("gcode_validate/pdl_path", str(p))
+        except Exception:
+            pass
 
     def _open_vars(self):
-        fn, _ = QFileDialog.getOpenFileName(self, "Open Variables JSON", "", "JSON (*.json)")
+        start = self.s.value("gcode_validate/vars_path", "")
+        fn, _ = QFileDialog.getOpenFileName(self, "Open Variables JSON", start or "", "JSON (*.json)")
         if not fn: return
         p = Path(fn)
         self._vars = json.loads(p.read_text(encoding="utf-8"))
         self._vars_label.setText(str(p))
+        try:
+            self.s.setValue("gcode_validate/vars_path", str(p))
+        except Exception:
+            pass
 
     def _validate(self):
         hooks = list_hooks(self._gcode)
@@ -68,4 +80,3 @@ class GcodeValidateDialog(QDialog):
                 r = self._table.rowCount(); self._table.insertRow(r)
                 self._table.setItem(r, 0, QTableWidgetItem(h))
                 self._table.setItem(r, 1, QTableWidgetItem(", ".join(sorted(missing))))
-

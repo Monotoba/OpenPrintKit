@@ -27,12 +27,18 @@ class GenerateProfilesDialog(QDialog):
         row_out = QHBoxLayout(); row_out.addWidget(self.ed_out); row_out.addWidget(b_out)
         self.ck_bundle = QCheckBox("Bundle (Orca/Cura/Prusa/ideaMaker)")
         self.ed_bundle = QLineEdit(); self.ed_bundle.setPlaceholderText("OUT.orca_printer")
+        self._btn_bundle = QPushButton("…"); self._btn_bundle.setToolTip("Choose bundle output file")
+        self._btn_bundle.clicked.connect(self._pick_bundle)
         # Toggle bundle path enablement and placeholder per slicer
         def _update_bundle_enabled():
             slicer = self.cb_slicer.currentText()
             bundlable = slicer in ("orca","cura","prusa","ideamaker")
             self.ck_bundle.setEnabled(bundlable)
             self.ed_bundle.setEnabled(bundlable and self.ck_bundle.isChecked())
+            try:
+                self._btn_bundle.setEnabled(bundlable and self.ck_bundle.isChecked())
+            except Exception:
+                pass
             self.ed_bundle.setPlaceholderText("OUT.orca_printer" if slicer == 'orca' else "OUT.zip")
         self.ck_bundle.toggled.connect(lambda *_: _update_bundle_enabled())
         self.cb_slicer.currentIndexChanged.connect(lambda *_: _update_bundle_enabled())
@@ -44,7 +50,8 @@ class GenerateProfilesDialog(QDialog):
         f.addRow("Slicer", self.cb_slicer)
         f.addRow("Output dir", row_out)
         f.addRow(self.ck_bundle)
-        f.addRow("Bundle output", self.ed_bundle)
+        row_bundle = QHBoxLayout(); row_bundle.addWidget(self.ed_bundle); row_bundle.addWidget(self._btn_bundle)
+        f.addRow("Bundle output", row_bundle)
         # Buttons
         btns = QHBoxLayout();
         prev = QPushButton("Preview…"); prev.clicked.connect(self._preview)
@@ -78,6 +85,20 @@ class GenerateProfilesDialog(QDialog):
     def _pick_out(self):
         d = QFileDialog.getExistingDirectory(self, "Select Output Directory", self.ed_out.text() or "")
         if d: self.ed_out.setText(d)
+
+    def _pick_bundle(self):
+        slicer = self.cb_slicer.currentText()
+        start = self.ed_bundle.text().strip() or self.ed_out.text().strip() or ""
+        if slicer == 'orca':
+            fn, _ = QFileDialog.getSaveFileName(self, "Save Bundle As", start, "OPK Bundle (*.orca_printer)")
+        else:
+            fn, _ = QFileDialog.getSaveFileName(self, "Save Bundle As", start, "Zip Archive (*.zip)")
+        if fn:
+            self.ed_bundle.setText(fn)
+            try:
+                self.s.setValue("gen_profiles/bundle_path", fn)
+            except Exception:
+                pass
 
     def _gen(self):
         out_dir = Path(self.ed_out.text().strip() or ".")

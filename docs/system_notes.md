@@ -50,6 +50,10 @@ This document captures key decisions, changes, and notes from the current develo
     - Auto-suggest bundle filenames when empty (Orca: .orca_printer; Cura/Prusa/ideaMaker: .zip) and enforce suffixes.
     - Enable bundle path only for supported slicers; dynamic placeholder updates.
     - Persist PDL path and out dir in Generate Snippets (gen_snippets/*), and improve invalid-PDL messages.
+    - Add a “Browse…” button for bundle file selection in Generate Profiles.
+    - Persist G-code dialogs:
+      - G-code Preview: remembers PDL path, selected hook, and variables JSON (gcode_preview/*).
+      - Validate Hook Variables: remembers PDL and vars.json paths (gcode_validate/*).
     - Remember last bundle save path in main window Build Bundle (paths/last_bundle).
   - Help: Overview, G-code Help, M-code Reference, Firmware Mapping.
   - Settings dialog (default slicer/firmware, output dir, variables JSON, policy toggles) via QSettings.

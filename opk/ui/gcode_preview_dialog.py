@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton, QTextEdit, QFileDialog
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSettings
 import yaml
 from ..core.gcode import list_hooks, render_sequence, find_placeholders
 
@@ -15,6 +15,7 @@ class GcodePreviewDialog(QDialog):
         self.setWindowTitle("G-code Preview")
         self._pdl_path: Path | None = None
         self._gcode: dict = {}
+        self.s = QSettings("OpenPrintKit", "OPKStudio")
         self._build_ui()
 
     def _build_ui(self):
@@ -40,7 +41,10 @@ class GcodePreviewDialog(QDialog):
         lay.addWidget(QLabel("Variables (JSON):"))
         self._vars = QTextEdit()
         self._vars.setPlaceholderText('{"nozzle":205, "bed":60, "layer":1, "tool":0}')
-        self._vars.setText('{"nozzle":205, "bed":60, "layer":1, "tool":0}')
+        try:
+            self._vars.setText(self.s.value("gcode_preview/vars_json", '{"nozzle":205, "bed":60, "layer":1, "tool":0}'))
+        except Exception:
+            self._vars.setText('{"nozzle":205, "bed":60, "layer":1, "tool":0}')
         self._vars.setTabChangesFocus(True)
         lay.addWidget(self._vars)
 
@@ -55,7 +59,8 @@ class GcodePreviewDialog(QDialog):
         lay.addWidget(self._preview, 1)
 
     def _open_pdl(self):
-        fn, _ = QFileDialog.getOpenFileName(self, "Open PDL (YAML/JSON)", "", "PDL (*.yaml *.yml *.json)")
+        start = self.s.value("gcode_preview/pdl_path", "")
+        fn, _ = QFileDialog.getOpenFileName(self, "Open PDL (YAML/JSON)", start or "", "PDL (*.yaml *.yml *.json)")
         if not fn:
             return
         p = Path(fn)
@@ -78,8 +83,18 @@ class GcodePreviewDialog(QDialog):
         hooks = list_hooks(self._gcode)
         self._hook.clear()
         self._hook.addItems(hooks)
+        try:
+            last_hook = self.s.value("gcode_preview/hook", "")
+            if last_hook and last_hook in hooks:
+                self._hook.setCurrentText(last_hook)
+        except Exception:
+            pass
         self._pdl_path = p
         self._file_label.setText(str(p))
+        try:
+            self.s.setValue("gcode_preview/pdl_path", str(p))
+        except Exception:
+            pass
 
     def _render(self):
         hook = self._hook.currentText()
@@ -99,6 +114,13 @@ class GcodePreviewDialog(QDialog):
         except Exception as e:
             self._preview.setPlainText(f"Invalid variables JSON: {e}")
             return
+        # Persist vars and hook
+        try:
+            self.s.setValue("gcode_preview/vars_json", self._vars.toPlainText())
+            if hook:
+                self.s.setValue("gcode_preview/hook", hook)
+        except Exception:
+            pass
         rendered, missing = render_sequence(seq, vars_obj)
         out = "\n".join(rendered)
         if missing:

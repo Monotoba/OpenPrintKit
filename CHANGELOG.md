@@ -27,6 +27,8 @@ The format is inspired by Keep a Changelog. Dates are YYYY-MM-DD.
     - Auto-suggest bundle filenames when none provided (Orca → `.orca_printer`, others → `.zip`), adding suffixes if missing.
     - Enable bundle path only for supported slicers (orca/cura/prusa/ideamaker) and reflect that in the placeholder.
     - Generate Snippets remembers PDL and output dir (`gen_snippets/*`) and uses app defaults as fallback.
+    - G-code Preview/Validate remember last PDL/vars and (Preview) last hook selection (`gcode_preview/*`, `gcode_validate/*`).
+    - Add bundle “Browse…” button in Generate Profiles.
     - Build Bundle now remembers last bundle save path (`paths/last_bundle`).
 - Rules:
   - Firmware guidance: GRBL/LinuxCNC coolant mapping (M7/M8/M9), Klipper camera mapping info, RRF SD logging mapping/filename spacing and named pin suggestion, Marlin numeric pin requirement.

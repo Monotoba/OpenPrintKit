@@ -37,3 +37,14 @@ Commands:
 
 See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.
 - `opk slice --slicer slic3r|prusaslicer|superslicer|curaengine --model MODEL.stl --profile PROFILE.ini --out OUT.gcode [--flags "..."]` — Slice via external CLI (binary must be on PATH; CuraEngine requires `--flags` with `-j` and settings).
+
+## GUI Tips
+
+- Persistence: Dialogs remember last-used fields via QSettings.
+  - Generate Profiles: slicer, output directory, PDL path (when used), bundle enabled/path (`gen_profiles/*`).
+  - Generate Snippets: PDL path and output directory (`gen_snippets/*`).
+  - Build Bundle: last saved bundle path (`paths/last_bundle`).
+- Bundling from Generate Profiles:
+  - Supported slicers: Orca, Cura, Prusa, ideaMaker.
+  - If bundle path is empty, a sensible filename is suggested; required suffix is auto-added (`.orca_printer` for Orca; `.zip` otherwise).
+  - Use the bundle “…” button to set the path explicitly.
