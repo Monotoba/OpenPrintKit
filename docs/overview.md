@@ -13,6 +13,22 @@ This help page summarizes OPK concepts and UI:
 
 See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-reference.md`.
 
+Quick links:
+
+- User Manual: `docs/user-manual.md`
+- GUI Screenshots: `docs/images/`
+
+## Settings Controls (Highlights)
+
+- Default slicer/firmware — used by generators and UI defaults.
+- Output directory — suggested path for generated files.
+- Variables JSON — default vars file for G‑code Preview.
+- Vars Templates JSON — optional file with named variables templates used by G‑code dialogs.
+- Network retry policy — limit/backoff/jitter for integrations (spool clients).
+- Recent files limit — maximum number of recent PDL/Vars entries (per list) remembered by G‑code dialogs.
+
+Tools → Clear Recent Files… clears recent PDL/Vars lists for G‑code dialogs. The same action exists in Preferences.
+
 ### Slicer Support
 
 For a summary of supported slicers, import/export coverage, and mapping depth, see `docs/slicer-support.md`.

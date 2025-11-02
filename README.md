@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/Monotoba/OpenPrintKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions)
 [![Docs](https://img.shields.io/badge/docs-site-blue.svg)](https://monotoba.github.io/OpenPrintKit/)
+[![User Manual](https://img.shields.io/badge/User%20Manual-read-blue.svg)](https://monotoba.github.io/OpenPrintKit/user-manual/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
@@ -30,8 +31,16 @@ For a step-by-step guide with more detail, see `docs/quickstart.md`.
 python -m venv .venv
 source .venv/bin/activate
 
-# Install in editable mode
+# Install core (CLI, generators)
 pip install -e .
+
+# Optional extras
+# GUI (OPK Studio)
+pip install -e .[gui]
+# NFC (OpenPrintTag NFC features)
+pip install -e .[nfc]
+# Docs (MkDocs site)
+pip install -e .[docs]
 
 # Validate individual profiles
 opk validate examples/printers/Longer_LK5_Pro_Marlin.json

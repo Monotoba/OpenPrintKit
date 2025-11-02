@@ -11,10 +11,8 @@ requires-python = ">=3.11"
 authors = [{name="Your Name"}]
 dependencies = [
   "jsonschema>=4.21.1",
-  "PySide6>=6.7.0",
   "pyyaml>=6.0.1",
-  "rich>=13.7.1",
-  "nfcpy>=1.0.4"
+  "rich>=13.7.1"
 ]
 
 [project.scripts]
@@ -28,3 +26,25 @@ line-length = 100
 where = ["."]
 include = ["opk*"]
 exclude = ["schemas*", "tests*", "examples*", "dist*"]
+
+[project.optional-dependencies]
+# GUI features (OPK Studio)
+gui = [
+  "PySide6>=6.7.0",
+]
+# NFC features (OpenPrintTag NFC read/write)
+nfc = [
+  "nfcpy>=1.0.4",
+]
+# Docs site (MkDocs)
+docs = [
+  "mkdocs>=1.6.0",
+  "mkdocs-material>=9.5.0",
+]
+# Convenience bundle for common extras
+full = [
+  "PySide6>=6.7.0",
+  "nfcpy>=1.0.4",
+  "mkdocs>=1.6.0",
+  "mkdocs-material>=9.5.0",
+]

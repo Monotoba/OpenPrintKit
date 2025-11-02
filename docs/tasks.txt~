@@ -1,0 +1,49 @@
+  
+  - Docs sync: Update README and docs/implementation-status.md to match current
+    features (GUI implemented, gen for multiple slicers, new CLI commands like
+    slice and gui-screenshot). Fix plan.md/spec.md stale “specs/001-opk” pointers.
+  * GUI polish: Add minor UX touches (persist last-used bundle path, tighter
+    error messages, small layout tweaks) and finish any missing tool wiring you
+    want.
+  * Spool clients: Implement basic read/search for Spoolman/TigerTag/OpenSpool
+    in opk/integrations/spool_clients.py (currently stubs).
+  * Firmware rules: Expand firmware-specific validations in opk/core/rules.py
+    and surface more contextual tips in the GUI.
+  
+  - Packaging: Add optional extras in pyproject (e.g., gui, nfc) and a minimal
+    release checklist.
+  
+  - Add persistence for G-code preview/validate dialogs too?
+  - Wire a “Browse…” button for the bundle path in Generate Profiles?
+  - Update docs to reflect new persistence behavior and tips?
+  - Generate Profiles: add bundle \"…\" picker; keep enablement in sync
+  - G-code Preview: persist PDL path, vars JSON, and hook selection
+  - G-code Validate: persist PDL and vars paths
+  - README + CLI Reference: add GUI Tips section
+  - System Notes + Changelog: record persistence and bundle picker changes"
+  
+  - Docs sync: Update implementation-status and project-status to reflect
+    working slicer generators and CLI gen.
+  - Rules: Expand firmware-specific rule checks and linting (e.g., nozzle/
+    filament mismatches).
+  - GUI polish: Small UX improvements in the install wizard and generate
+    dialogs; persist more defaults.
+  
+  - Packaging: Improve CLI/GUI packaging notes and add release workflow stubs.
+  - Generators: Tweak mappings and add more parameters for Cura/Prusa/Bambu/
+    SuperSlicer/etc. outputs.
+  - Add a path-only filter dropdown (e.g., machine_control, process_defaults,
+    gcode)?
+  - Show inline hints near additional fields (e.g., camera before/after flags)?
+  - Add similar “Check…” affordances to other tabs (Extruders, Multi-Material)
+    even if rules are limited today?
+  
+  - Sync the manual sections into the docs site structure.
+  - Add screenshots in the manual (using the existing GUI screenshot tool).
+  - Expand advanced sections (project policies, PDL schema reference, generator
+  mappings).
+
+
+ 
+
+

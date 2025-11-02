@@ -24,6 +24,10 @@ class AppSettingsDialog(QDialog):
         self.ed_vars = QLineEdit(); self.ed_vars.setPlaceholderText("pdl-spec/examples/vars.sample.json"); self.ed_vars.setToolTip("Default variables JSON for G-code preview")
         b_v = QPushButton("…"); b_v.clicked.connect(self._pick_vars)
         row_v = QHBoxLayout(); row_v.addWidget(self.ed_vars); row_v.addWidget(b_v)
+        # Templates JSON for variables
+        self.ed_vars_tpl = QLineEdit(); self.ed_vars_tpl.setPlaceholderText("optional: vars_templates.json"); self.ed_vars_tpl.setToolTip("Path to a JSON file with named variables templates")
+        b_vt = QPushButton("…"); b_vt.clicked.connect(self._pick_vars_tpl)
+        row_vt = QHBoxLayout(); row_vt.addWidget(self.ed_vars_tpl); row_vt.addWidget(b_vt)
         # Policy toggles
         self.ck_klip_cam = QCheckBox("Map M240 to M118 TIMELAPSE_TAKE_FRAME (Klipper)")
         self.ck_rrf_named = QCheckBox("Prefer named pins (RRF)")
@@ -32,20 +36,27 @@ class AppSettingsDialog(QDialog):
         self.sb_retry = QSpinBox(); self.sb_retry.setRange(0, 20); self.sb_retry.setToolTip("HTTP retry attempts for online integrations (0 = no retries)")
         self.db_backoff = QDoubleSpinBox(); self.db_backoff.setRange(0.0, 60.0); self.db_backoff.setDecimals(2); self.db_backoff.setSingleStep(0.1); self.db_backoff.setToolTip("Base exponential backoff seconds")
         self.db_jitter = QDoubleSpinBox(); self.db_jitter.setRange(0.0, 60.0); self.db_jitter.setDecimals(2); self.db_jitter.setSingleStep(0.05); self.db_jitter.setToolTip("Random jitter seconds added per retry")
+        # UI recents limit
+        self.sb_recents = QSpinBox(); self.sb_recents.setRange(1, 50); self.sb_recents.setToolTip("Maximum number of recent files to remember (per list)")
         # Layout
         f.addRow("Default slicer", self.cb_slicer)
         f.addRow("Default firmware", self.cb_firmware)
         f.addRow("Output directory", row_od)
         f.addRow("Variables JSON", row_v)
+        f.addRow("Vars Templates JSON", row_vt)
         f.addRow(self.ck_klip_cam)
         f.addRow(self.ck_rrf_named)
         f.addRow("GRBL/LinuxCNC exhaust", self.cb_grbl_exh)
         f.addRow("Network retry limit", self.sb_retry)
         f.addRow("Retry backoff (s)", self.db_backoff)
         f.addRow("Retry jitter (s)", self.db_jitter)
+        f.addRow("Recent files limit", self.sb_recents)
         # Buttons
-        btns = QHBoxLayout(); ok = QPushButton("Save"); ok.clicked.connect(self.accept); cancel = QPushButton("Cancel"); cancel.clicked.connect(self.reject)
-        btns.addWidget(ok); btns.addWidget(cancel)
+        btns = QHBoxLayout();
+        reset = QPushButton("Reset to Defaults"); reset.setToolTip("Reset fields to sensible defaults (not saved until you click Save)"); reset.clicked.connect(self._reset_defaults)
+        ok = QPushButton("Save"); ok.clicked.connect(self.accept)
+        cancel = QPushButton("Cancel"); cancel.clicked.connect(self.reject)
+        btns.addWidget(reset); btns.addStretch(1); btns.addWidget(ok); btns.addWidget(cancel)
         f.addRow(btns)
 
     def _pick_outdir(self):
@@ -58,11 +69,17 @@ class AppSettingsDialog(QDialog):
         if fn:
             self.ed_vars.setText(fn)
 
+    def _pick_vars_tpl(self):
+        fn, _ = QFileDialog.getOpenFileName(self, "Select Vars Templates JSON", self.ed_vars_tpl.text() or "", "JSON (*.json)")
+        if fn:
+            self.ed_vars_tpl.setText(fn)
+
     def _load(self):
         self.cb_slicer.setCurrentText(self.s.value("app/default_slicer", "orca"))
         self.cb_firmware.setCurrentText(self.s.value("app/default_firmware", "marlin"))
         self.ed_outdir.setText(self.s.value("app/out_dir", ""))
         self.ed_vars.setText(self.s.value("app/vars_path", ""))
+        self.ed_vars_tpl.setText(self.s.value("gcode/templates_path", ""))
         self.ck_klip_cam.setChecked(self.s.value("policy/klipper/camera_map", True, type=bool))
         self.ck_rrf_named.setChecked(self.s.value("policy/rrf/prefer_named_pins", True, type=bool))
         self.cb_grbl_exh.setCurrentIndex(0 if self.s.value("policy/grbl/exhaust_mode","M8") == "M8" else 1)
@@ -78,16 +95,40 @@ class AppSettingsDialog(QDialog):
             self.db_jitter.setValue(float(self.s.value("net/retry_jitter", 0.25)))
         except Exception:
             self.db_jitter.setValue(0.25)
+        try:
+            self.sb_recents.setValue(int(self.s.value("ui/recents_max", 10)))
+        except Exception:
+            self.sb_recents.setValue(10)
 
     def accept(self):
         self.s.setValue("app/default_slicer", self.cb_slicer.currentText())
         self.s.setValue("app/default_firmware", self.cb_firmware.currentText())
         self.s.setValue("app/out_dir", self.ed_outdir.text().strip())
         self.s.setValue("app/vars_path", self.ed_vars.text().strip())
+        self.s.setValue("gcode/templates_path", self.ed_vars_tpl.text().strip())
         self.s.setValue("policy/klipper/camera_map", self.ck_klip_cam.isChecked())
         self.s.setValue("policy/rrf/prefer_named_pins", self.ck_rrf_named.isChecked())
         self.s.setValue("policy/grbl/exhaust_mode", "M8" if self.cb_grbl_exh.currentIndex()==0 else "M7")
         self.s.setValue("net/retry_limit", int(self.sb_retry.value()))
         self.s.setValue("net/retry_backoff", float(self.db_backoff.value()))
         self.s.setValue("net/retry_jitter", float(self.db_jitter.value()))
+        self.s.setValue("ui/recents_max", int(self.sb_recents.value()))
         super().accept()
+
+    def _reset_defaults(self):
+        # Restore fields to sensible defaults (does not write QSettings until Save)
+        try:
+            self.cb_slicer.setCurrentText("orca")
+            self.cb_firmware.setCurrentText("marlin")
+            self.ed_outdir.setText("")
+            self.ed_vars.setText("")
+            self.ed_vars_tpl.setText("")
+            self.ck_klip_cam.setChecked(True)
+            self.ck_rrf_named.setChecked(True)
+            self.cb_grbl_exh.setCurrentIndex(0)  # M8
+            self.sb_retry.setValue(5)
+            self.db_backoff.setValue(0.5)
+            self.db_jitter.setValue(0.25)
+            self.sb_recents.setValue(10)
+        except Exception:
+            pass

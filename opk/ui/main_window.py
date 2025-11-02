@@ -160,9 +160,12 @@ class MainWindow(QMainWindow):
         tools_menu.addAction(act_gen_prof)
         tools_menu.addAction(act_slice)
         tools_menu.addAction(act_shots)
+        # Clear recents (G-code tools)
+        act_clear_rec = QAction("Clear Recent Files…", self); act_clear_rec.setToolTip("Clear recent PDL/Vars lists used by G-code tools"); act_clear_rec.triggered.connect(self._clear_recents)
+        tools_menu.addAction(act_clear_rec)
         # Status tips for toolbar/status bar
         for a in (act_validate, act_rules, act_bundle, act_ws_init, act_install, act_open_pdl, act_save_pdl, act_exit,
-                  act_gcode_prev, act_gcode_validate, act_gen_snip, act_gen_prof):
+                  act_gcode_prev, act_gcode_validate, act_gen_snip, act_gen_prof, act_clear_rec):
             a.setStatusTip(a.toolTip() or a.text())
 
         help_menu = mb.addMenu("Help")
@@ -258,8 +261,25 @@ class MainWindow(QMainWindow):
         else:
             self.log(f"[BUNDLE] Wrote {outp}")
             QMessageBox.information(self, "Bundle", f"Wrote: {outp}")
+            # persist last used directories/paths
             self.settings.setValue("dirs/src", src)
             self.settings.setValue("paths/last_bundle", str(outp))
+
+    def _clear_recents(self):
+        # Clear G-code dialogs recent lists
+        s = self.settings
+        keys = (
+            "gcode_preview/recent_pdls",
+            "gcode_preview/recent_vars",
+            "gcode_validate/recent_pdls",
+            "gcode_validate/recent_vars",
+        )
+        for k in keys:
+            try:
+                s.setValue(k, "[]")
+            except Exception:
+                pass
+        QMessageBox.information(self, "Recent Files", "Cleared recent PDL/Vars lists.")
 
     def _workspace_init(self):
         start = self.settings.value("dirs/ws", "")

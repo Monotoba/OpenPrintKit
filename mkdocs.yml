@@ -1,0 +1,28 @@
+site_name: OpenPrintKit Docs
+site_url: https://example.com/
+repo_url: https://github.com/Monotoba/OpenPrintKit
+docs_dir: docs
+theme:
+  name: mkdocs
+nav:
+  - Home: index.md
+  - User Manual: user-manual.md
+  - Translations:
+      - Español: user-manual.es.md
+      - Español (CLI): cli-reference.es.md
+      - Español (Resumen): overview.es.md
+      - Français: user-manual.fr.md
+      - Deutsch: user-manual.de.md
+      - Português: user-manual.pt.md
+  - Quickstart: quickstart.md
+  - CLI Reference: cli-reference.md
+  - Overview: overview.md
+  - Firmware Mapping: firmware-mapping.md
+  - G-code Help: gcode-help.md
+  - M-code Reference: mcode-reference.md
+  - Generator Mappings: generator-mappings.md
+  - Exact Generator Keys: exact-generator-keys.md
+  - PDL Schema: pdl-schema-reference.md
+  - Implementation Status: implementation-status.md
+  - Publishing: publishing.md
+  - Translations: translations.md

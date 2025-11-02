@@ -151,11 +151,44 @@ Main areas:
 - OpenPrintTag: metadata block embedded into start G‑code.
 - Issues: results from rule checks with filters.
 
+Screenshots (sample views):
+
+![Main Window](images/main_window.png)
+
+![Rules Dialog](images/rules_dialog.png)
+
+![Generate Profiles](images/generate_profiles.png)
+
+![Generate Snippets](images/generate_snippets.png)
+
+![App Settings](images/app_settings.png)
+
+![Preferences](images/preferences.png)
+
 Helpful actions:
 - Check… on various tabs runs rules and focuses relevant issues.
 - Help… buttons open domain docs (Overview, Firmware Mapping, G‑code Help, M‑code Reference).
 - Issues tab filters by level and search text.
 - Inline hint icons appear near fields when rules apply (hover for tips).
+
+### Recents & Templates
+
+- G‑code Preview and Validate dialogs remember recent PDL/Vars files (limit configurable in Settings → Recent files limit). Use the “Recent” dropdowns or clear the lists from Tools → Clear Recent Files… or in Preferences.
+- Variables Templates let you prefill or save common JSON variable sets. Configure a templates JSON file (Settings → Vars Templates JSON) or use the built‑in templates. A sample file is provided at `docs/vars-templates.example.json`.
+
+### Keyboard Shortcuts (G‑code dialogs)
+
+- Preview:
+  - Ctrl+O — Open PDL
+  - Ctrl+L — Load Vars
+  - Ctrl+S — Save Vars As…
+  - Ctrl+T — Insert Template…
+  - Ctrl+R — Render
+- Validate:
+  - Ctrl+O — Open PDL
+  - Ctrl+L — Open Vars
+  - Ctrl+T — Template… (save a template vars file)
+  - Ctrl+V — Validate
 
 ## Firmware‑Specific Guidance (summary)
 
@@ -177,6 +210,40 @@ Helpful actions:
   - Keep start/end minimal; prefer printer‑side macros.
 
 The Issues tab and inline hints surface contextual tips based on the selected firmware.
+
+## Advanced
+
+### Project Policies
+
+OPK can merge project‑level policies into a PDL. Supported config files at or above the PDL path:
+
+- `.opk-project.yaml` / `.opk-project.yml` / `.opk-project.json`
+
+When present, `policies` from the project file are shallow‑merged into the PDL’s `policies` before generation and tools like `gcode-preview`/`gcode-validate` (see `opk.core.project`). This enables per‑project defaults without modifying the PDL.
+
+### PDL Schema (overview)
+
+Key top‑level keys (JSON/YAML):
+
+- `name`, `firmware`, `geometry` (`bed_shape`, `z_height`)
+- `extruders` (nozzle diameter, max temp, drive), `materials` (diameter, temps, retraction)
+- `process_defaults` (layer heights, speeds, accelerations, adhesion, cooling)
+- `machine_control` (PSU, mesh, Z offset, camera, lights/RGB, fans, SD logging, exhaust, aux outputs, custom peripherals)
+- `gcode` (explicit hooks and macros), plus optional `hooks` map
+- `open_print_tag` (ID, version, metadata)
+
+See also: `docs/firmware-mapping.md`, `docs/gcode-help.md`, `docs/mcode-reference.md`.
+
+### Generator Mappings (per slicer)
+
+Generators interpret a subset of PDL into slicer formats (best‑effort initial mappings):
+
+- OrcaSlicer: printer/filament/process JSON written to out directory; optional `.orca_printer` bundle.
+- Cura: combined `.cfg` with machine geometry, nozzle/filament diameters, temps, layer heights, speeds, retraction, adhesion, cooling, and optional limits.
+- Prusa/SuperSlicer/Bambu: `.ini` with printer, filament, and print sections; includes nozzle diameter, diameters, temps, layer heights, speed/acceleration hints, start/end G‑code from hooks.
+- ideaMaker/KISSlicer: minimal `.cfg`/`.ini` seeds with core geometry and process hints.
+
+Refer to `opk/plugins/slicers/*.py` for exact fields; add missing mappings incrementally as needed.
 
 ## Workspaces
 
