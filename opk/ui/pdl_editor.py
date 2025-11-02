@@ -45,8 +45,56 @@ class PDLForm(QWidget):
         self._init_peripherals_tab()
         self._init_openprinttag_tab()
         self._init_gcode_tab()
+        self._init_issues_tab()
 
         self.set_defaults()
+
+    # --- Issues tab (rules validation) ---
+    def _init_issues_tab(self):
+        w = QWidget(); v = QVBoxLayout(w)
+        row = QHBoxLayout();
+        btn_refresh = QPushButton("Refresh"); btn_refresh.setToolTip("Validate current PDL against rules"); btn_refresh.clicked.connect(self._refresh_issues)
+        btn_copy = QPushButton("Copy"); btn_copy.setToolTip("Copy issues to clipboard"); btn_copy.clicked.connect(self._copy_issues)
+        row.addWidget(btn_refresh); row.addWidget(btn_copy); row.addStretch(1)
+        v.addLayout(row)
+        self.t_issues = QTableWidget(0, 3)
+        self.t_issues.setHorizontalHeaderLabels(["Level","Path","Message"])
+        self.t_issues.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        v.addWidget(self.t_issues)
+        idx = self.tabs.addTab(w, "Issues"); self.tabs.setTabToolTip(idx, "Rule-based validation results")
+
+    def _refresh_issues(self):
+        try:
+            from ..core.rules import validate_pdl, summarize
+            pdl = self.dump_pdl()
+            issues = validate_pdl(pdl or {})
+            self.t_issues.setRowCount(0)
+            for i in issues:
+                r = self.t_issues.rowCount(); self.t_issues.insertRow(r)
+                self.t_issues.setItem(r, 0, QTableWidgetItem(i.level.upper()))
+                self.t_issues.setItem(r, 1, QTableWidgetItem(i.path))
+                self.t_issues.setItem(r, 2, QTableWidgetItem(i.message))
+            s = summarize(issues)
+            try:
+                if hasattr(self.parent(), 'update_issue_status'):
+                    self.parent().update_issue_status(s.get('error',0), s.get('warn',0), s.get('info',0))
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    def _copy_issues(self):
+        try:
+            from PySide6.QtWidgets import QApplication
+            rows = []
+            for r in range(self.t_issues.rowCount()):
+                level = self.t_issues.item(r,0).text() if self.t_issues.item(r,0) else ''
+                path = self.t_issues.item(r,1).text() if self.t_issues.item(r,1) else ''
+                msg = self.t_issues.item(r,2).text() if self.t_issues.item(r,2) else ''
+                rows.append(f"{level}\t{path}\t{msg}")
+            QApplication.clipboard().setText("\n".join(rows))
+        except Exception:
+            pass
 
     # --- Helpers: Docs openers and resets ---
     def _open_doc(self, rel: str, title: str) -> None:

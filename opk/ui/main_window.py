@@ -96,7 +96,14 @@ class MainWindow(QMainWindow):
         container = QTabWidgetWrap(self.editor, self.log_view)
         self.setCentralWidget(container)
         self.setAcceptDrops(True)
-        self.statusBar().showMessage("Ready")
+        sb = self.statusBar(); sb.showMessage("Ready")
+        # Persistent issues counter
+        try:
+            from PySide6.QtWidgets import QLabel as _QLabel
+            self.issue_status = _QLabel("Issues: 0 errors, 0 warnings")
+            sb.addPermanentWidget(self.issue_status)
+        except Exception:
+            self.issue_status = None
 
         # Menus
         mb = self.menuBar()
@@ -187,6 +194,13 @@ class MainWindow(QMainWindow):
     # Utilities
     def log(self, msg: str) -> None:
         self.log_view.appendPlainText(msg)
+
+    def update_issue_status(self, errors: int, warnings: int, infos: int = 0) -> None:
+        try:
+            if self.issue_status:
+                self.issue_status.setText(f"Issues: {errors} errors, {warnings} warnings")
+        except Exception:
+            pass
 
     # Actions
     def _validate(self):
@@ -502,7 +516,13 @@ class QTabWidgetWrap(QWidget):
         super().__init__()
         from ._qt_compat import QTabWidget
         tabs = QTabWidget()
-        tabs.addTab(editor, "PDL Editor")
+        # Wrap editor in a scroll area to reduce vertical constraints
+        try:
+            from PySide6.QtWidgets import QScrollArea as _QScrollArea
+            sa = _QScrollArea(); sa.setWidget(editor); sa.setWidgetResizable(True)
+            tabs.addTab(sa, "PDL Editor")
+        except Exception:
+            tabs.addTab(editor, "PDL Editor")
         tabs.addTab(logs, "Logs")
         lay = QVBoxLayout(self)
         lay.addWidget(tabs)
