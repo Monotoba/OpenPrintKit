@@ -40,6 +40,10 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     spd = proc.get('speeds_mms') or {}
     speed_print = _num(spd.get('infill') or spd.get('perimeter') or 60)
     speed_travel = _num(spd.get('travel') or 150)
+    # Optional per-section speeds
+    ext_per_spd = _num(spd.get('external_perimeter') or spd.get('wall_external') or 0)
+    top_spd = _num(spd.get('top') or spd.get('top_solid') or 0)
+    bot_spd = _num(spd.get('bottom') or spd.get('bottom_solid') or 0)
     # Retraction (optional)
     retract_len = _num(proc.get('retract_mm') or 0.0)
     retract_spd = _num(proc.get('retract_speed_mms') or 35.0)
@@ -75,12 +79,16 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f'speed_travel = {speed_travel:.0f}',
         f'speed_infill = {speed_print:.0f}',
         f'speed_wall = {speed_print:.0f}',
-        f'speed_wall_0 = {speed_print:.0f}',
+        f'speed_wall_0 = {int(ext_per_spd) if ext_per_spd else int(speed_print):d}',
         f'speed_wall_x = {speed_print:.0f}',
         f'retraction_enable = {1 if retract_len>0 else 0}',
         f'retraction_amount = {retract_len:.2f}',
         f'retraction_speed = {retract_spd:.0f}',
     ]
+    # Top/bottom combined speed if provided
+    topbot = int(max(top_spd, bot_spd)) if (top_spd or bot_spd) else 0
+    if topbot:
+        lines.append(f'speed_topbottom = {topbot}')
     if adhesion in ("skirt","brim","raft"):
         lines.append(f'adhesion_type = {adhesion}')
     if flow_pct is not None:
@@ -108,6 +116,22 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         lines.append('acceleration_enabled = True')
         lines.append(f'acceleration_print = {amax}')
         lines.append(f'acceleration_travel = {amax}')
+        # Optional per-section accelerations
+        acc = (proc.get('accelerations_mms2') or {})
+        acc_per = int(_num(acc.get('perimeter') or 0))
+        acc_inf = int(_num(acc.get('infill') or 0))
+        acc_ext = int(_num(acc.get('external_perimeter') or acc.get('wall_external') or 0))
+        acc_top = int(_num(acc.get('top') or acc.get('top_solid') or 0))
+        acc_bot = int(_num(acc.get('bottom') or acc.get('bottom_solid') or 0))
+        if acc_per:
+            lines.append(f'acceleration_wall = {acc_per}')
+        if acc_inf:
+            lines.append(f'acceleration_infill = {acc_inf}')
+        if acc_ext:
+            lines.append(f'acceleration_wall_0 = {acc_ext}')
+        topbot_acc = max(acc_top, acc_bot)
+        if topbot_acc:
+            lines.append(f'acceleration_topbottom = {topbot_acc}')
     if jmax:
         lines.append('jerk_enabled = True')
         lines.append(f'jerk_print = {jmax}')

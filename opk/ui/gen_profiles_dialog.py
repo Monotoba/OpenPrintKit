@@ -23,7 +23,7 @@ class GenerateProfilesDialog(QDialog):
         self.ed_out = QLineEdit(); self.ed_out.setPlaceholderText("Output directory")
         b_out = QPushButton("…"); b_out.clicked.connect(self._pick_out)
         row_out = QHBoxLayout(); row_out.addWidget(self.ed_out); row_out.addWidget(b_out)
-        self.ck_bundle = QCheckBox("Bundle (Orca)")
+        self.ck_bundle = QCheckBox("Bundle (Orca/Cura/Prusa/ideaMaker)")
         self.ed_bundle = QLineEdit(); self.ed_bundle.setPlaceholderText("OUT.orca_printer")
         if self._pdl_data is None:
             f.addRow("PDL file", row_pdl)
@@ -87,12 +87,21 @@ class GenerateProfilesDialog(QDialog):
             elif slicer == 'cura':
                 from ..plugins.slicers.cura import generate_cura
                 out = generate_cura(data or {}, out_dir)
+                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                    from ..core.bundle import build_profile_bundle
+                    build_profile_bundle(out, Path(self.ed_bundle.text().strip()), 'cura')
             elif slicer == 'prusa':
                 from ..plugins.slicers.prusa import generate_prusa
                 out = generate_prusa(data or {}, out_dir)
+                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                    from ..core.bundle import build_profile_bundle
+                    build_profile_bundle(out, Path(self.ed_bundle.text().strip()), 'prusa')
             elif slicer == 'ideamaker':
                 from ..plugins.slicers.ideamaker import generate_ideamaker
                 out = generate_ideamaker(data or {}, out_dir)
+                if self.ck_bundle.isChecked() and self.ed_bundle.text().strip():
+                    from ..core.bundle import build_profile_bundle
+                    build_profile_bundle(out, Path(self.ed_bundle.text().strip()), 'ideamaker')
             elif slicer == 'bambu':
                 from ..plugins.slicers.bambu import generate_bambu
                 out = generate_bambu(data or {}, out_dir)

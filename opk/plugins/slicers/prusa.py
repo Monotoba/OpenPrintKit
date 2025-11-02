@@ -41,6 +41,9 @@ def generate_prusa(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     per_spd = _num(spd.get('perimeter') or 40)
     inf_spd = _num(spd.get('infill') or 60)
     trav_spd = _num(spd.get('travel') or 150)
+    ext_per_spd = _num(spd.get('external_perimeter') or 0)
+    top_spd = _num(spd.get('top') or spd.get('top_solid') or 0)
+    bot_spd = _num(spd.get('bottom') or spd.get('bottom_solid') or 0)
     adhesion = (proc.get('adhesion') or '').lower()
     ex0 = (pdl.get('extruders') or [{}])[0]
     nozzle = _num(ex0.get('nozzle_diameter') or 0.4)
@@ -59,11 +62,17 @@ def generate_prusa(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     end_g = '\n'.join(hooks.get('end') or [])
     sg = start_g.replace('\n','\\n')
     eg = end_g.replace('\n','\\n')
+    # Optional per-section accelerations
+    acc = (proc.get('accelerations_mms2') or {})
+    per_acc = _num(acc.get('perimeter') or 0)
+    inf_acc = _num(acc.get('infill') or 0)
+    trav_acc = _num(acc.get('travel') or 0)
+
     lines = [
         f"[printer:{name}]",
         f"bed_shape = {bed_str}",
         f"nozzle_diameter = {nozzle:.2f}",
-        f"min_layer_height = 0.07",
+        f"min_layer_height = {(_num(proc.get('min_layer_height_mm') or 0.07))}",
         f"max_layer_height = {nozzle:.2f}",
         f"start_gcode = {sg}",
         f"end_gcode = {eg}",
@@ -81,6 +90,18 @@ def generate_prusa(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f"infill_speed = {inf_spd}",
         f"travel_speed = {trav_spd}",
     ]
+    if ext_per_spd:
+        lines.append(f'external_perimeter_speed = {ext_per_spd}')
+    if top_spd:
+        lines.append(f'top_solid_infill_speed = {top_spd}')
+    if bot_spd:
+        lines.append(f'bottom_solid_infill_speed = {bot_spd}')
+    if per_acc:
+        lines.append(f'perimeter_acceleration = {int(per_acc)}')
+    if inf_acc:
+        lines.append(f'infill_acceleration = {int(inf_acc)}')
+    if trav_acc:
+        lines.append(f'travel_acceleration = {int(trav_acc)}')
     # Map acceleration limits to global print/travel acceleration
     lim = (pdl.get('limits') or {})
     try:

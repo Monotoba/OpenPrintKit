@@ -46,6 +46,9 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     per_spd = _num(spd.get('perimeter') or 40)
     inf_spd = _num(spd.get('infill') or 60)
     trav_spd = _num(spd.get('travel') or 150)
+    ext_per_spd = _num(spd.get('external_perimeter') or 0)
+    top_spd = _num(spd.get('top') or spd.get('top_solid') or 0)
+    bot_spd = _num(spd.get('bottom') or spd.get('bottom_solid') or 0)
     start_g = '\n'.join(hooks.get('start') or [])
     end_g = '\n'.join(hooks.get('end') or [])
     bdir = out_dir / 'bambu'
@@ -53,6 +56,12 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     ini = bdir / f'{name}.ini'
     sg = start_g.replace('\n','\\n')
     eg = end_g.replace('\n','\\n')
+    # Optional per-section accelerations
+    acc = (proc.get('accelerations_mms2') or {})
+    per_acc = _num(acc.get('perimeter') or 0)
+    inf_acc = _num(acc.get('infill') or 0)
+    trav_acc = _num(acc.get('travel') or 0)
+
     lines = [
         f"[printer:{name}]",
         f"bed_shape = 0x0,{int(w)}x0,{int(w)}x{int(d)},0x{int(d)}",
@@ -73,6 +82,18 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f"infill_speed = {inf_spd}",
         f"travel_speed = {trav_spd}",
     ]
+    if ext_per_spd:
+        lines.append(f'external_perimeter_speed = {ext_per_spd}')
+    if top_spd:
+        lines.append(f'top_solid_infill_speed = {top_spd}')
+    if bot_spd:
+        lines.append(f'bottom_solid_infill_speed = {bot_spd}')
+    if per_acc:
+        lines.append(f'perimeter_acceleration = {int(per_acc)}')
+    if inf_acc:
+        lines.append(f'infill_acceleration = {int(inf_acc)}')
+    if trav_acc:
+        lines.append(f'travel_acceleration = {int(trav_acc)}')
     lim = (pdl.get('limits') or {})
     try:
         amax = int(float(lim.get('acceleration_max') or 0))

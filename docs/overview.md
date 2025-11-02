@@ -18,10 +18,13 @@ See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-refer
 - process_defaults.layer_height_mm → slicer layer height
 - process_defaults.first_layer_mm → first layer height
 - process_defaults.speeds_mms.{perimeter,infill,travel} → perimeter/infill/travel speeds
+- process_defaults.speeds_mms.external_perimeter → external perimeter speed
+- process_defaults.speeds_mms.{top,bottom} → top/bottom solid infill speeds
 - process_defaults.extrusion_multiplier → extrusion multiplier / material flow
 - process_defaults.cooling.{min_layer_time_s,fan_*} → cooling and fan settings
 - limits.acceleration_max → print/travel acceleration (where supported)
 - limits.jerk_max → Cura jerk settings
+- process_defaults.accelerations_mms2.{perimeter,infill,external_perimeter,top,bottom} → per-section acceleration (where supported)
 
 ## OpenPrintTag
 
