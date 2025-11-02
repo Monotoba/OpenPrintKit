@@ -38,6 +38,7 @@ nav:
       - LK5 Pro (full): examples/full_lk5pro.yaml
   - Schema:
       - pdl.schema.json: schema/pdl.schema.json
+  - Changelog: changelog.md
   - Contributing: contributing.md
   - License: license.md
 
