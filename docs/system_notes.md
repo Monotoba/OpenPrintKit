@@ -29,12 +29,14 @@ This document captures key decisions, changes, and notes from the current develo
     - Map `limits` acceleration/jerk (Cura: acceleration/jerk enabled + values; Prusa/Bambu: max_print/travel acceleration).
     - Per-section accelerations via `process_defaults.accelerations_mms2` (perimeter/infill/external/top/bottom) to slicer-specific keys.
   - Added `build_profile_bundle(files, out, slicer)` to package generated profiles (Cura/Prusa/ideaMaker) with a manifest.
+  - Added import converters for Prusa/SuperSlicer INI and ideaMaker CFG to OPK printer JSON (minimal mapping).
   - G-code renderer supports dotted/array placeholders in preview.
 
 - CLI
   - Added: `rules`, `workspace init`, `install`, `convert --from cura`, `gcode-hooks`, `gcode-preview`, `gcode-validate`, `pdl-validate`, `tag-preview`, `gen-snippets`.
   - CLI applies firmware-aware mapping when previewing/validating hooks.
   - `gen` now supports bundling for cura/prusa/ideamaker via `--bundle OUT.zip` (Orca bundling unchanged).
+  - `convert --from prusa|superslicer|ideamaker` for profile import to OPK printer JSON.
   - Added fine-grained acceleration overrides (merged into `process_defaults.accelerations_mms2`): `--acc-perimeter`, `--acc-infill`, `--acc-external`, `--acc-top`, `--acc-bottom`.
   - Stabilized/deduplicated subparser registrations; fixed earlier argparse conflicts.
 
@@ -65,7 +67,7 @@ This document captures key decisions, changes, and notes from the current develo
   - README updated with Docs badge, website link, and documentation links.
 
 - Tests
-  - Expanded coverage to 46 tests: schema, bundles, CLI (including overrides), generators (process/limits/overrides), firmware mapping, OpenPrintTag, G‑code utils, GUI import smokes, firmware rules.
+  - Expanded coverage to 51 tests: schema, bundles, CLI (including overrides and converters), generators (process/limits/overrides), firmware mapping, OpenPrintTag, G‑code utils, GUI import smokes, firmware rules.
 
 - CI/CD
   - CI matrix expanded to Python 3.10–3.14 on Ubuntu/Windows (exclude Windows+3.13/3.14 due to PySide6 wheels); QT_QPA_PLATFORM=offscreen.

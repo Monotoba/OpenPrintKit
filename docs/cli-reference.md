@@ -8,6 +8,9 @@ Commands:
 - `opk workspace init ROOT [--no-examples]` — Scaffold a standard workspace.
 - `opk install --src SRC --dest ORCA_PRESET_DIR [--backup BACKUP.zip] [--dry-run]` — Dry‑run and install profiles to Orca presets.
 - `opk convert --from cura --in CURA_FILE_OR_DIR --out OUT_DIR` — Convert Cura definitions to OPK printers.
+- `opk convert --from prusa --in INPUT.ini --out OUT_DIR` — Convert PrusaSlicer INI to OPK printer profile(s).
+- `opk convert --from superslicer --in INPUT.ini --out OUT_DIR` — Convert SuperSlicer INI to OPK printer profile(s).
+- `opk convert --from ideamaker --in INPUT.cfg --out OUT_DIR` — Convert ideaMaker CFG to OPK printer profile(s).
 - `opk gcode-hooks --pdl PDL.yaml` — List G‑code hooks in a PDL (after applying machine_control and firmware mapping).
 - `opk gcode-preview --pdl PDL.yaml --hook start --vars vars.json` — Render a hook with provided variables.
 - `opk gcode-validate --pdl PDL.yaml --vars vars.json` — Validate all hooks for unresolved placeholders.
@@ -19,6 +22,7 @@ Commands:
 - `opk gen --pdl PDL.yaml --slicer prusa --out OUTDIR` — Generate a minimal Prusa `.ini` profile.
 - `opk gen --pdl PDL.yaml --slicer ideamaker --out OUTDIR` — Generate a minimal ideaMaker `.cfg` profile.
 - `opk gen --pdl PDL.yaml --slicer bambu --out OUTDIR` — Generate a minimal Bambu Studio `.ini`-style profile.
+- `opk gen --pdl PDL.yaml --slicer superslicer --out OUTDIR` — Generate a minimal SuperSlicer `.ini` profile.
 
 ### Advanced Overrides
 

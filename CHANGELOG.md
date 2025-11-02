@@ -39,7 +39,12 @@ The format is inspired by Keep a Changelog. Dates are YYYY-MM-DD.
 - Docs build matrix (3.10–3.14) and deploy on 3.12 (GitHub Pages).
 
 ### Tests
-- Coverage expanded to 46 tests including generators (process/limits/overrides), CLI (overrides), firmware mapping/rules, GUI import smokes.
+- Coverage expanded to 51 tests including converters (Prusa/SuperSlicer/ideaMaker), generators (process/limits/overrides), CLI (overrides), firmware mapping/rules, GUI import smokes.
 
 ## [0.1.0] – 2025-10-28
 - Initial public baseline: core schemas, CLI, basic GUI, and tests.
+- Converters (import):
+  - `opk convert --from prusa|superslicer` — Convert Prusa/SuperSlicer INI to OPK printer profiles.
+  - `opk convert --from ideamaker` — Convert ideaMaker CFG to OPK printer profiles.
+- Generators (export):
+  - SuperSlicer generator added; ideaMaker mapping deepened (layers/speeds).

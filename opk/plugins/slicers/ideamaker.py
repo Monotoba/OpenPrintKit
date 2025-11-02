@@ -36,6 +36,14 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     hooks = render_hooks_with_firmware(pdl or {})
     start_g = '\n'.join(hooks.get('start') or [])
     end_g = '\n'.join(hooks.get('end') or [])
+    # Process defaults
+    proc = (pdl.get('process_defaults') or {})
+    lh = _num(proc.get('layer_height_mm') or 0.2)
+    flh = _num(proc.get('first_layer_mm') or 0.28)
+    spd = proc.get('speeds_mms') or {}
+    per_spd = _num(spd.get('perimeter') or 40)
+    inf_spd = _num(spd.get('infill') or 60)
+    trav_spd = _num(spd.get('travel') or 150)
     lines = [
         f'machineWidth = {int(w)}',
         f'machineDepth = {int(d)}',
@@ -44,8 +52,11 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f'filamentDiameter = {mat_dia:.2f}',
         f'printingTemperature = {noz_temp:.0f}',
         f'bedTemperature = {bed_temp:.0f}',
-        f'layerHeight = {0.2}',
-        f'firstLayerHeight = {0.28}',
+        f'layerHeight = {lh}',
+        f'firstLayerHeight = {flh}',
+        f'perimeterSpeed = {int(per_spd)}',
+        f'infillSpeed = {int(inf_spd)}',
+        f'travelSpeed = {int(trav_spd)}',
         f'startGcode = {start_g}',
         f'endGcode = {end_g}',
     ]

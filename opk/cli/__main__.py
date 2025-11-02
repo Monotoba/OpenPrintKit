@@ -112,7 +112,7 @@ def main():
 
     # convert
     cv = sub.add_parser("convert", help="Convert from other formats")
-    cv.add_argument("--from", dest="from_fmt", required=True, choices=["cura"], help="Source format")
+    cv.add_argument("--from", dest="from_fmt", required=True, choices=["cura","prusa","superslicer","ideamaker"], help="Source format")
     cv.add_argument("--in", dest="src", required=True, help="Input file or directory to convert")
     cv.add_argument("--out", dest="out", required=True, help="Output directory (printers)")
 
@@ -154,9 +154,13 @@ def main():
 
     gn = sub.add_parser("gen", help="Generate slicer profiles from PDL")
     gn.add_argument("--pdl", required=True, help="Path to PDL file (YAML/JSON)")
-    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu"], help="Target slicer")
+    gn.add_argument("--slicer", required=True, choices=["orca","cura","prusa","ideamaker","bambu","superslicer"], help="Target slicer")
     gn.add_argument("--out", required=True, help="Output directory for profiles")
     gn.add_argument("--bundle", help="Optional bundle output (for orca/cura/prusa/ideamaker)")
+    # screenshot
+    ss = sub.add_parser("gui-screenshot", help="Capture GUI screenshots (offscreen) to an output directory")
+    ss.add_argument("--out", required=True, help="Output directory for PNGs")
+    ss.add_argument("--targets", help="Comma-separated targets: main,rules,profiles,snippets,settings,preferences")
     # Fine-grained acceleration overrides
     gn.add_argument("--acc-perimeter", type=int, help="Override perimeter acceleration (mm/s^2)")
     gn.add_argument("--acc-infill", type=int, help="Override infill acceleration (mm/s^2)")
@@ -189,6 +193,40 @@ def main():
                 print(f"[WROTE] {w}")
             print(f"[SUMMARY] wrote={len(written)}")
             raise SystemExit(0)
+        if args.from_fmt == "prusa":
+            from ..plugins.converters.prusa import convert_prusa_input
+            out_dir = Path(args.out)
+            written = convert_prusa_input(Path(args.src), out_dir)
+            for w in written:
+                print(f"[WROTE] {w}")
+            print(f"[SUMMARY] wrote={len(written)}")
+            raise SystemExit(0)
+        if args.from_fmt == "superslicer":
+            from ..plugins.converters.prusa import convert_superslicer_input
+            out_dir = Path(args.out)
+            written = convert_superslicer_input(Path(args.src), out_dir)
+            for w in written:
+                print(f"[WROTE] {w}")
+            print(f"[SUMMARY] wrote={len(written)}")
+            raise SystemExit(0)
+        if args.from_fmt == "ideamaker":
+            from ..plugins.converters.ideamaker import convert_ideamaker_input
+            out_dir = Path(args.out)
+            written = convert_ideamaker_input(Path(args.src), out_dir)
+            for w in written:
+                print(f"[WROTE] {w}")
+            print(f"[SUMMARY] wrote={len(written)}")
+            raise SystemExit(0)
+    if args.cmd == "gui-screenshot":
+        from pathlib import Path as _Path
+        targets = [t.strip() for t in (getattr(args, 'targets', '') or 'main,rules,profiles,snippets,settings,preferences').split(',') if t.strip()]
+        from ..ui.screenshot import capture as _capture
+        outd = _Path(args.out)
+        wrote = _capture(targets, outd)
+        for p in wrote:
+            print(f"[SHOT] {p}")
+        print(f"[SUMMARY] shots={len(wrote)} out={outd}")
+        raise SystemExit(0)
     if args.cmd == "gcode-hooks":
         from pathlib import Path as _Path
         import json as _json, yaml as _yaml
@@ -378,6 +416,16 @@ def main():
             if args.bundle:
                 from ..core.bundle import build_profile_bundle
                 build_profile_bundle(generated, _Path(args.bundle), 'ideamaker')
+                print(f"[BUNDLE] {args.bundle}")
+            raise SystemExit(0)
+        if args.slicer == 'superslicer':
+            from ..plugins.slicers.superslicer import generate_superslicer
+            generated = generate_superslicer(data or {}, out_dir)
+            for k, p in generated.items():
+                print(f"[WROTE] {p}")
+            if args.bundle:
+                from ..core.bundle import build_profile_bundle
+                build_profile_bundle(generated, _Path(args.bundle), 'superslicer')
                 print(f"[BUNDLE] {args.bundle}")
             raise SystemExit(0)
     if args.cmd == "spool":
