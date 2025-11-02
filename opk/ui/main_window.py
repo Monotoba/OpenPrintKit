@@ -168,6 +168,9 @@ class MainWindow(QMainWindow):
         act_cli = QAction("CLI Reference…", self); act_cli.triggered.connect(self._help_cli_reference)
         act_cli.setToolTip("Command-line reference"); act_cli.setShortcut("F3")
         help_menu.addAction(act_cli)
+        act_chlog = QAction("Changelog…", self); act_chlog.triggered.connect(self._help_changelog)
+        act_chlog.setToolTip("Recent changes and release notes"); act_chlog.setShortcut("F4")
+        help_menu.addAction(act_chlog)
         act_mref = QAction("M-code Reference…", self); act_mref.triggered.connect(self._mcode_ref)
         act_mref.setToolTip("Machine-control M-code reference")
         help_menu.addAction(act_mref)
@@ -414,6 +417,24 @@ class MainWindow(QMainWindow):
             if p.exists():
                 dlg.view.setPlainText(p.read_text(encoding="utf-8"))
             dlg.setWindowTitle("CLI Reference")
+        except Exception:
+            pass
+        dlg.resize(800, 600)
+        dlg.exec()
+
+    def _help_changelog(self):
+        from .mcode_reference_dialog import McodeReferenceDialog as _DocDlg
+        dlg = _DocDlg(self)
+        try:
+            from pathlib import Path
+            # Prefer repo root CHANGELOG.md; fallback to docs copy
+            root_ch = Path(__file__).resolve().parents[2] / "CHANGELOG.md"
+            docs_ch = Path(__file__).resolve().parents[2] / "pdl-spec" / "docs" / "changelog.md"
+            if root_ch.exists():
+                dlg.view.setPlainText(root_ch.read_text(encoding="utf-8"))
+            elif docs_ch.exists():
+                dlg.view.setPlainText(docs_ch.read_text(encoding="utf-8"))
+            dlg.setWindowTitle("Changelog")
         except Exception:
             pass
         dlg.resize(800, 600)
