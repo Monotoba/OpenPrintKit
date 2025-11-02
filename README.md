@@ -61,6 +61,7 @@ ls ./my-workspace
 - Overview: [docs/overview.md](docs/overview.md)
 - Quickstart: [docs/quickstart.md](docs/quickstart.md)
 - CLI Reference: [docs/cli-reference.md](docs/cli-reference.md)
+- User Manual: [docs/user-manual.md](docs/user-manual.md)
 - Firmware Mapping Guide: [docs/firmware-mapping.md](docs/firmware-mapping.md)
 - G-code Help: [docs/gcode-help.md](docs/gcode-help.md)
 - M-code Reference: [docs/mcode-reference.md](docs/mcode-reference.md)
@@ -112,7 +113,7 @@ OpenPrintKit/
 - `opk pdl-validate --pdl PDL.yaml` — Validate PDL schema and machine-control rules
 - `opk gen-snippets --pdl PDL.yaml --out-dir OUTDIR [--firmware marlin|klipper|rrf|grbl|linuxcnc]` — Generate start/end G-code files
 - `opk gen --pdl PDL.yaml --slicer orca|cura|prusa|ideamaker|bambu --out OUTDIR [--bundle BUNDLE.orca_printer]` — Generate slicer profiles
-- `opk spool --source spoolman|tigertag|openspool|opentag3d --base-url URL --action create|read|update|delete|search [...]` — Spool DB stubs
+- `opk spool --source spoolman|tigertag|openspool|opentag3d --base-url URL --action create|read|update|delete|search [--query Q] [--page N] [--page-size N] [--format items|normalized] [--endpoints-file FILE.json] [--endpoints-json JSON]` — Spool DB ops with pagination and endpoint overrides. Default retry limit: 5 attempts (configurable in App Settings or `OPK_NET_RETRY_LIMIT`).
 
 ### GUI
 

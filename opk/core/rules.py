@@ -73,6 +73,8 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
     issues: List[Issue] = []
     mc = (pdl or {}).get("machine_control") or {}
     fw = str((pdl or {}).get("firmware") or "").lower()
+    fans = mc.get("fans") or {}
+    rgb = (mc.get("rgb_start") or {}) if isinstance(mc.get("rgb_start"), dict) else {}
     # Exhaust: warn if both pin and fan_index set (ambiguous)
     ex = mc.get("exhaust") or {}
     if ex.get("pin") is not None and ex.get("fan_index") is not None:
@@ -103,10 +105,25 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
             issues.append(Issue("warn", "GRBL/LinuxCNC exhaust maps to coolant (M8 on/M9 off); set off_at_end to ensure M9 is emitted", "machine_control.exhaust.off_at_end"))
         if ex.get("pin") is not None and ex.get("pin") != "":
             issues.append(Issue("info", "GRBL/LinuxCNC ignores raw pin control for exhaust; using M7/M8/M9 coolant mapping instead", "machine_control.exhaust.pin"))
+        # Fans are not standard in GRBL/LinuxCNC; advise coolant or custom peripherals
+        if (fans.get("part_start_percent") or 0) > 0 or (fans.get("aux_start_percent") or 0) > 0 or isinstance(fans.get("aux_index"), int):
+            issues.append(Issue("info", "GRBL/LinuxCNC: fan commands (M106/M107) are not standard; prefer coolant (M7/M8/M9) or custom peripherals", "machine_control.fans"))
+        # SD logging/camera often not applicable
+        sdl = mc.get("sd_logging") or {}
+        if sdl.get("enable_start"):
+            issues.append(Issue("info", "GRBL/LinuxCNC: SD logging G-codes may not be supported; consider host-side logging", "machine_control.sd_logging"))
+        if cam.get("use_before_snapshot") or cam.get("use_after_snapshot"):
+            issues.append(Issue("info", "GRBL/LinuxCNC: camera triggers require custom macros or HAL integration", "machine_control.camera"))
     if fw == "klipper":
         cam_cmd = (cam.get("command") or "").strip().upper()
         if (cam.get("use_before_snapshot") or cam.get("use_after_snapshot")) and cam_cmd.startswith("M240"):
             issues.append(Issue("info", "Klipper: camera M240 will be mapped to 'M118 TIMELAPSE_TAKE_FRAME' by policy", "machine_control.camera.command"))
+        # Klipper typically maps M106/M107 to macros; hint if fans used
+        if (fans.get("part_start_percent") or 0) > 0 or (fans.get("aux_start_percent") or 0) > 0:
+            issues.append(Issue("info", "Klipper: M106/M107 are often implemented as macros; ensure your printer.cfg defines fan aliases", "machine_control.fans"))
+        sdl = mc.get("sd_logging") or {}
+        if sdl.get("enable_start"):
+            issues.append(Issue("info", "Klipper: SD logging is typically host-driven; ensure macros exist if you rely on G-codes", "machine_control.sd_logging"))
     # RRF / RepRapFirmware guidance
     if fw in ("rrf", "reprap", "reprapfirmware", "duet"):
         sdl = mc.get("sd_logging") or {}
@@ -120,10 +137,43 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         fans = mc.get("fans") or {}
         if isinstance(fans.get("aux_index"), int) and (fans.get("aux_start_percent") not in (None, 0)) and not fans.get("off_at_end"):
             issues.append(Issue("warn", "Aux fan configured without off_at_end; add off_at_end to emit M107 P at end", "machine_control.fans.off_at_end"))
+        # RGB tips
+        if any((rgb.get("r",0), rgb.get("g",0), rgb.get("b",0))):
+            issues.append(Issue("info", "RRF: RGB is set via M150; mapping will emit M150 Rnn Unn Bnn", "machine_control.rgb_start"))
     # Marlin guidance
     if fw == "marlin":
         if isinstance(ex.get("pin"), str) and (ex.get("pin") or "").strip():
             issues.append(Issue("warn", "Marlin M42 expects numeric pin values; string pins unsupported — use fan_index (M106/M107) or numeric P", "machine_control.exhaust.pin"))
+        sdl = mc.get("sd_logging") or {}
+        if sdl.get("enable_start"):
+            issues.append(Issue("info", "Marlin: SD logging uses M928 filename (start) / M29 (stop)", "machine_control.sd_logging"))
+            fn = sdl.get("filename")
+            if isinstance(fn, str) and " " in fn:
+                issues.append(Issue("warn", "Marlin: SD log filename contains spaces; consider using underscores", "machine_control.sd_logging.filename"))
+        # RGB via M150 often needs NeoPixel setup
+        if any((rgb.get("r",0), rgb.get("g",0), rgb.get("b",0))):
+            issues.append(Issue("info", "Marlin: RGB commonly uses M150; ensure NEOPIXEL or LED support is enabled", "machine_control.rgb_start"))
+        # Fans: remind to turn off
+        if ((fans.get("part_start_percent") or 0) > 0 or (fans.get("aux_start_percent") or 0) > 0) and not fans.get("off_at_end"):
+            issues.append(Issue("info", "Marlin: consider 'Fans off at end' to emit M107", "machine_control.fans.off_at_end"))
+    # Smoothieware guidance (best-effort)
+    if fw in ("smoothie", "smoothieware"):
+        if (fans.get("part_start_percent") or 0) > 0 or (fans.get("aux_start_percent") or 0) > 0:
+            issues.append(Issue("info", "Smoothieware: use M106/M107; ensure fan modules are configured in config.txt", "machine_control.fans"))
+        if any((rgb.get("r",0), rgb.get("g",0), rgb.get("b",0))):
+            issues.append(Issue("info", "Smoothieware: RGB via M150 may require LED module support", "machine_control.rgb_start"))
+    # Repetier guidance (best-effort)
+    if fw == "repetier":
+        if (fans.get("part_start_percent") or 0) > 0:
+            issues.append(Issue("info", "Repetier: fans controlled with M106/M107; verify P index mapping", "machine_control.fans"))
+        if any((rgb.get("r",0), rgb.get("g",0), rgb.get("b",0))):
+            issues.append(Issue("info", "Repetier: M150 availability depends on build; otherwise use custom commands", "machine_control.rgb_start"))
+    # Bambu guidance (info-only)
+    if fw == "bambu":
+        if (mc.get("psu_on_start") or mc.get("psu_off_end") or (fans.get("part_start_percent") or 0) > 0):
+            issues.append(Issue("info", "Bambu: G-code support is limited; prefer minimal start/end and printer-side macros when possible", "machine_control"))
+        if (cam.get("use_before_snapshot") or cam.get("use_after_snapshot")) or (mc.get("sd_logging") or {}).get("enable_start"):
+            issues.append(Issue("info", "Bambu: camera and SD logging should be managed by built-in features when available", "machine_control"))
 
     # PDL-level process defaults checks (if present)
     pd = (pdl or {}).get("process_defaults") or {}

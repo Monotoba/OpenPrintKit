@@ -119,7 +119,7 @@ def main():
     # (gcode + PDL + generators) subcommands defined below, after spool
 
     # Spool client operations (stubs)
-    sp = sub.add_parser("spool", help="Spool data operations (stubs)")
+    sp = sub.add_parser("spool", help="Spool data operations")
     sp.add_argument("--source", required=True, choices=["spoolman","tigertag","openspool","opentag3d"], help="Remote database source")
     sp.add_argument("--base-url", required=True, help="Base URL for the API")
     sp.add_argument("--api-key", help="API key/token (if required)")
@@ -127,6 +127,11 @@ def main():
     sp.add_argument("--id", dest="item_id", help="Item ID (read/update/delete)")
     sp.add_argument("--payload", help="JSON payload for create/update")
     sp.add_argument("--query", help="Search query string")
+    sp.add_argument("--page", type=int, help="Search page number (1-based)")
+    sp.add_argument("--page-size", type=int, help="Search page size (items per page)")
+    sp.add_argument("--format", choices=["items","normalized"], default="items", help="Output format for search results")
+    sp.add_argument("--endpoints-json", help="Inline JSON to override API endpoints for this source")
+    sp.add_argument("--endpoints-file", help="Path to JSON file with endpoint overrides for this source")
 
     # gcode: list hooks and preview
     gh = sub.add_parser("gcode-hooks", help="List available gcode hooks in a PDL file (YAML/JSON)")
@@ -472,29 +477,73 @@ def main():
                 print(f"[BUNDLE] {args.bundle}")
             raise SystemExit(0)
     if args.cmd == "spool":
-        from ..integrations.spool_clients import get_client
+        from ..integrations.spool_clients import get_client, SpoolClientError
         import json as _json
-        cli = get_client(args.source, args.base_url, api_key=args.api_key)
+        # Load endpoint overrides (file then inline; inline takes precedence)
+        eps_override = None
+        if getattr(args, 'endpoints_file', None):
+            try:
+                with open(args.endpoints_file, 'r', encoding='utf-8') as f:
+                    eps_override = _json.load(f)
+            except Exception:
+                eps_override = None
+        if getattr(args, 'endpoints_json', None):
+            try:
+                inline = _json.loads(args.endpoints_json)
+                # If both provided and both dicts, prefer inline when keys conflict
+                if isinstance(eps_override, dict) and isinstance(inline, dict):
+                    eps_override.update(inline)
+                else:
+                    eps_override = inline
+            except Exception:
+                pass
+        cli = get_client(args.source, args.base_url, api_key=args.api_key, endpoints=eps_override)
         try:
             if args.action == 'create':
                 payload = _json.loads(args.payload or '{}')
-                res = cli.create(payload)
-                print(_json.dumps(res, indent=2))
+                if args.format == 'normalized' and hasattr(cli, 'create_normalized'):
+                    out = cli.create_normalized(payload)
+                    print(_json.dumps(out, indent=2))
+                else:
+                    res = cli.create(payload)
+                    print(_json.dumps(res, indent=2))
             elif args.action == 'read':
-                res = cli.read(args.item_id or '')
-                print(_json.dumps(res, indent=2))
+                if args.format == 'normalized' and hasattr(cli, 'read_normalized'):
+                    out = cli.read_normalized(args.item_id or '')
+                    print(_json.dumps(out, indent=2))
+                else:
+                    res = cli.read(args.item_id or '')
+                    print(_json.dumps(res, indent=2))
             elif args.action == 'update':
                 payload = _json.loads(args.payload or '{}')
-                res = cli.update(args.item_id or '', payload)
-                print(_json.dumps(res, indent=2))
+                if args.format == 'normalized' and hasattr(cli, 'update_normalized'):
+                    out = cli.update_normalized(args.item_id or '', payload)
+                    print(_json.dumps(out, indent=2))
+                else:
+                    res = cli.update(args.item_id or '', payload)
+                    print(_json.dumps(res, indent=2))
             elif args.action == 'delete':
-                ok = cli.delete(args.item_id or '')
-                print(f"[OK] delete={ok}")
+                if args.format == 'normalized' and hasattr(cli, 'delete_normalized'):
+                    out = cli.delete_normalized(args.item_id or '')
+                    print(_json.dumps(out, indent=2))
+                else:
+                    ok = cli.delete(args.item_id or '')
+                    print(f"[OK] delete={ok}")
             elif args.action == 'search':
-                res = cli.search(args.query or '')
+                if args.format == 'normalized':
+                    page = int(args.page) if args.page else 1
+                    size = int(args.page_size) if args.page_size else 50
+                    res = cli.search_normalized(args.query or '', page=page, page_size=size)
+                else:
+                    res = cli.search(args.query or '', page=args.page, page_size=args.page_size)
                 print(_json.dumps(res, indent=2))
+        except SpoolClientError as e:
+            err = {"error": str(e), "status": getattr(e, 'status', None), "url": getattr(e, 'url', None), "details": getattr(e, 'details', None)}
+            print(_json.dumps(err, indent=2))
+            raise SystemExit(2)
         except NotImplementedError:
             print("[STUB] This operation is not implemented yet for", args.source)
+            raise SystemExit(2)
         raise SystemExit(0)
 
 if __name__ == "__main__":

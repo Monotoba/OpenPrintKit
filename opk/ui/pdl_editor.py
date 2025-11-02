@@ -4,7 +4,7 @@ from pathlib import Path
 from ._qt_compat import (
     QWidget, QTabWidget, QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QDoubleSpinBox, QSpinBox, QComboBox, QCheckBox, QPushButton, QTableWidget,
-    QTableWidgetItem, QHeaderView, QTextEdit, QGroupBox
+    QTableWidgetItem, QHeaderView, QTextEdit, QGroupBox, QStyle
 )
 from ..core.gcode import EXPLICIT_HOOK_KEYS
 from ..core.gcode import EXPLICIT_HOOK_KEYS
@@ -52,34 +52,161 @@ class PDLForm(QWidget):
     # --- Issues tab (rules validation) ---
     def _init_issues_tab(self):
         w = QWidget(); v = QVBoxLayout(w)
-        row = QHBoxLayout();
+        controls = QHBoxLayout()
         btn_refresh = QPushButton("Refresh"); btn_refresh.setToolTip("Validate current PDL against rules"); btn_refresh.clicked.connect(self._refresh_issues)
         btn_copy = QPushButton("Copy"); btn_copy.setToolTip("Copy issues to clipboard"); btn_copy.clicked.connect(self._copy_issues)
-        row.addWidget(btn_refresh); row.addWidget(btn_copy); row.addStretch(1)
-        v.addLayout(row)
+        controls.addWidget(btn_refresh); controls.addWidget(btn_copy)
+        controls.addStretch(1)
+        # Level filter
+        controls.addWidget(QLabel("Level:"))
+        from ._qt_compat import QComboBox as _QComboBox
+        self.cb_issue_level = _QComboBox(); self.cb_issue_level.addItems(["ALL","ERROR+WARN","ERROR","WARN","INFO"])  # type: ignore
+        try:
+            self.cb_issue_level.currentIndexChanged.connect(lambda *_: self._render_issues())  # type: ignore[attr-defined]
+        except Exception:
+            pass
+        controls.addWidget(self.cb_issue_level)
+        # Text filter
+        controls.addWidget(QLabel("Filter:"))
+        self.ed_issue_filter = QLineEdit(); self.ed_issue_filter.setPlaceholderText("path or message contains…")
+        try:
+            self.ed_issue_filter.textChanged.connect(lambda *_: self._render_issues())  # type: ignore[attr-defined]
+        except Exception:
+            pass
+        controls.addWidget(self.ed_issue_filter)
+        v.addLayout(controls)
         self.t_issues = QTableWidget(0, 3)
         self.t_issues.setHorizontalHeaderLabels(["Level","Path","Message"])
         self.t_issues.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         v.addWidget(self.t_issues)
         idx = self.tabs.addTab(w, "Issues"); self.tabs.setTabToolTip(idx, "Rule-based validation results")
+        self.issues_tab_index = idx
 
     def _refresh_issues(self):
         try:
             from ..core.rules import validate_pdl, summarize
             pdl = self.dump_pdl()
             issues = validate_pdl(pdl or {})
-            self.t_issues.setRowCount(0)
-            for i in issues:
-                r = self.t_issues.rowCount(); self.t_issues.insertRow(r)
-                self.t_issues.setItem(r, 0, QTableWidgetItem(i.level.upper()))
-                self.t_issues.setItem(r, 1, QTableWidgetItem(i.path))
-                self.t_issues.setItem(r, 2, QTableWidgetItem(i.message))
+            # Cache then render with filter
+            self._issues_cache = [(i.level, i.path, i.message) for i in issues]
+            self._render_issues()
+            # Update inline hints from issues
+            self._update_inline_hints(issues)
             s = summarize(issues)
             try:
                 if hasattr(self.parent(), 'update_issue_status'):
                     self.parent().update_issue_status(s.get('error',0), s.get('warn',0), s.get('info',0))
             except Exception:
                 pass
+        except Exception:
+            pass
+
+    def _render_issues(self):
+        rows = getattr(self, '_issues_cache', [])
+        try:
+            target = (self.cb_issue_level.currentText() or 'ALL').upper()
+        except Exception:
+            target = 'ALL'
+        try:
+            q = (self.ed_issue_filter.text() or '').strip().lower()
+        except Exception:
+            q = ''
+        def _keep(level: str) -> bool:
+            l = (level or '').lower()
+            if target == 'ALL':
+                return True
+            if target == 'ERROR+WARN':
+                return l in ('error','warn')
+            if target in ('ERROR','WARN','INFO'):
+                return l == target.lower()
+            return True
+        self.t_issues.setRowCount(0)
+        for lvl, path, msg in rows:
+            if not _keep(lvl):
+                continue
+            if q and (q not in (path or '').lower()) and (q not in (msg or '').lower()):
+                continue
+            r = self.t_issues.rowCount(); self.t_issues.insertRow(r)
+            self.t_issues.setItem(r, 0, QTableWidgetItem((lvl or '').upper()))
+            self.t_issues.setItem(r, 1, QTableWidgetItem(path or ''))
+            self.t_issues.setItem(r, 2, QTableWidgetItem(msg or ''))
+
+    # --- Inline hints ---
+    def _icon_for_level(self, level: str):
+        try:
+            st = self.style()
+            if (level or '').lower() == 'error':
+                return st.standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
+            if (level or '').lower() == 'warn':
+                return st.standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
+            return st.standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
+        except Exception:
+            return None
+
+    def _apply_hint(self, label: QLabel, level: str | None, message: str | None):
+        try:
+            if not label:
+                return
+            if not level and not message:
+                label.setVisible(False)
+                label.setToolTip("")
+                return
+            icon = self._icon_for_level(level or 'info')
+            if icon:
+                pm = icon.pixmap(16, 16)
+                label.setPixmap(pm)
+                label.setText("")
+            else:
+                label.setText("!")
+            label.setToolTip(message or "")
+            label.setVisible(True)
+        except Exception:
+            pass
+
+    def _update_inline_hints(self, issues: list):
+        # Reset
+        for lab in [getattr(self, 'hint_fans_off', None), getattr(self, 'hint_exhaust_off', None), getattr(self, 'hint_sd_file', None), getattr(self, 'hint_camera_cmd', None), getattr(self, 'hint_exhaust_pin', None)]:
+            try:
+                if lab: lab.setVisible(False)
+            except Exception:
+                pass
+        # Apply based on issues
+        for i in issues:
+            p = (getattr(i, 'path', '') or '')
+            lvl = getattr(i, 'level', 'info')
+            msg = getattr(i, 'message', '')
+            if 'machine_control.fans.off_at_end' in p and getattr(self, 'hint_fans_off', None):
+                self._apply_hint(self.hint_fans_off, lvl, msg)
+            if 'machine_control.exhaust.off_at_end' in p and getattr(self, 'hint_exhaust_off', None):
+                self._apply_hint(self.hint_exhaust_off, lvl, msg)
+            if 'machine_control.sd_logging.filename' in p and getattr(self, 'hint_sd_file', None):
+                self._apply_hint(self.hint_sd_file, lvl, msg)
+            if p.startswith('machine_control.camera') and getattr(self, 'hint_camera_cmd', None):
+                self._apply_hint(self.hint_camera_cmd, lvl, msg)
+            if 'machine_control.exhaust.pin' in p and getattr(self, 'hint_exhaust_pin', None):
+                self._apply_hint(self.hint_exhaust_pin, lvl, msg)
+
+    def _run_firmware_checks(self, focus_prefix: str | List[str] = "machine_control") -> None:
+        try:
+            # Populate issues
+            self._refresh_issues()
+            # Switch to Issues tab and focus first relevant row
+            idx = getattr(self, 'issues_tab_index', None)
+            if isinstance(idx, int):
+                self.tabs.setCurrentIndex(idx)
+            # Select the first row with matching path prefix
+            prefixes: List[str]
+            if isinstance(focus_prefix, (list, tuple, set)):
+                prefixes = [str(p) for p in focus_prefix]
+            else:
+                prefixes = [str(focus_prefix)]
+            for r in range(self.t_issues.rowCount()):
+                it = self.t_issues.item(r, 1)
+                txt = (it.text() or '') if it else ''
+                if any(txt.startswith(p) for p in prefixes):
+                    self.t_issues.selectRow(r)
+                    self.t_issues.scrollToItem(self.t_issues.item(r, 0))
+                    break
         except Exception:
             pass
 
@@ -154,8 +281,11 @@ class PDLForm(QWidget):
         row_actions = QHBoxLayout()
         btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Reset common fields to sensible defaults")
         btn_help = QPushButton("Help…"); btn_help.setToolTip("Open overview documentation")
-        btn_reset.clicked.connect(self._reset_build_area_defaults); btn_help.clicked.connect(lambda: self._open_doc("docs/overview.md", "Overview"))
-        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addStretch(1)
+        btn_check = QPushButton("Check…"); btn_check.setToolTip("Run rules and open Issues tab")
+        btn_reset.clicked.connect(self._reset_build_area_defaults)
+        btn_help.clicked.connect(lambda: self._open_doc("docs/overview.md", "Overview"))
+        btn_check.clicked.connect(lambda: self._run_firmware_checks(["process_defaults","limits"]))
+        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addWidget(btn_check); row_actions.addStretch(1)
         self.f_pdl_version = QLineEdit("1.0"); self.f_pdl_version.setToolTip("PDL schema version")
         self.f_id = QLineEdit()
         self.f_id.setToolTip("Unique printer identifier")
@@ -262,6 +392,14 @@ class PDLForm(QWidget):
     # ---------- Features ----------
     def _init_features_tab(self):
         w = QWidget(); form = QFormLayout(w)
+        row_actions = QHBoxLayout()
+        btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Reset feature fields to defaults")
+        btn_help = QPushButton("Help…"); btn_help.setToolTip("Open firmware mapping documentation")
+        btn_check = QPushButton("Check…"); btn_check.setToolTip("Run rules and open Issues tab")
+        btn_reset.clicked.connect(lambda: None)
+        btn_help.clicked.connect(lambda: self._open_doc("docs/firmware-mapping.md", "Firmware Mapping"))
+        btn_check.clicked.connect(lambda: self._run_firmware_checks(["machine_control","process_defaults"]))
+        form.addRow(row_actions)
         self.f_abl = QCheckBox(); self.f_abl.setToolTip("Enable/disable ABL feature")
         self.f_probe_type = QComboBox(); self.f_probe_type.addItems(PROBE_TYPES)
         self.f_mesh_r = QSpinBox(); self.f_mesh_r.setRange(1, 20)
@@ -293,8 +431,11 @@ class PDLForm(QWidget):
         row_actions = QHBoxLayout();
         btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Clear machine control to defaults")
         btn_help = QPushButton("Help…"); btn_help.setToolTip("Open M-code reference")
-        btn_reset.clicked.connect(self._reset_machine_control_defaults); btn_help.clicked.connect(lambda: self._open_doc("docs/mcode-reference.md", "M-code Reference"))
-        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addStretch(1)
+        btn_check = QPushButton("Check…"); btn_check.setToolTip("Run firmware-specific checks and open Issues tab")
+        btn_reset.clicked.connect(self._reset_machine_control_defaults)
+        btn_help.clicked.connect(lambda: self._open_doc("docs/mcode-reference.md", "M-code Reference"))
+        btn_check.clicked.connect(lambda: self._run_firmware_checks("machine_control"))
+        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addWidget(btn_check); row_actions.addStretch(1)
         # PSU controls (standard)
         self.mc_psu_on_start = QCheckBox(); self.mc_psu_on_start.setToolTip("Insert M80 into start")
         self.mc_psu_off_end = QCheckBox(); self.mc_psu_off_end.setToolTip("Insert M81 into end")
@@ -320,8 +461,11 @@ class PDLForm(QWidget):
         row_actions = QHBoxLayout()
         btn_reset = QPushButton("Restore Defaults"); btn_reset.setToolTip("Clear peripherals to defaults")
         btn_help = QPushButton("Help…"); btn_help.setToolTip("Open firmware mapping documentation")
-        btn_reset.clicked.connect(self._reset_peripherals_defaults); btn_help.clicked.connect(lambda: self._open_doc("docs/firmware-mapping.md", "Firmware Mapping"))
-        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addStretch(1)
+        btn_check = QPushButton("Check…"); btn_check.setToolTip("Run firmware-specific checks and open Issues tab")
+        btn_reset.clicked.connect(self._reset_peripherals_defaults)
+        btn_help.clicked.connect(lambda: self._open_doc("docs/firmware-mapping.md", "Firmware Mapping"))
+        btn_check.clicked.connect(lambda: self._run_firmware_checks("machine_control"))
+        row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addWidget(btn_check); row_actions.addStretch(1)
         form.addRow(row_actions)
         self.lb_fw_tip = QLabel(""); self.lb_fw_tip.setWordWrap(True)
         form.addRow(self.lb_fw_tip)
@@ -342,6 +486,7 @@ class PDLForm(QWidget):
         self.pr_camera_before = QCheckBox("Trigger before snapshot"); self.pr_camera_before.setToolTip("Adds camera command to before_snapshot hook")
         self.pr_camera_after = QCheckBox("Trigger after snapshot"); self.pr_camera_after.setToolTip("Adds camera command to after_snapshot hook")
         self.pr_camera_cmd = QLineEdit("M240"); self.pr_camera_cmd.setToolTip("Snapshot command (e.g., M240 or macro)")
+        self.hint_camera_cmd = QLabel("")
         # Fans
         row_part = QHBoxLayout();
         self.pr_fan_part = QSpinBox(); self.pr_fan_part.setRange(0,100); self.pr_fan_part.setSuffix(" %"); self.pr_fan_part.setToolTip("Part cooling fan at start")
@@ -351,23 +496,28 @@ class PDLForm(QWidget):
         self.pr_fan_aux = QSpinBox(); self.pr_fan_aux.setRange(0,100); self.pr_fan_aux.setSuffix(" %"); self.pr_fan_aux.setToolTip("Aux fan speed at start")
         row_aux.addWidget(QLabel("Aux fan P:")); row_aux.addWidget(self.pr_fan_aux_idx); row_aux.addWidget(self.pr_fan_aux)
         self.pr_fans_off_end = QCheckBox("Fans off at end"); self.pr_fans_off_end.setToolTip("Insert M107 at end")
+        self.hint_fans_off = QLabel("")
         # SD logging
         row_sd = QHBoxLayout();
         self.pr_sd_enable = QCheckBox("Enable at start")
         self.pr_sd_file = QLineEdit("opk_log.gco")
         self.pr_sd_stop = QCheckBox("Stop at end")
-        row_sd.addWidget(self.pr_sd_enable); row_sd.addWidget(self.pr_sd_file); row_sd.addWidget(self.pr_sd_stop)
+        self.hint_sd_file = QLabel("")
+        row_sd.addWidget(self.pr_sd_enable); row_sd.addWidget(self.pr_sd_file); row_sd.addWidget(self.pr_sd_stop); row_sd.addWidget(self.hint_sd_file)
 
         form.addRow("Light ON at start (M355)", self.pr_light_on_start)
         form.addRow("Light OFF at end (M355)", self.pr_light_off_end)
         form.addRow("RGB at start (M150)", row_rgb)
         form.addRow("Chamber temp at start (M141/M191)", row_cht)
-        form.addRow(QLabel("Camera command"), self.pr_camera_cmd)
+        _camrow = QHBoxLayout(); _camrow.addWidget(self.pr_camera_cmd); _camrow.addWidget(self.hint_camera_cmd); _camrow.addStretch(1)
+        _camroww = QWidget(); _camroww.setLayout(_camrow)
+        form.addRow(QLabel("Camera command"), _camroww)
         form.addRow(self.pr_camera_before)
         form.addRow(self.pr_camera_after)
         form.addRow(row_part)
         form.addRow(row_aux)
-        form.addRow(self.pr_fans_off_end)
+        row_fans_off = QHBoxLayout(); row_fans_off.addWidget(self.pr_fans_off_end); row_fans_off.addWidget(self.hint_fans_off); row_fans_off.addStretch(1)
+        form.addRow(row_fans_off)
         form.addRow("SD logging (M928/M29)", row_sd)
 
         # Exhaust controls
@@ -379,7 +529,8 @@ class PDLForm(QWidget):
         self.pr_exhaust_pin = QSpinBox(); self.pr_exhaust_pin.setRange(0,999); self.pr_exhaust_pin.setPrefix("Pin P:"); self.pr_exhaust_pin.setToolTip("GPIO pin (M42 P) or use policy for named pins")
         self.pr_exhaust_fan = QSpinBox(); self.pr_exhaust_fan.setRange(0,9); self.pr_exhaust_fan.setPrefix(" Fan P:"); self.pr_exhaust_fan.setToolTip("Fan index (M106/M107 P)")
         self.pr_exhaust_off = QCheckBox("Off at end"); self.pr_exhaust_off.setToolTip("Turn exhaust off at end")
-        ex_row2.addWidget(self.pr_exhaust_pin); ex_row2.addWidget(self.pr_exhaust_fan); ex_row2.addWidget(self.pr_exhaust_off)
+        self.hint_exhaust_off = QLabel(""); self.hint_exhaust_pin = QLabel("")
+        ex_row2.addWidget(self.pr_exhaust_pin); ex_row2.addWidget(self.pr_exhaust_fan); ex_row2.addWidget(self.pr_exhaust_off); ex_row2.addWidget(self.hint_exhaust_off); ex_row2.addWidget(self.hint_exhaust_pin)
         form.addRow(QLabel("Exhaust (choose Pin or Fan)"))
         form.addRow(ex_row1)
         form.addRow(ex_row2)
@@ -494,6 +645,14 @@ class PDLForm(QWidget):
     # ---------- G-code (Start/End) ----------
     def _init_gcode_tab(self):
         w = QWidget(); outer = QVBoxLayout(w)
+        # Actions row
+        row = QHBoxLayout()
+        btn_check = QPushButton("Check…"); btn_check.setToolTip("Run rules and focus G-code issues")
+        btn_check.clicked.connect(lambda: self._run_firmware_checks("gcode"))
+        btn_help = QPushButton("Help…"); btn_help.setToolTip("Open G-code Help")
+        btn_help.clicked.connect(lambda: self._open_doc("docs/gcode-help.md", "G-code Help"))
+        row.addWidget(btn_check); row.addWidget(btn_help); row.addStretch(1)
+        outer.addLayout(row)
 
         # Hook categories and fields (explicit hooks)
         self.g_edits: Dict[str, QTextEdit] = {}
@@ -1193,20 +1352,62 @@ class PDLForm(QWidget):
         fw = (self.f_firmware.currentText() or "").lower()
         tip = ""
         if fw in ("rrf","reprap","reprapfirmware","duet"):
-            tip = "RRF: SD logging uses M929; named pins allowed (use string pin names). Fans prefer M106/M107 with P index."
+            tip = (
+                "RRF tips:\n"
+                "- SD logging via M929 P\"filename\" S1 (stop: M929 S0).\n"
+                "- Prefer named pins (e.g., out1) over numeric pins.\n"
+                "- Fans use M106/M107 with P index; add 'Fans off at end' to emit M107.\n"
+                "- RGB uses M150 R/G/B values."
+            )
             self.pr_sd_enable.setToolTip("Start SD logging (RRF uses M929)")
             self.pr_sd_file.setToolTip("RRF: M929 P\"filename\" S1")
             self.pr_exhaust_pin.setToolTip("RRF: you can use named pins (e.g., out1) as string")
             self.pr_camera_cmd.setToolTip("RRF: use M240 if configured, or M42 with named pin")
         elif fw == "klipper":
-            tip = "Klipper: camera M240 maps to M118 TIMELAPSE_TAKE_FRAME by default; consider macros for lights/fans."
+            tip = (
+                "Klipper tips:\n"
+                "- Camera M240 maps to 'M118 TIMELAPSE_TAKE_FRAME' by policy.\n"
+                "- M106/M107 are typically macros; ensure printer.cfg defines fans.\n"
+                "- Consider using SET_FAN_SPEED FAN=name SPEED=s for fine control."
+            )
             self.pr_camera_cmd.setToolTip("Klipper: override default with your macro command")
         elif fw == "grbl":
-            tip = "GRBL: Exhaust mapped to M8 (on) / M9 (off). Use Custom Peripherals for other IO."
+            tip = (
+                "GRBL tips:\n"
+                "- Exhaust uses coolant: M8 on / M9 off (M7 optional).\n"
+                "- Fan commands are not standard; consider coolant or custom peripherals."
+            )
         elif fw == "linuxcnc":
-            tip = "LinuxCNC: Exhaust mapped to M7 (on) / M9 (off). Use Custom Peripherals for HAL outputs."
+            tip = (
+                "LinuxCNC tips:\n"
+                "- Exhaust uses coolant: M7/M8 on / M9 off.\n"
+                "- Fan commands are not standard; prefer HAL-driven peripherals."
+            )
+        elif fw == "bambu":
+            tip = (
+                "Bambu tips:\n"
+                "- G-code is limited; keep start/end minimal.\n"
+                "- Prefer built-in macros and studio-side settings."
+            )
+        elif fw in ("smoothie", "smoothieware"):
+            tip = (
+                "Smoothieware tips:\n"
+                "- Fans use M106/M107; ensure fan modules are enabled in config.txt.\n"
+                "- RGB via M150 may require LED module support."
+            )
+        elif fw == "repetier":
+            tip = (
+                "Repetier tips:\n"
+                "- Fans use M106/M107; verify P index.\n"
+                "- RGB (M150) support depends on build; use macros if unavailable."
+            )
         else:
-            tip = "Marlin-like: standard M-codes supported; see M-code Reference."
+            tip = (
+                "Marlin tips:\n"
+                "- SD logging: M928 start / M29 stop.\n"
+                "- RGB via M150 requires LED/NeoPixel support.\n"
+                "- Use numeric pins for M42; for fans use M106/M107."
+            )
         if hasattr(self, 'lb_fw_tip'):
             self.lb_fw_tip.setText(tip)
 

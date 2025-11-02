@@ -25,6 +25,32 @@ Commands:
 - `opk gen --pdl PDL.yaml --slicer superslicer --out OUTDIR` — Generate a minimal SuperSlicer `.ini` profile.
 - `opk gen --pdl PDL.yaml --slicer kisslicer --out OUTDIR` — Generate a minimal KISSlicer `.ini` profile (best‑effort).
 
+### Spool databases
+
+- `opk spool --source spoolman|tigertag|openspool|opentag3d --base-url URL --action create|read|update|delete|search` — Basic CRUD/search against spool databases.
+  - Common flags:
+    - `--api-key TOKEN` — Optional API key.
+    - `--id ID` — Item ID for read/update/delete.
+    - `--payload JSON` — JSON payload for create/update.
+    - `--query Q` — Search term.
+    - `--page N` and `--page-size N` — Pagination hints for search.
+    - `--format items|normalized` — List of items or normalized envelope including `total`, `count`, `page`, `page_size`.
+    - `--endpoints-file FILE.json` — Per‑source endpoint overrides as JSON.
+    - `--endpoints-json JSON` — Inline JSON overrides (takes precedence over file).
+  - Output format:
+    - `--format items` (default): prints raw items/dicts, and `[OK] delete=True/False` for delete.
+    - `--format normalized`: envelopes the output uniformly:
+      - create: `{ "source", "action": "create", "item": {...} }`
+      - read: `{ "source", "action": "read", "id", "item": {...} }`
+      - update: `{ "source", "action": "update", "id", "item": {...} }`
+      - delete: `{ "source", "action": "delete", "id", "ok": true }`
+      - search: `{ "source", "query", "page", "page_size", "items", "count", "total" }`
+  - Retry policy: HTTP operations retry on 408/429/5xx up to the system preference “Network retry limit” (default 5). Override via env `OPK_NET_RETRY_LIMIT` or App Settings.
+  - Backoff & jitter:
+    - Base backoff seconds: QSettings `net/retry_backoff` (default 0.5s), env `OPK_NET_RETRY_BACKOFF`.
+    - Jitter seconds: QSettings `net/retry_jitter` (default 0.25s), env `OPK_NET_RETRY_JITTER`.
+    - Sleep between retries = `backoff * (2^attempt)` + `rand(0, jitter)`.
+
 ### Advanced Overrides
 
 - `opk gen ... [--bundle OUT.zip]` — For cura/prusa/ideamaker, bundles generated files with a manifest (use `.zip`).

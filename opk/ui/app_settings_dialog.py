@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ._qt_compat import (
-    QDialog, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QHBoxLayout, QFileDialog, QSettings
+    QDialog, QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QHBoxLayout, QFileDialog, QSettings, QSpinBox, QDoubleSpinBox
 )
 
 
@@ -28,6 +28,10 @@ class AppSettingsDialog(QDialog):
         self.ck_klip_cam = QCheckBox("Map M240 to M118 TIMELAPSE_TAKE_FRAME (Klipper)")
         self.ck_rrf_named = QCheckBox("Prefer named pins (RRF)")
         self.cb_grbl_exh = QComboBox(); self.cb_grbl_exh.addItems(["M8 (flood)", "M7 (mist)"]) ; self.cb_grbl_exh.setToolTip("Exhaust mapping for GRBL/LinuxCNC")
+        # Network / system prefs
+        self.sb_retry = QSpinBox(); self.sb_retry.setRange(0, 20); self.sb_retry.setToolTip("HTTP retry attempts for online integrations (0 = no retries)")
+        self.db_backoff = QDoubleSpinBox(); self.db_backoff.setRange(0.0, 60.0); self.db_backoff.setDecimals(2); self.db_backoff.setSingleStep(0.1); self.db_backoff.setToolTip("Base exponential backoff seconds")
+        self.db_jitter = QDoubleSpinBox(); self.db_jitter.setRange(0.0, 60.0); self.db_jitter.setDecimals(2); self.db_jitter.setSingleStep(0.05); self.db_jitter.setToolTip("Random jitter seconds added per retry")
         # Layout
         f.addRow("Default slicer", self.cb_slicer)
         f.addRow("Default firmware", self.cb_firmware)
@@ -36,6 +40,9 @@ class AppSettingsDialog(QDialog):
         f.addRow(self.ck_klip_cam)
         f.addRow(self.ck_rrf_named)
         f.addRow("GRBL/LinuxCNC exhaust", self.cb_grbl_exh)
+        f.addRow("Network retry limit", self.sb_retry)
+        f.addRow("Retry backoff (s)", self.db_backoff)
+        f.addRow("Retry jitter (s)", self.db_jitter)
         # Buttons
         btns = QHBoxLayout(); ok = QPushButton("Save"); ok.clicked.connect(self.accept); cancel = QPushButton("Cancel"); cancel.clicked.connect(self.reject)
         btns.addWidget(ok); btns.addWidget(cancel)
@@ -59,6 +66,18 @@ class AppSettingsDialog(QDialog):
         self.ck_klip_cam.setChecked(self.s.value("policy/klipper/camera_map", True, type=bool))
         self.ck_rrf_named.setChecked(self.s.value("policy/rrf/prefer_named_pins", True, type=bool))
         self.cb_grbl_exh.setCurrentIndex(0 if self.s.value("policy/grbl/exhaust_mode","M8") == "M8" else 1)
+        try:
+            self.sb_retry.setValue(int(self.s.value("net/retry_limit", 5)))
+        except Exception:
+            self.sb_retry.setValue(5)
+        try:
+            self.db_backoff.setValue(float(self.s.value("net/retry_backoff", 0.5)))
+        except Exception:
+            self.db_backoff.setValue(0.5)
+        try:
+            self.db_jitter.setValue(float(self.s.value("net/retry_jitter", 0.25)))
+        except Exception:
+            self.db_jitter.setValue(0.25)
 
     def accept(self):
         self.s.setValue("app/default_slicer", self.cb_slicer.currentText())
@@ -68,4 +87,7 @@ class AppSettingsDialog(QDialog):
         self.s.setValue("policy/klipper/camera_map", self.ck_klip_cam.isChecked())
         self.s.setValue("policy/rrf/prefer_named_pins", self.ck_rrf_named.isChecked())
         self.s.setValue("policy/grbl/exhaust_mode", "M8" if self.cb_grbl_exh.currentIndex()==0 else "M7")
+        self.s.setValue("net/retry_limit", int(self.sb_retry.value()))
+        self.s.setValue("net/retry_backoff", float(self.db_backoff.value()))
+        self.s.setValue("net/retry_jitter", float(self.db_jitter.value()))
         super().accept()
