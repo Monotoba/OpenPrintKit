@@ -1,7 +1,7 @@
 # 🧩 OpenPrintKit (OPK)
 
 [![Build Status](https://github.com/Monotoba/OpenPrintKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions)
-[![Docs](https://img.shields.io/badge/docs-Overview-blue.svg)](docs/overview.md)
+[![Docs](https://img.shields.io/badge/docs-site-blue.svg)](https://monotoba.github.io/OpenPrintKit/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
