@@ -1,8 +1,8 @@
 site_name: Printer Definition Language (PDL)
 site_description: Open, slicer-agnostic specification for defining 3D printers, materials, and processes.
-site_url: https://YOUR_GH_USERNAME.github.io/PDL-Spec  # update after split
-repo_name: OpenPrintKit / pdl-spec
-repo_url: https://github.com/YOUR_GH_USERNAME/OpenPrintKit  # or new repo URL after split
+site_url: https://monotoba.github.io/OpenPrintKit/
+repo_name: Monotoba/OpenPrintKit
+repo_url: https://github.com/Monotoba/OpenPrintKit
 edit_uri: edit/main/pdl-spec/docs/
 
 theme:
@@ -44,4 +44,4 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/YOUR_GH_USERNAME
+      link: https://github.com/Monotoba/OpenPrintKit
