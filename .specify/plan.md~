@@ -1,0 +1,8 @@
+# OpenPrintKit – Agent Plan
+
+- task: validate bundle schema against ./schemas/*.json
+  done: false
+- task: generate test bundles into ./dist/
+  done: false
+- task: ensure pytest passes
+  done: false

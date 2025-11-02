@@ -107,6 +107,23 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         cam_cmd = (cam.get("command") or "").strip().upper()
         if (cam.get("use_before_snapshot") or cam.get("use_after_snapshot")) and cam_cmd.startswith("M240"):
             issues.append(Issue("info", "Klipper: camera M240 will be mapped to 'M118 TIMELAPSE_TAKE_FRAME' by policy", "machine_control.camera.command"))
+    # RRF / RepRapFirmware guidance
+    if fw in ("rrf", "reprap", "reprapfirmware", "duet"):
+        sdl = mc.get("sd_logging") or {}
+        if sdl.get("enable_start"):
+            issues.append(Issue("info", "RRF: SD logging uses M929 P\"filename\" S1 / M929 S0 (mapped from M928/M29)", "machine_control.sd_logging"))
+            fn = sdl.get("filename")
+            if isinstance(fn, str) and " " in fn:
+                issues.append(Issue("warn", "RRF: SD log filename contains spaces; ensure your firmware accepts this name", "machine_control.sd_logging.filename"))
+        if isinstance(ex.get("pin"), int):
+            issues.append(Issue("info", "RRF: prefer named pins (e.g., out1) instead of numeric pins for exhaust", "machine_control.exhaust.pin"))
+        fans = mc.get("fans") or {}
+        if isinstance(fans.get("aux_index"), int) and (fans.get("aux_start_percent") not in (None, 0)) and not fans.get("off_at_end"):
+            issues.append(Issue("warn", "Aux fan configured without off_at_end; add off_at_end to emit M107 P at end", "machine_control.fans.off_at_end"))
+    # Marlin guidance
+    if fw == "marlin":
+        if isinstance(ex.get("pin"), str) and (ex.get("pin") or "").strip():
+            issues.append(Issue("warn", "Marlin M42 expects numeric pin values; string pins unsupported — use fan_index (M106/M107) or numeric P", "machine_control.exhaust.pin"))
 
     # PDL-level process defaults checks (if present)
     pd = (pdl or {}).get("process_defaults") or {}

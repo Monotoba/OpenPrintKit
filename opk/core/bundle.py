@@ -36,3 +36,25 @@ def build_bundle(src_dir: Path, out_path: Path) -> Path:
 
     S.validate("bundle", manifest)
     return out_path
+
+
+def build_profile_bundle(files: Dict[str, Path], out_path: Path, slicer: str) -> Path:
+    """Bundle generated slicer profile files into a simple ZIP with a manifest.
+
+    files: mapping name->path from a generator (e.g., {'profile': Path(...)})
+    slicer: one of 'cura', 'prusa', 'ideamaker'
+    """
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest: Dict[str, Any] = {
+        'generator': 'opk.profile-bundle',
+        'slicer': slicer,
+        'files': sorted([p.name for p in files.values()])
+    }
+    import zipfile, json
+    with zipfile.ZipFile(out_path, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+        for key, p in files.items():
+            if Path(p).exists():
+                zf.write(p, arcname=Path(p).name)
+        zf.writestr('manifest.json', json.dumps(manifest, indent=2))
+    return out_path
