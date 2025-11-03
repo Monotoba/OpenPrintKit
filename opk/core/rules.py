@@ -142,6 +142,13 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         # RGB tips
         if any((rgb.get("r",0), rgb.get("g",0), rgb.get("b",0))):
             issues.append(Issue("info", "RRF: RGB is set via M150; mapping will emit M150 Rnn Unn Bnn", "machine_control.rgb_start"))
+        # Aux fan index guidance
+        if (fans.get("aux_start_percent") not in (None, 0)) and not isinstance(fans.get("aux_index"), int):
+            issues.append(Issue("warn", "RRF: aux_start_percent set without aux_index; specify fan P index (e.g., P1)", "machine_control.fans.aux_index"))
+        # Aux outputs prefer named pins
+        for i, ao in enumerate(mc.get("aux_outputs") or []):
+            if isinstance(ao, dict) and isinstance(ao.get("pin"), int):
+                issues.append(Issue("info", "RRF: prefer named pins (e.g., out1) for aux_outputs", f"machine_control.aux_outputs[{i}].pin"))
     # Marlin guidance
     if fw == "marlin":
         if isinstance(ex.get("pin"), str) and (ex.get("pin") or "").strip():
@@ -158,6 +165,9 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         # Fans: remind to turn off
         if ((fans.get("part_start_percent") or 0) > 0 or (fans.get("aux_start_percent") or 0) > 0) and not fans.get("off_at_end"):
             issues.append(Issue("info", "Marlin: consider 'Fans off at end' to emit M107", "machine_control.fans.off_at_end"))
+        # Mesh enable → suggest Z offset
+        if bool(mc.get("enable_mesh_start")) and (_num(mc.get("z_offset")) in (None, 0)):
+            issues.append(Issue("info", "Marlin: mesh enabled; consider setting probe Z offset (M851)", "machine_control.z_offset"))
     # Smoothieware guidance (best-effort)
     if fw in ("smoothie", "smoothieware"):
         if (fans.get("part_start_percent") or 0) > 0 or (fans.get("aux_start_percent") or 0) > 0:
