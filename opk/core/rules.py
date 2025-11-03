@@ -208,11 +208,14 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
             issues.append(Issue("warn", f"Acceleration '{k}' should be >= 0", f"process_defaults.accelerations_mms2.{k}"))
 
     # General lint: materials checks
+    mat_types_present = set()
     for mi, mat in enumerate(materials):
         try:
             mtype = str((mat.get('filament_type') or '')).upper()
         except Exception:
             mtype = ''
+        if mtype:
+            mat_types_present.add(mtype)
         fd = _num(mat.get('filament_diameter'))
         if fd is not None and all(abs(fd - x) > 0.05 for x in (1.75, 2.85)):
             issues.append(Issue("warn", f"Unusual material filament_diameter: {fd} (typical 1.75 or 2.85)", f"materials[{mi}].filament_diameter"))
@@ -223,6 +226,21 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
                 issues.append(Issue("warn", "PLA nozzle temp usually 180–230 °C", f"materials[{mi}].nozzle_temperature"))
             if bt is not None and not (0 <= bt <= 70):
                 issues.append(Issue("warn", "PLA bed temp usually 0–70 °C", f"materials[{mi}].bed_temperature"))
+        if mtype == 'PETG':
+            if nt is not None and not (220 <= nt <= 260):
+                issues.append(Issue("warn", "PETG nozzle temp usually 220–260 °C", f"materials[{mi}].nozzle_temperature"))
+            if bt is not None and not (70 <= bt <= 90):
+                issues.append(Issue("warn", "PETG bed temp usually 70–90 °C", f"materials[{mi}].bed_temperature"))
+        if mtype in ('ABS', 'ASA'):
+            if nt is not None and not (230 <= nt <= 260):
+                issues.append(Issue("warn", f"{mtype} nozzle temp usually 230–260 °C", f"materials[{mi}].nozzle_temperature"))
+            if bt is not None and not (90 <= bt <= 110):
+                issues.append(Issue("warn", f"{mtype} bed temp usually 90–110 °C", f"materials[{mi}].bed_temperature"))
+        if mtype == 'TPU':
+            if nt is not None and not (200 <= nt <= 240):
+                issues.append(Issue("warn", "TPU nozzle temp usually 200–240 °C", f"materials[{mi}].nozzle_temperature"))
+            if bt is not None and not (30 <= bt <= 60):
+                issues.append(Issue("warn", "TPU bed temp usually 30–60 °C", f"materials[{mi}].bed_temperature"))
         # Extrusion multiplier sanity
         em = mat.get('extrusion_multiplier') if isinstance(mat, dict) else None
         try:
@@ -252,4 +270,17 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
             issues.append(Issue("info", f"Bowden drive typically needs higher retract_mm (>= 2.0); current {retract}", "process_defaults.retract_mm"))
         if drive == 'direct' and retract > 2.0:
             issues.append(Issue("info", f"Direct drive often works with lower retract_mm (<= 2.0); current {retract}", "process_defaults.retract_mm"))
+
+    # Cooling fan policy hints by material type (if any applicable material present)
+    cooling = pd.get('cooling') or {}
+    try:
+        fmax = int(cooling.get('fan_max_percent') or 0)
+    except Exception:
+        fmax = 0
+    if any(m in mat_types_present for m in ('ABS', 'ASA')) and fmax and fmax > 20:
+        issues.append(Issue("warn", "ABS/ASA typically use low/no part cooling; reduce fan_max_percent", "process_defaults.cooling.fan_max_percent"))
+    if 'PETG' in mat_types_present and fmax and fmax > 60:
+        issues.append(Issue("info", "PETG usually benefits from moderate fan (≤60%) to avoid layer adhesion issues", "process_defaults.cooling.fan_max_percent"))
+    if 'TPU' in mat_types_present and retract is not None and retract > 3.0:
+        issues.append(Issue("warn", "TPU is flexible; consider lower retract_mm (≤3.0) to prevent jams", "process_defaults.retract_mm"))
     return issues

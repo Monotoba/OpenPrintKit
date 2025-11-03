@@ -20,6 +20,7 @@ The format is inspired by Keep a Changelog. Dates are YYYY-MM-DD.
   - Materials: unusual filament_diameter; PLA temperature ranges; extrusion multiplier sanity.
   - Process: speed thresholds for perimeter/infill/travel; accelerations non-negative; layer heights vs nozzle (existing).
   - Extruder drive vs retract length hints (Bowden vs direct).
+  - Material-specific: PETG temperature ranges; ABS/ASA temperature ranges + low/no fan guidance; TPU temperature ranges and low retract guidance.
 - Inline firmware tips in GUI Peripherals; “Check…” buttons on Machine Control/Peripherals/Build Area/Features/G-code tabs; Issues tab filters (level + text) and focus from “Check…”.
 - User Manual (`docs/user-manual.md`) with screenshots; added translations stubs (es/fr/de/pt) and summary translations; index page; generator mappings and exact keys reference; PDL schema reference; publishing guide; translations guide; example vars templates JSON.
 - Docs site: MkDocs config (`mkdocs.yml`) and GitHub Actions workflow to deploy docs.
