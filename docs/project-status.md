@@ -19,6 +19,18 @@ We now have:
   - ideaMaker (CFG) with bundling (`.zip`)
 * ✅ GUI “Generate Profiles…” dialog with preview, bundle picker, recents (out/bundle), and suffix validation
 
+### Slicer Support Snapshot
+
+| Slicer        | Generate Profiles | Bundle Output |
+|---------------|-------------------|---------------|
+| OrcaSlicer    | ✅ JSON           | ✅ `.orca_printer` |
+| Cura          | ✅ CFG            | ✅ `.zip`         |
+| PrusaSlicer   | ✅ INI            | ✅ `.zip`         |
+| SuperSlicer   | ✅ INI            | ❌ (seed only)    |
+| Bambu Studio  | ✅ INI-like       | ❌ (seed only)    |
+| ideaMaker     | ✅ CFG            | ✅ `.zip`         |
+| KISSlicer     | ✅ INI            | ❌ (seed only)    |
+
 ---
 
 ## 🧰 “Tools” Layer — What We Planned

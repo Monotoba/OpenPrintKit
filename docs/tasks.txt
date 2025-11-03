@@ -24,7 +24,7 @@
   * README + CLI Reference: add GUI Tips section
   * System Notes + Changelog: record persistence and bundle picker changes"
   
-  - Docs sync: Update implementation-status and project-status to reflect
+  * Docs sync: Update implementation-status and project-status to reflect
     working slicer generators and CLI gen.
   - Rules: Expand firmware-specific rule checks and linting (e.g., nozzle/
     filament mismatches).
