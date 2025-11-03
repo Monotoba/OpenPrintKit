@@ -26,7 +26,7 @@
   
   * Docs sync: Update implementation-status and project-status to reflect
     working slicer generators and CLI gen.
-  - Rules: Expand firmware-specific rule checks and linting (e.g., nozzle/
+  * Rules: Expand firmware-specific rule checks and linting (e.g., nozzle/
     filament mismatches).
   - GUI polish: Small UX improvements in the install wizard and generate
     dialogs; persist more defaults.

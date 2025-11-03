@@ -75,6 +75,8 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
     fw = str((pdl or {}).get("firmware") or "").lower()
     fans = mc.get("fans") or {}
     rgb = (mc.get("rgb_start") or {}) if isinstance(mc.get("rgb_start"), dict) else {}
+    materials = (pdl or {}).get("materials") or []
+    extruders = (pdl or {}).get("extruders") or []
     # Exhaust: warn if both pin and fan_index set (ambiguous)
     ex = mc.get("exhaust") or {}
     if ex.get("pin") is not None and ex.get("fan_index") is not None:
@@ -204,4 +206,50 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         vv = _num(v)
         if vv is not None and vv < 0:
             issues.append(Issue("warn", f"Acceleration '{k}' should be >= 0", f"process_defaults.accelerations_mms2.{k}"))
+
+    # General lint: materials checks
+    for mi, mat in enumerate(materials):
+        try:
+            mtype = str((mat.get('filament_type') or '')).upper()
+        except Exception:
+            mtype = ''
+        fd = _num(mat.get('filament_diameter'))
+        if fd is not None and all(abs(fd - x) > 0.05 for x in (1.75, 2.85)):
+            issues.append(Issue("warn", f"Unusual material filament_diameter: {fd} (typical 1.75 or 2.85)", f"materials[{mi}].filament_diameter"))
+        nt = _num(mat.get('nozzle_temperature'))
+        bt = _num(mat.get('bed_temperature'))
+        if mtype == 'PLA':
+            if nt is not None and not (180 <= nt <= 230):
+                issues.append(Issue("warn", "PLA nozzle temp usually 180–230 °C", f"materials[{mi}].nozzle_temperature"))
+            if bt is not None and not (0 <= bt <= 70):
+                issues.append(Issue("warn", "PLA bed temp usually 0–70 °C", f"materials[{mi}].bed_temperature"))
+        # Extrusion multiplier sanity
+        em = mat.get('extrusion_multiplier') if isinstance(mat, dict) else None
+        try:
+            if em is not None and not (0.8 <= float(em) <= 1.2):
+                issues.append(Issue("warn", f"Extrusion multiplier unusual: {em} (typical 0.95–1.05)", f"materials[{mi}].extrusion_multiplier"))
+        except Exception:
+            pass
+
+    # Process speeds lint (if present)
+    spd = pd.get('speeds_mms') or {}
+    def _spd_warn(key: str, value: Any, max_ok: float, label: str):
+        v = _num(value)
+        if v is not None and v > max_ok:
+            issues.append(Issue("warn", f"{label} unusually high (>{max_ok} mm/s)", f"process_defaults.speeds_mms.{key}"))
+    _spd_warn('perimeter', spd.get('perimeter'), 150, 'perimeter speed')
+    _spd_warn('infill', spd.get('infill'), 150, 'infill speed')
+    _spd_warn('travel', spd.get('travel'), 300, 'travel speed')
+
+    # Retraction vs drive type heuristics
+    try:
+        drive = str(((extruders or [{}])[0].get('drive') or '')).lower()
+    except Exception:
+        drive = ''
+    retract = _num(pd.get('retract_mm'))
+    if retract is not None:
+        if drive == 'bowden' and retract < 2.0:
+            issues.append(Issue("info", f"Bowden drive typically needs higher retract_mm (>= 2.0); current {retract}", "process_defaults.retract_mm"))
+        if drive == 'direct' and retract > 2.0:
+            issues.append(Issue("info", f"Direct drive often works with lower retract_mm (<= 2.0); current {retract}", "process_defaults.retract_mm"))
     return issues
