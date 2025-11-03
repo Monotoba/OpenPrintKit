@@ -1,5 +1,12 @@
 # OPK CLI Reference
 
+## Table of Contents
+
+- [Commands](#opk-cli-reference)
+- [Spool databases](#spool-databases)
+- [Advanced Overrides](#advanced-overrides)
+- [GUI Tips](#gui-tips)
+
 Commands:
 
 - `opk validate {paths...}` — Schema validation for JSON profiles.

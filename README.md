@@ -10,6 +10,20 @@
 
 ---
 
+## Table of Contents
+
+- [Quickstart](#quickstart)
+- [Documentation](#documentation)
+- [CLI Overview](#cli-overview)
+- [GUI](#gui)
+  - [GUI Tips](#gui-tips)
+- [Development](#development)
+- [Features](#features)
+- [Roadmap](#roadmap)
+- [License](#license)
+- [Contributing](#contributing)
+- [Community](#community)
+
 ### Define once. Slice anywhere.
 **OpenPrintKit (OPK)** is an open-source toolkit for defining, validating, and bundling 3D printer configurations into slicer-ready packages — starting with **OrcaSlicer**, and expanding to Cura, PrusaSlicer, and beyond.
 
