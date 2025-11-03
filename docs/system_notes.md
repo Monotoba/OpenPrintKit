@@ -45,6 +45,10 @@ This document captures key decisions, changes, and notes from the current develo
   - Build menu added (Validate, Run Rules, Build Bundle). Keyboard shortcuts and tooltips/status tips added across menus.
   - Tools: G-code Preview; Validate Hook Variables; Generate Snippets; Generate Profiles (with Preview before write); Slice (CLI) with QSettings‑persisted last selections; Capture Screenshots.
   - Generate Profiles dialog: supports in-editor PDL (no need to save); multi-file preview; bundle summary with open-folder.
+    - Bundle picker: “…” button opens the correct filter per slicer (Orca → `.orca_printer`; others → `.zip`).
+    - Recent paths: remembers recent output directories and recent bundle outputs (capped by `ui/recents_max` in Settings). Clear via Tools or Preferences.
+    - Enablement kept in sync: bundle controls enable/disable based on slicer + checkbox; placeholder/tooltip update dynamically with required suffix.
+    - Inline validation: shows required suffix hint and highlights bundle field until suffix is correct; suffix enforced at Generate time.
   - GUI polish: Persist last-used fields and improve UX
     - Persist bundle path, out dir, and slicer selection in Generate Profiles (QSettings under gen_profiles/*).
     - Auto-suggest bundle filenames when empty (Orca: .orca_printer; Cura/Prusa/ideaMaker: .zip) and enforce suffixes.
@@ -52,8 +56,9 @@ This document captures key decisions, changes, and notes from the current develo
     - Persist PDL path and out dir in Generate Snippets (gen_snippets/*), and improve invalid-PDL messages.
     - Add a “Browse…” button for bundle file selection in Generate Profiles.
     - Persist G-code dialogs:
-      - G-code Preview: remembers PDL path, selected hook, and variables JSON (gcode_preview/*).
-      - Validate Hook Variables: remembers PDL and vars.json paths (gcode_validate/*).
+      - G-code Preview: remembers PDL path, selected hook, and variables JSON (gcode_preview/*); recent PDL/Vars lists with Clear; templates (built-in + configurable JSON) and keyboard shortcuts.
+      - Validate Hook Variables: remembers PDL and vars.json paths (gcode_validate/*); recent PDL/Vars lists with Clear; templates save and keyboard shortcuts.
+    - Global recents cap (`ui/recents_max`), and “Clear Recent Files…” in Tools and Preferences.
     - Remember last bundle save path in main window Build Bundle (paths/last_bundle).
   - Help: Overview, G-code Help, M-code Reference, Firmware Mapping.
   - Settings dialog (default slicer/firmware, output dir, variables JSON, policy toggles) via QSettings.
