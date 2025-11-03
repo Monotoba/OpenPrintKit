@@ -7,6 +7,21 @@ This project welcomes translations of the User Manual and key docs. Suggested wo
 3) Add a language note at the top and link back to the English original.
 4) Submit a PR with the translated file and an index entry in `docs/index.md`.
 
-## Example: Spanish Stub
+## Existing translations
 
-See `docs/user-manual.es.md` for a starting point.
+- Español
+  - Manual: `docs/user-manual.es.md`
+  - CLI: `docs/cli-reference.es.md`
+  - Resumen: `docs/overview.es.md`
+- Français
+  - Manuel: `docs/user-manual.fr.md`
+  - CLI: `docs/cli-reference.fr.md`
+  - Aperçu: `docs/overview.fr.md`
+- Deutsch
+  - Handbuch: `docs/user-manual.de.md`
+  - CLI: `docs/cli-reference.de.md`
+  - Überblick: `docs/overview.de.md`
+- Português
+  - Manual: `docs/user-manual.pt.md`
+  - CLI: `docs/cli-reference.pt.md`
+  - Visão Geral: `docs/overview.pt.md`

@@ -31,6 +31,9 @@ Commands:
 - `opk gen --pdl PDL.yaml --slicer bambu --out OUTDIR` — Generate a minimal Bambu Studio `.ini`-style profile.
 - `opk gen --pdl PDL.yaml --slicer superslicer --out OUTDIR` — Generate a minimal SuperSlicer `.ini` profile.
 - `opk gen --pdl PDL.yaml --slicer kisslicer --out OUTDIR` — Generate a minimal KISSlicer `.ini` profile (best‑effort).
+ - Install tips:
+   - End users: `pip install openprintkit` or `pip install 'openprintkit[gui]'`
+   - Dev install: `pip install -e .` and extras via `pip install -e '.[gui]'`
 
 ### Spool databases
 

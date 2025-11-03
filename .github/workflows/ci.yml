@@ -58,6 +58,18 @@ jobs:
       - name: Run unit tests
         run: python -m pytest -q
 
+      - name: Check exact-generator-keys is up-to-date
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          git config core.autocrlf false
+          python scripts/extract_generator_keys.py
+          # Fail if script produced diffs
+          if ! git diff --quiet -- docs/exact-generator-keys.md; then
+            echo "::error ::docs/exact-generator-keys.md is stale. Run: python scripts/extract_generator_keys.py"
+            git --no-pager diff -- docs/exact-generator-keys.md | sed -n '1,200p'
+            exit 1
+          fi
+
       - name: Validate example profiles
         run: |
           python -m opk.cli.__main__ validate examples/printers/Longer_LK5_Pro_Marlin.json
@@ -74,3 +86,9 @@ jobs:
           name: opk-bundle-${{ runner.os }}-py${{ matrix.python-version }}
           path: dist/*.orca_printer
           if-no-files-found: error
+
+      - name: Smoke build sdist/wheel
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12' }}
+        run: |
+          python -m pip install --upgrade build
+          python -m build

@@ -1,6 +1,6 @@
 # Publishing Documentation
 
-This repo includes a docs/ tree suitable for static site generators like MkDocs. You can publish locally or via GitHub Pages.
+This repo includes a docs/ tree suitable for static site generators like MkDocs. You can publish locally or via GitHub Pages. For Python package publishing, see `docs/packaging.md`.
 
 ## MkDocs (recommended)
 

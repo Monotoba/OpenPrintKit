@@ -51,6 +51,7 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     min_layer_time = int(cooling.get('min_layer_time_s') or 0)
     fan_min = int(cooling.get('fan_min_percent') or 0)
     fan_max = int(cooling.get('fan_max_percent') or 0)
+    adhesion = ((pdl.get('process_defaults') or {}).get('adhesion') or '').lower()
     lines = [
         f'machineWidth = {int(w)}',
         f'machineDepth = {int(d)}',
@@ -68,9 +69,21 @@ def generate_ideamaker(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         *( [f'retractionDistance = {retr_len:.2f}', f'retractionSpeed = {int(retr_spd)}'] if retr_len else [] ),
         *( [f'minLayerTime = {min_layer_time}'] if min_layer_time else [] ),
         *( [f'fanMin = {fan_min}', f'fanMax = {fan_max}'] if (fan_min or fan_max) else [] ),
+        *( [f'adhesionType = {adhesion}'] if adhesion in ('brim','skirt','raft') else [] ),
         f'startGcode = {start_g}',
         f'endGcode = {end_g}',
     ]
+    # Infill density and supports (best-effort keys)
+    pd = (pdl.get('process_defaults') or {})
+    if pd.get('infill_percent') is not None:
+        try:
+            lines.append(f'infillDensity = {int(pd.get("infill_percent") or 0)}')
+        except Exception:
+            pass
+    if pd.get('support') is not None:
+        lines.append(f'supportEnable = {str(bool(pd.get("support")))}')
+        if isinstance(pd.get('support'), str):
+            lines.append(f'supportPattern = {pd.get("support")}')
     outdir = out_dir / 'ideamaker'
     _ensure_dir(outdir)
     cfg = outdir / f'{name}.cfg'

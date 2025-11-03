@@ -216,6 +216,10 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         vv = _num(v)
         if vv is not None and vv < 0:
             issues.append(Issue("warn", f"Acceleration '{k}' should be >= 0", f"process_defaults.accelerations_mms2.{k}"))
+    # Retraction sanity
+    rmm = _num(pd.get('retract_mm'))
+    if rmm is not None and rmm > 10:
+        issues.append(Issue("warn", f"retract_mm unusually high (>10): {rmm}", "process_defaults.retract_mm"))
 
     # General lint: materials checks
     mat_types_present = set()
@@ -293,4 +297,39 @@ def validate_pdl(pdl: Dict[str, Any]) -> List[Issue]:
         issues.append(Issue("info", "PETG usually benefits from moderate fan (≤60%) to avoid layer adhesion issues", "process_defaults.cooling.fan_max_percent"))
     if 'TPU' in mat_types_present and retract is not None and retract > 3.0:
         issues.append(Issue("warn", "TPU is flexible; consider lower retract_mm (≤3.0) to prevent jams", "process_defaults.retract_mm"))
+
+    # Slicer-specific (optional, only if hinted)
+    try:
+        pol = (pdl or {}).get('policies') or {}
+        slicer = str(pol.get('target_slicer') or (pdl or {}).get('slicer') or '').lower()
+    except Exception:
+        slicer = ''
+
+    def _is_rect_polygon(bed):
+        try:
+            pts = list(bed or [])
+            if len(pts) != 4:
+                return False
+            xs = [float(p[0]) for p in pts]; ys = [float(p[1]) for p in pts]
+            minx, maxx = min(xs), max(xs); miny, maxy = min(ys), max(ys)
+            corners = {(minx, miny), (maxx, miny), (maxx, maxy), (minx, maxy)}
+            return corners == {(float(p[0]), float(p[1])) for p in pts}
+        except Exception:
+            return False
+
+    geom = (pdl or {}).get('geometry') or {}
+    if slicer == 'cura':
+        bed = geom.get('bed_shape') or []
+        if not _is_rect_polygon(bed):
+            issues.append(Issue("info", "Cura generator uses rectangular bed dimensions; polygon bed_shape will be rectangularized", "geometry.bed_shape"))
+    if slicer == 'orca':
+        if not materials:
+            issues.append(Issue("info", "Orca generator expects at least one material to seed temperatures/diameter", "materials"))
+    if slicer in ('prusa', 'superslicer', 'bambu'):
+        if (pd.get('accelerations_mms2') or {}) and not (pdl.get('limits') or {}).get('acceleration_max'):
+            issues.append(Issue("info", "Consider setting limits.acceleration_max to map max print/travel acceleration in INI-style profiles", "limits.acceleration_max"))
+    if slicer in ('ideamaker', 'kisslicer'):
+        spd = pd.get('speeds_mms') or {}
+        if not any(spd.get(k) for k in ('perimeter','infill','travel')):
+            issues.append(Issue("info", f"Add speeds_mms (perimeter/infill/travel) for better {slicer} seeds", "process_defaults.speeds_mms"))
     return issues

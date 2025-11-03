@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: extract-generator-keys
+        name: Extract generator keys
+        entry: bash -c 'python scripts/extract_generator_keys.py && git diff --quiet -- docs/exact-generator-keys.md || (echo "docs/exact-generator-keys.md is stale after extraction. Commit the regenerated file." >&2; exit 1)'
+        language: system
+        files: ^(opk/plugins/slicers/|scripts/extract_generator_keys\.py|docs/exact-generator-keys\.md)
+        pass_filenames: false

@@ -15,6 +15,7 @@ from ._qt_compat import (
     QStyle,
     QColor,
     QIcon,
+    QComboBox,
 )
 from ..core.io import load_json
 from ..core.rules import validate_printer, validate_filament, validate_process, summarize
@@ -36,10 +37,27 @@ class RulesDialog(QDialog):
         for label, edit, btn in (("Printer", self._printer, btn_pr), ("Filament", self._filament, btn_fi), ("Process", self._process, btn_ps)):
             row = QHBoxLayout(); row.addWidget(QLabel(label)); row.addWidget(edit); row.addWidget(btn); lay.addLayout(row)
 
-        # Buttons
-        btn_run = QPushButton("Run")
-        btn_run.clicked.connect(self._run)
-        lay.addWidget(btn_run)
+        # Controls row (Run + Path filter)
+        controls = QHBoxLayout()
+        btn_run = QPushButton("Run"); btn_run.clicked.connect(self._run); controls.addWidget(btn_run)
+        controls.addStretch(1)
+        # Path-only filter
+        controls.addWidget(QLabel("Path:"))
+        self._path_filter = QComboBox(); self._path_filter.addItems(["ALL"])  # populated after Run
+        try:
+            self._path_filter.currentIndexChanged.connect(lambda *_: self._render_rows())
+        except Exception:
+            pass
+        controls.addWidget(self._path_filter)
+        # Text filter
+        controls.addWidget(QLabel("Filter:"))
+        self._text_filter = QLineEdit(); self._text_filter.setPlaceholderText("path or message contains…")
+        try:
+            self._text_filter.textChanged.connect(lambda *_: self._render_rows())
+        except Exception:
+            pass
+        controls.addWidget(self._text_filter)
+        lay.addLayout(controls)
 
         # Results table
         self._table = QTableWidget(0, 4)
@@ -68,7 +86,27 @@ class RulesDialog(QDialog):
         for target, issues in (("printer", ip), ("filament", ifi), ("process", ips)):
             for i in issues:
                 rows.append((i.level, target, i.path, i.message))
-        self._populate(rows)
+        self._rows = rows
+        # Populate path filter options dynamically (unique path prefixes)
+        try:
+            # Extract simple prefixes (before first dot or '[')
+            def _prefix(p: str) -> str:
+                if not p:
+                    return ''
+                cut = len(p)
+                for ch in ('.', '['):
+                    idx = p.find(ch)
+                    if idx != -1:
+                        cut = min(cut, idx)
+                return p[:cut] if cut > 0 else p
+            opts = sorted({ _prefix(path) for _, _, path, _ in rows if path })
+            items = ["ALL"] + [o for o in opts if o]
+            self._path_filter.blockSignals(True)
+            self._path_filter.clear(); self._path_filter.addItems(items)
+            self._path_filter.blockSignals(False)
+        except Exception:
+            pass
+        self._render_rows()
 
     def _populate(self, rows):
         self._table.setRowCount(0)
@@ -88,3 +126,19 @@ class RulesDialog(QDialog):
                         item.setForeground(QColor("gray"))
                         item.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation))
                 self._table.setItem(r, c, item)
+
+    def _render_rows(self):
+        rows = getattr(self, '_rows', [])
+        try:
+            prefix = (self._path_filter.currentText() or 'ALL').strip()
+        except Exception:
+            prefix = 'ALL'
+        try:
+            q = (self._text_filter.text() or '').strip().lower()
+        except Exception:
+            q = ''
+        if prefix and prefix != 'ALL':
+            rows = [(lvl, tgt, path, msg) for (lvl, tgt, path, msg) in rows if (path or '').startswith(prefix)]
+        if q:
+            rows = [(lvl, tgt, path, msg) for (lvl, tgt, path, msg) in rows if (q in (path or '').lower()) or (q in (msg or '').lower())]
+        self._populate(rows)

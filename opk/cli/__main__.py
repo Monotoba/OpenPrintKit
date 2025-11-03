@@ -166,6 +166,13 @@ def main():
     ss = sub.add_parser("gui-screenshot", help="Capture GUI screenshots (offscreen) to an output directory")
     ss.add_argument("--out", required=True, help="Output directory for PNGs")
     ss.add_argument("--targets", help="Comma-separated targets: main,rules,profiles,snippets,settings,preferences")
+    # slice
+    sl = sub.add_parser("slice", help="Slice via external CLI (slic3r/prusaslicer/superslicer/curaengine)")
+    sl.add_argument("--slicer", required=True, choices=["slic3r","prusaslicer","superslicer","curaengine"], help="Slicer binary to use (must be on PATH)")
+    sl.add_argument("--model", required=True, help="Input model file (e.g., .stl)")
+    sl.add_argument("--profile", help="Slic3r-family INI profile to load (ignored for CuraEngine)")
+    sl.add_argument("--out", required=True, help="Output G-code file path")
+    sl.add_argument("--flags", help="Additional flags for CuraEngine (e.g., -j printer.json -s layer_height=0.2)")
     # Fine-grained acceleration overrides
     gn.add_argument("--acc-perimeter", type=int, help="Override perimeter acceleration (mm/s^2)")
     gn.add_argument("--acc-infill", type=int, help="Override infill acceleration (mm/s^2)")

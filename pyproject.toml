@@ -48,3 +48,23 @@ full = [
   "mkdocs>=1.6.0",
   "mkdocs-material>=9.5.0",
 ]
+# Developer tools
+dev = [
+  "pytest>=7.4.0",
+  "ruff>=0.6.9",
+  "black>=24.8.0",
+  "pre-commit>=3.8.0",
+  "build>=1.2.2",
+  "twine>=5.1.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-select = ["E","F","W"]
+exclude = [
+  ".venv",
+  "dist",
+  "schemas",
+  "examples",
+]

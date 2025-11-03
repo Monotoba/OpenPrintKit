@@ -37,6 +37,9 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     proc = (pdl.get('process_defaults') or {})
     # Extrusion multiplier
     ext_mult = proc.get('extrusion_multiplier')
+    # Retraction (filament-level)
+    retr_len = _num(proc.get('retract_mm') or 0.0)
+    retr_spd = _num(proc.get('retract_speed_mms') or 0.0)
     hooks = render_hooks_with_firmware(pdl or {})
     # Process defaults
     proc = (pdl.get('process_defaults') or {})
@@ -74,6 +77,8 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f"temperature = {noz_temp:.0f}",
         f"bed_temperature = {bed_temp:.0f}",
         *( [f"extrusion_multiplier = {float(ext_mult):.2f}"] if isinstance(ext_mult, (int,float)) else [] ),
+        *( [f"retract_length = {retr_len:.2f}"] if retr_len > 0 else [] ),
+        *( [f"retract_speed = {int(retr_spd)}"] if retr_spd > 0 else [] ),
         "",
         f"[print:Standard]",
         f"layer_height = {lh}",
@@ -88,6 +93,30 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         lines.append(f'top_solid_infill_speed = {top_spd}')
     if bot_spd:
         lines.append(f'bottom_solid_infill_speed = {bot_spd}')
+    # Walls and infill pattern (Prusa-like)
+    walls = proc.get('walls') if isinstance(proc, dict) else None
+    try:
+        if walls is not None:
+            lines.append(f'perimeters = {int(walls)}')
+    except Exception:
+        pass
+    inf_pat = (proc.get('infill_pattern') if isinstance(proc, dict) else None)
+    if isinstance(inf_pat, str) and inf_pat:
+        lines.append(f'fill_pattern = {inf_pat}')
+    # Infill density (percent)
+    try:
+        infill_pct = int(float((proc.get('infill_percent') if isinstance(proc, dict) else 0) or 0))
+        if infill_pct:
+            lines.append(f'fill_density = {infill_pct}')
+    except Exception:
+        pass
+    # Supports (best-effort)
+    support = (proc.get('support') if isinstance(proc, dict) else None)
+    if isinstance(support, bool):
+        lines.append(f'support_material = {1 if support else 0}')
+    elif isinstance(support, str) and support:
+        lines.append('support_material = 1')
+        lines.append(f'support_material_pattern = {support}')
     if per_acc:
         lines.append(f'perimeter_acceleration = {int(per_acc)}')
     if inf_acc:
@@ -102,6 +131,12 @@ def generate_bambu(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     if amax:
         lines.append(f'max_print_acceleration = {amax}')
         lines.append(f'max_travel_acceleration = {amax}')
+    # Simple adhesion mapping
+    adhesion = (proc.get('adhesion') or '').lower()
+    if adhesion == 'brim':
+        lines.append('brim_width = 5')
+    elif adhesion == 'skirt':
+        lines.append('skirts = 1')
     cooling = proc.get('cooling') or {}
     mlt = int(cooling.get('min_layer_time_s') or 0)
     fmin = int(cooling.get('fan_min_percent') or 0)

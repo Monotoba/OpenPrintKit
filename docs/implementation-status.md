@@ -39,6 +39,9 @@ This document tracks major features, their implementation status, and next steps
   - [x] Help pages (Overview, G-code Help, Firmware Mapping, M-code Reference)
   - [x] Tools → Generate Snippets… (invoke CLI core with defaults)
   - [x] Generate Profiles dialog persistence (slicer/out dir/PDL/bundle) and bundle UX improvements
+  - [x] Issues tab: Level and Path filters (machine_control, process_defaults, gcode)
+  - [x] Rules dialog: Path and text filters
+  - [x] Inline hints near camera triggers, exhaust conflicts, aux outputs
   - [ ] Project-level config management (optional)
 
 - Rules & Validation
@@ -48,6 +51,8 @@ This document tracks major features, their implementation status, and next steps
 - Docs
   - [x] Firmware Mapping, Overview, G-code Help, CLI Reference, M-code Reference
   - [x] System Notes (this session) and Implementation Status
+  - [x] Translations: Spanish, French, German, Portuguese (manuals + CLI/Overview)
+  - [x] Exact generator keys automation (`scripts/extract_generator_keys.py`) and CI check
   - [ ] Slicer generator documentation (once implemented)
 
 ## Achievements
@@ -70,12 +75,14 @@ This document tracks major features, their implementation status, and next steps
    - GUI tips reflecting those nuances.
 
 3. GUI Enhancements
-   - Tools → Generate Snippets… action using Settings.
-   - Optional project-level config files for per-project defaults.
+  - Tools → Generate Snippets… action using Settings.
+  - Optional project-level config files for per-project defaults.
+  - Process Defaults editor tab with inline hints (layer heights, speeds, cooling)
 
 4. Validation & Rules
    - Expand rule checks for more firmware-specific guidance.
    - Lint common pitfalls (e.g., mismatched nozzle/filament diameters).
 
 5. Packaging & Distribution
-   - CLI/GUI packaging guidance, CI workflows, and release notes.
+  - CLI/GUI packaging guidance, CI workflows, and release notes.
+  - Pre-commit config and lint workflow (ruff + black) in CI.

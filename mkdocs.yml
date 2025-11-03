@@ -12,8 +12,23 @@ nav:
       - Español (CLI): cli-reference.es.md
       - Español (Resumen): overview.es.md
       - Français: user-manual.fr.md
+      - Français (CLI): cli-reference.fr.md
+      - Français (Aperçu): overview.fr.md
+      - Français (Firmware): firmware-mapping.fr.md
+      - Français (G-code): gcode-help.fr.md
+      - Français (M-code): mcode-reference.fr.md
       - Deutsch: user-manual.de.md
+      - Deutsch (CLI): cli-reference.de.md
+      - Deutsch (Überblick): overview.de.md
+      - Deutsch (Firmware): firmware-mapping.de.md
+      - Deutsch (G-code): gcode-help.de.md
+      - Deutsch (M-code): mcode-reference.de.md
       - Português: user-manual.pt.md
+      - Português (CLI): cli-reference.pt.md
+      - Português (Visão Geral): overview.pt.md
+      - Português (Firmware): firmware-mapping.pt.md
+      - Português (G-code): gcode-help.pt.md
+      - Português (M-code): mcode-reference.pt.md
   - Quickstart: quickstart.md
   - CLI Reference: cli-reference.md
   - Overview: overview.md

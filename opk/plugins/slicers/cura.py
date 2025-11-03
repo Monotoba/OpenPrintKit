@@ -60,6 +60,11 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     min_layer_time = int(cooling.get('min_layer_time_s') or 0)
     fan_min = int(cooling.get('fan_min_percent') or 0)
     fan_max = int(cooling.get('fan_max_percent') or fan_min)
+    # Infill density, pattern and support
+    infill_pct = proc.get('infill_percent')
+    support = proc.get('support')  # bool or str
+    inf_pat = proc.get('infill_pattern')
+    walls = proc.get('walls')
     # path
     cdir = out_dir / 'cura'
     _ensure_dir(cdir)
@@ -93,6 +98,21 @@ def generate_cura(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         lines.append(f'adhesion_type = {adhesion}')
     if flow_pct is not None:
         lines.append(f'material_flow = {flow_pct}')
+    if isinstance(infill_pct, (int, float)):
+        lines.append(f'infill_sparse_density = {int(infill_pct)}')
+    if isinstance(inf_pat, str) and inf_pat:
+        lines.append(f'infill_pattern = {inf_pat}')
+    try:
+        if walls is not None:
+            lines.append(f'wall_line_count = {int(walls)}')
+    except Exception:
+        pass
+    if isinstance(support, bool):
+        lines.append(f'support_enable = {str(bool(support))}')
+    elif isinstance(support, str) and support:
+        # Enable support and set a basic pattern if a string is provided
+        lines.append('support_enable = True')
+        lines.append(f'support_pattern = {support}')
     if min_layer_time > 0:
         lines.append(f'cool_min_layer_time = {min_layer_time}')
     # Cura uses 0-100 fan percent

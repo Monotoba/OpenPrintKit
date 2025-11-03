@@ -2,11 +2,13 @@
 
 [![Build Status](https://github.com/Monotoba/OpenPrintKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions)
 [![Docs](https://img.shields.io/badge/docs-site-blue.svg)](https://monotoba.github.io/OpenPrintKit/)
+[![Release](https://github.com/Monotoba/OpenPrintKit/actions/workflows/release.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions/workflows/release.yml)
 [![User Manual](https://img.shields.io/badge/User%20Manual-read-blue.svg)](https://monotoba.github.io/OpenPrintKit/user-manual/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 [![Chat](https://img.shields.io/badge/community-chat-brightgreen.svg)]()
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 
 ---
 
@@ -19,6 +21,7 @@
 - [GUI](#gui)
   - [GUI Tips](#gui-tips)
 - [Development](#development)
+- [Translations](#translations)
 - [Features](#features)
 - [Roadmap](#roadmap)
 - [License](#license)
@@ -46,16 +49,17 @@ For a step-by-step guide with more detail, see `docs/quickstart.md`.
 python -m venv .venv
 source .venv/bin/activate
 
-# Install core (CLI, generators)
-pip install -e .
+# End-user install (PyPI)
+pip install openprintkit
+# or include the GUI
+pip install 'openprintkit[gui]'
 
-# Optional extras
-# GUI (OPK Studio)
-pip install -e .[gui]
-# NFC (OpenPrintTag NFC features)
-pip install -e .[nfc]
-# Docs (MkDocs site)
-pip install -e .[docs]
+# Dev install (editable)
+pip install -e .
+# Optional dev extras
+pip install -e '.[gui]'
+pip install -e '.[nfc]'
+pip install -e '.[docs]'
 
 # Validate individual profiles
 opk validate examples/printers/Longer_LK5_Pro_Marlin.json
@@ -137,6 +141,8 @@ OpenPrintKit/
 - `opk pdl-validate --pdl PDL.yaml` — Validate PDL schema and machine-control rules
 - `opk gen-snippets --pdl PDL.yaml --out-dir OUTDIR [--firmware marlin|klipper|rrf|grbl|linuxcnc]` — Generate start/end G-code files
 - `opk gen --pdl PDL.yaml --slicer orca|cura|prusa|ideamaker|bambu --out OUTDIR [--bundle BUNDLE.orca_printer]` — Generate slicer profiles
+- `opk gui-screenshot --out OUTDIR [--targets main,rules,profiles,snippets,settings,preferences]` — Capture offscreen GUI screenshots for docs
+- `opk slice --slicer slic3r|prusaslicer|superslicer|curaengine --model MODEL.stl --profile PROFILE.ini --out OUT.gcode [--flags "..."]` — Slice via external CLI (binary must be on PATH)
 - `opk spool --source spoolman|tigertag|openspool|opentag3d --base-url URL --action create|read|update|delete|search [--query Q] [--page N] [--page-size N] [--format items|normalized] [--endpoints-file FILE.json] [--endpoints-json JSON]` — Spool DB ops with pagination and endpoint overrides. Default retry limit: 5 attempts (configurable in App Settings or `OPK_NET_RETRY_LIMIT`).
 
 ### Slicer Support
@@ -180,7 +186,11 @@ See full details in docs/project-status.md.
 - Bundling from Generate Profiles:
   - Supported for Orca, Cura, Prusa, ideaMaker; auto-suggests a filename if empty.
   - Suffix is added automatically (`.orca_printer` for Orca, `.zip` for others).
-  - Use the “…” button to pick a bundle path directly.
+ - Use the “…” button to pick a bundle path directly.
+ - Issues tab filters:
+   - Level filter (ALL, ERROR+WARN, ERROR, WARN, INFO) and a Path filter (ALL, machine_control, process_defaults, gcode) help focus diagnostics quickly.
+  - Rules dialog filters:
+    - Path dropdown (built from detected field prefixes) and a text Filter box let you narrow results by path prefix and search terms (path/message).
 
 If the app exits immediately, try:
 
@@ -198,6 +208,31 @@ If the app exits immediately, try:
 - CLI help: `python -m opk.cli --help`
 - GUI: `opk-gui` or `python -m opk.ui.main_window`
 
+Dev notes:
+- Update extracted output keys: `python scripts/extract_generator_keys.py` (writes `docs/exact-generator-keys.md`).
+- Pre-commit hook (optional):
+  - `pip install pre-commit && pre-commit install`
+  - Runs a check to ensure `docs/exact-generator-keys.md` is up to date when generator code changes.
+
+## Translations
+
+- Español
+  - Manual de Usuario: [docs/user-manual.es.md](docs/user-manual.es.md)
+  - CLI: [docs/cli-reference.es.md](docs/cli-reference.es.md)
+  - Resumen: [docs/overview.es.md](docs/overview.es.md)
+- Français
+  - Guide Utilisateur: [docs/user-manual.fr.md](docs/user-manual.fr.md)
+  - CLI: [docs/cli-reference.fr.md](docs/cli-reference.fr.md)
+  - Aperçu: [docs/overview.fr.md](docs/overview.fr.md)
+- Deutsch
+  - Benutzerhandbuch: [docs/user-manual.de.md](docs/user-manual.de.md)
+  - CLI: [docs/cli-reference.de.md](docs/cli-reference.de.md)
+  - Überblick: [docs/overview.de.md](docs/overview.de.md)
+- Português
+  - Manual do Usuário: [docs/user-manual.pt.md](docs/user-manual.pt.md)
+  - CLI: [docs/cli-reference.pt.md](docs/cli-reference.pt.md)
+  - Visão Geral: [docs/overview.pt.md](docs/overview.pt.md)
+
 🧩 Features
 
 ✅ JSON-Schema validation for all profiles
@@ -210,14 +245,14 @@ If the app exits immediately, try:
 
 🧠 Extensible to multiple slicers (Orca, Cura, Prusa)
 
-🔧 Planned GUI editor and install wizard (PySide6)
+🖥️ PySide6 GUI editor, tools, and install wizard (OPK Studio)
 
 🧱 Roadmap
 Phase	Feature	Status
 1	Baseline CLI + schemas + examples	✅ Complete
-2	PDL intermediate model + converters	🚧 In progress
-3	GUI Editor (PySide6)	🔜 Planned
-4	Multi-slicer export (Cura, Prusa, SuperSlicer)	🔜 Planned
+2	PDL intermediate model + converters	✅ Initial
+3	GUI Editor (PySide6)	✅ Complete
+4	Multi-slicer export (Cura, Prusa, SuperSlicer)	✅ Initial
 5	Online registry of printer definitions	🧩 Future milestone
 🧾 License
 
@@ -238,6 +273,11 @@ Run tests (pytest -q)
 Submit a PR
 
 For major changes, open an issue first to discuss your ideas.
+
+Recommended:
+- Enable pre-commit to keep docs/exact-generator-keys.md current:
+  - `pip install pre-commit && pre-commit install`
+  - The hook runs `scripts/extract_generator_keys.py` on changes to generator modules and fails if the keys doc is stale.
 
 💬 Community
 Resource	Link

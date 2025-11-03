@@ -17,9 +17,9 @@ Welcome to the OPK docs. Start here for high‑level concepts and jump to the us
 
 Translations:
 
-- Español: user-manual.es.md
-- Français: user-manual.fr.md
-- Deutsch: user-manual.de.md
-- Português: user-manual.pt.md
+- Español: user-manual.es.md, cli-reference.es.md, overview.es.md
+- Français: user-manual.fr.md, cli-reference.fr.md, overview.fr.md
+- Deutsch: user-manual.de.md, cli-reference.de.md, overview.de.md
+- Português: user-manual.pt.md, cli-reference.pt.md, overview.pt.md
 
 Screenshots: images/

@@ -49,6 +49,12 @@ def generate_kisslicer(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     hooks = render_hooks_with_firmware(pdl or {})
     start_g = '\n'.join(hooks.get('start') or [])
     end_g = '\n'.join(hooks.get('end') or [])
+    # Optional: infill density and supports (best-effort generic keys)
+    try:
+        infill_pct = int(float((pdl.get('process_defaults') or {}).get('infill_percent') or 0))
+    except Exception:
+        infill_pct = 0
+    support = (pdl.get('process_defaults') or {}).get('support')
     outdir = out_dir / 'kisslicer'
     _ensure_dir(outdir)
     ini = outdir / f'{name}.ini'
@@ -63,6 +69,9 @@ def generate_kisslicer(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         f'perimeter_speed = {int(per_spd)}',
         f'infill_speed = {int(inf_spd)}',
         f'travel_speed = {int(trav_spd)}',
+        *( [f'infill_density = {infill_pct}'] if infill_pct else [] ),
+        *( [f'support_material = {1 if support else 0}'] if support is not None else [] ),
+        *( [f'support_pattern = {support}'] if isinstance(support, str) else [] ),
         *( [f'retraction_length = {retr_len:.2f}', f'retraction_speed = {int(retr_spd)}'] if retr_len else [] ),
         *( [f'cool_min_layer_time = {min_layer_time}'] if min_layer_time else [] ),
         *( [f'fan_min = {fan_min}', f'fan_max = {fan_max}'] if (fan_min or fan_max) else [] ),

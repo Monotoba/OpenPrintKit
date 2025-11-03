@@ -41,6 +41,7 @@ class PDLForm(QWidget):
         self._init_multimaterial_tab()
         self._init_filaments_tab()
         self._init_features_tab()
+        self._init_process_defaults_tab()
         self._init_machine_control_tab()
         self._init_peripherals_tab()
         self._init_openprinttag_tab()
@@ -66,6 +67,20 @@ class PDLForm(QWidget):
         except Exception:
             pass
         controls.addWidget(self.cb_issue_level)
+        # Path-only prefix filter
+        controls.addWidget(QLabel("Path:"))
+        try:
+            from ._qt_compat import QComboBox as _QComboBox2
+            self.cb_issue_path = _QComboBox2()  # type: ignore
+        except Exception:
+            from ._qt_compat import QComboBox as _QComboBox2  # fallback alias
+            self.cb_issue_path = _QComboBox2()  # type: ignore
+        try:
+            self.cb_issue_path.addItems(["ALL","machine_control","process_defaults","gcode"])  # type: ignore[attr-defined]
+            self.cb_issue_path.currentIndexChanged.connect(lambda *_: self._render_issues())  # type: ignore[attr-defined]
+        except Exception:
+            pass
+        controls.addWidget(self.cb_issue_path)
         # Text filter
         controls.addWidget(QLabel("Filter:"))
         self.ed_issue_filter = QLineEdit(); self.ed_issue_filter.setPlaceholderText("path or message contains…")
@@ -111,6 +126,10 @@ class PDLForm(QWidget):
             q = (self.ed_issue_filter.text() or '').strip().lower()
         except Exception:
             q = ''
+        try:
+            path_prefix = (self.cb_issue_path.currentText() or 'ALL').strip()
+        except Exception:
+            path_prefix = 'ALL'
         def _keep(level: str) -> bool:
             l = (level or '').lower()
             if target == 'ALL':
@@ -124,6 +143,9 @@ class PDLForm(QWidget):
         for lvl, path, msg in rows:
             if not _keep(lvl):
                 continue
+            if path_prefix and path_prefix != 'ALL':
+                if not (path or '').startswith(path_prefix):
+                    continue
             if q and (q not in (path or '').lower()) and (q not in (msg or '').lower()):
                 continue
             r = self.t_issues.rowCount(); self.t_issues.insertRow(r)
@@ -165,7 +187,7 @@ class PDLForm(QWidget):
 
     def _update_inline_hints(self, issues: list):
         # Reset
-        for lab in [getattr(self, 'hint_fans_off', None), getattr(self, 'hint_exhaust_off', None), getattr(self, 'hint_sd_file', None), getattr(self, 'hint_camera_cmd', None), getattr(self, 'hint_exhaust_pin', None)]:
+        for lab in [getattr(self, 'hint_fans_off', None), getattr(self, 'hint_exhaust_off', None), getattr(self, 'hint_sd_file', None), getattr(self, 'hint_camera_cmd', None), getattr(self, 'hint_exhaust_pin', None), getattr(self, 'hint_camera_before', None), getattr(self, 'hint_camera_after', None), getattr(self, 'hint_exhaust_conflict', None), getattr(self, 'hint_aux_outputs', None), getattr(self, 'hint_process', None), getattr(self, 'hint_filaments', None)]:
             try:
                 if lab: lab.setVisible(False)
             except Exception:
@@ -181,10 +203,32 @@ class PDLForm(QWidget):
                 self._apply_hint(self.hint_exhaust_off, lvl, msg)
             if 'machine_control.sd_logging.filename' in p and getattr(self, 'hint_sd_file', None):
                 self._apply_hint(self.hint_sd_file, lvl, msg)
-            if p.startswith('machine_control.camera') and getattr(self, 'hint_camera_cmd', None):
-                self._apply_hint(self.hint_camera_cmd, lvl, msg)
+            if p.startswith('process_defaults') and getattr(self, 'hint_process', None):
+                self._apply_hint(self.hint_process, lvl, msg)
+            if p == 'process_defaults.retract_mm' and getattr(self, 'hint_retract', None):
+                self._apply_hint(self.hint_retract, lvl, msg)
+            if p.startswith('materials[') and getattr(self, 'hint_filaments', None):
+                self._apply_hint(self.hint_filaments, lvl, msg)
+            if p.startswith('machine_control.camera'):
+                if getattr(self, 'hint_camera_cmd', None):
+                    self._apply_hint(self.hint_camera_cmd, lvl, msg)
+                # Also hint near before/after toggles if enabled and command missing
+                try:
+                    if 'command' in p and 'trigger' in (msg or '').lower():
+                        if getattr(self, 'pr_camera_before', None) and getattr(self, 'hint_camera_before', None):
+                            if self.pr_camera_before.isChecked():
+                                self._apply_hint(self.hint_camera_before, lvl, msg)
+                        if getattr(self, 'pr_camera_after', None) and getattr(self, 'hint_camera_after', None):
+                            if self.pr_camera_after.isChecked():
+                                self._apply_hint(self.hint_camera_after, lvl, msg)
+                except Exception:
+                    pass
+            if p == 'machine_control.exhaust' and getattr(self, 'hint_exhaust_conflict', None):
+                self._apply_hint(self.hint_exhaust_conflict, lvl, msg)
             if 'machine_control.exhaust.pin' in p and getattr(self, 'hint_exhaust_pin', None):
                 self._apply_hint(self.hint_exhaust_pin, lvl, msg)
+            if 'machine_control.aux_outputs[' in p and getattr(self, 'hint_aux_outputs', None):
+                self._apply_hint(self.hint_aux_outputs, lvl, msg)
 
     def _run_firmware_checks(self, focus_prefix: str | List[str] = "machine_control") -> None:
         try:
@@ -274,6 +318,18 @@ class PDLForm(QWidget):
         # Exhaust
         self.pr_exhaust_enable.setChecked(False); self.pr_exhaust_speed.setValue(0); self.pr_exhaust_pin.setValue(0); self.pr_exhaust_fan.setValue(0); self.pr_exhaust_off.setChecked(False)
 
+    def _reset_process_defaults(self) -> None:
+        # Reasonable defaults; 0 means "unset" for optional numeric fields
+        self.pd_lh.setValue(0.2); self.pd_flh.setValue(0.28)
+        self.pd_sp_per.setValue(40); self.pd_sp_inf.setValue(60); self.pd_sp_trav.setValue(150)
+        self.pd_sp_ext.setValue(0); self.pd_sp_top.setValue(0); self.pd_sp_bot.setValue(0)
+        self.pd_retract_len.setValue(0.0); self.pd_retract_spd.setValue(35)
+        self.pd_adhesion.setCurrentIndex(0)
+        self.pd_ext_mult.setValue(1.0)
+        self.pd_cool_time.setValue(0); self.pd_fan_min.setValue(0); self.pd_fan_max.setValue(0); self.pd_fan_always.setChecked(False)
+        for acc in (self.pd_acc_per, self.pd_acc_inf, self.pd_acc_ext, self.pd_acc_top, self.pd_acc_bot, self.pd_acc_travel):
+            acc.setValue(0)
+
     # ---------- Build Area ----------
     def _init_build_area_tab(self):
         w = QWidget(); form = QFormLayout(w)
@@ -286,6 +342,9 @@ class PDLForm(QWidget):
         btn_help.clicked.connect(lambda: self._open_doc("docs/overview.md", "Overview"))
         btn_check.clicked.connect(lambda: self._run_firmware_checks(["process_defaults","limits"]))
         row_actions.addWidget(btn_reset); row_actions.addWidget(btn_help); row_actions.addWidget(btn_check); row_actions.addStretch(1)
+        # Header-level hint for process defaults and limits
+        self.hint_process = QLabel("")
+        row_actions.addWidget(self.hint_process)
         self.f_pdl_version = QLineEdit("1.0"); self.f_pdl_version.setToolTip("PDL schema version")
         self.f_id = QLineEdit()
         self.f_id.setToolTip("Unique printer identifier")
@@ -487,6 +546,8 @@ class PDLForm(QWidget):
         self.pr_camera_after = QCheckBox("Trigger after snapshot"); self.pr_camera_after.setToolTip("Adds camera command to after_snapshot hook")
         self.pr_camera_cmd = QLineEdit("M240"); self.pr_camera_cmd.setToolTip("Snapshot command (e.g., M240 or macro)")
         self.hint_camera_cmd = QLabel("")
+        self.hint_camera_before = QLabel("")
+        self.hint_camera_after = QLabel("")
         # Fans
         row_part = QHBoxLayout();
         self.pr_fan_part = QSpinBox(); self.pr_fan_part.setRange(0,100); self.pr_fan_part.setSuffix(" %"); self.pr_fan_part.setToolTip("Part cooling fan at start")
@@ -512,8 +573,10 @@ class PDLForm(QWidget):
         _camrow = QHBoxLayout(); _camrow.addWidget(self.pr_camera_cmd); _camrow.addWidget(self.hint_camera_cmd); _camrow.addStretch(1)
         _camroww = QWidget(); _camroww.setLayout(_camrow)
         form.addRow(QLabel("Camera command"), _camroww)
-        form.addRow(self.pr_camera_before)
-        form.addRow(self.pr_camera_after)
+        row_cam_before = QHBoxLayout(); row_cam_before.addWidget(self.pr_camera_before); row_cam_before.addWidget(self.hint_camera_before); row_cam_before.addStretch(1)
+        form.addRow(row_cam_before)
+        row_cam_after = QHBoxLayout(); row_cam_after.addWidget(self.pr_camera_after); row_cam_after.addWidget(self.hint_camera_after); row_cam_after.addStretch(1)
+        form.addRow(row_cam_after)
         form.addRow(row_part)
         form.addRow(row_aux)
         row_fans_off = QHBoxLayout(); row_fans_off.addWidget(self.pr_fans_off_end); row_fans_off.addWidget(self.hint_fans_off); row_fans_off.addStretch(1)
@@ -529,14 +592,19 @@ class PDLForm(QWidget):
         self.pr_exhaust_pin = QSpinBox(); self.pr_exhaust_pin.setRange(0,999); self.pr_exhaust_pin.setPrefix("Pin P:"); self.pr_exhaust_pin.setToolTip("GPIO pin (M42 P) or use policy for named pins")
         self.pr_exhaust_fan = QSpinBox(); self.pr_exhaust_fan.setRange(0,9); self.pr_exhaust_fan.setPrefix(" Fan P:"); self.pr_exhaust_fan.setToolTip("Fan index (M106/M107 P)")
         self.pr_exhaust_off = QCheckBox("Off at end"); self.pr_exhaust_off.setToolTip("Turn exhaust off at end")
-        self.hint_exhaust_off = QLabel(""); self.hint_exhaust_pin = QLabel("")
-        ex_row2.addWidget(self.pr_exhaust_pin); ex_row2.addWidget(self.pr_exhaust_fan); ex_row2.addWidget(self.pr_exhaust_off); ex_row2.addWidget(self.hint_exhaust_off); ex_row2.addWidget(self.hint_exhaust_pin)
+        self.hint_exhaust_off = QLabel(""); self.hint_exhaust_pin = QLabel(""); self.hint_exhaust_conflict = QLabel("")
+        ex_row2.addWidget(self.pr_exhaust_pin); ex_row2.addWidget(self.pr_exhaust_fan); ex_row2.addWidget(self.pr_exhaust_off); ex_row2.addWidget(self.hint_exhaust_off); ex_row2.addWidget(self.hint_exhaust_pin); ex_row2.addWidget(self.hint_exhaust_conflict)
         form.addRow(QLabel("Exhaust (choose Pin or Fan)"))
         form.addRow(ex_row1)
         form.addRow(ex_row2)
 
         # Aux Outputs (M42)
-        form.addRow(QLabel("Auxiliary Outputs (M42)"))
+        aux_hdr = QHBoxLayout();
+        aux_hdr.addWidget(QLabel("Auxiliary Outputs (M42)"))
+        self.hint_aux_outputs = QLabel("")
+        aux_hdr.addWidget(self.hint_aux_outputs); aux_hdr.addStretch(1)
+        _auxhdrw = QWidget(); _auxhdrw.setLayout(aux_hdr)
+        form.addRow(_auxhdrw)
         self.t_aux = QTableWidget(0, 4)
         self.t_aux.setHorizontalHeaderLabels(["Label","Pin P","Start S","End S"])
         self.t_aux.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -562,6 +630,73 @@ class PDLForm(QWidget):
         form.addRow(rowcp)
         idx = self.tabs.addTab(w, "Peripherals"); self.tabs.setTabToolTip(idx, "Lights, camera, fans, SD logging, exhaust")
         self._update_firmware_tips()
+
+    # ---------- Process Defaults ----------
+    def _init_process_defaults_tab(self):
+        w = QWidget(); form = QFormLayout(w)
+        # Actions row
+        row = QHBoxLayout()
+        btn_check = QPushButton("Check…"); btn_check.setToolTip("Run rules and focus Process Defaults issues")
+        btn_check.clicked.connect(lambda: self._run_firmware_checks("process_defaults"))
+        row.addWidget(btn_check); row.addStretch(1)
+        # Header hint
+        self.hint_process = QLabel("")
+        row.addWidget(self.hint_process)
+        form.addRow(row)
+
+        # Layer heights
+        self.pd_lh = QDoubleSpinBox(); self.pd_lh.setRange(0.0, 2.0); self.pd_lh.setDecimals(3); self.pd_lh.setSingleStep(0.01)
+        self.pd_flh = QDoubleSpinBox(); self.pd_flh.setRange(0.0, 2.0); self.pd_flh.setDecimals(3); self.pd_flh.setSingleStep(0.01)
+        form.addRow("Layer height (mm)", self.pd_lh)
+        form.addRow("First layer (mm)", self.pd_flh)
+
+        # Speeds (mm/s)
+        self.pd_sp_per = QSpinBox(); self.pd_sp_per.setRange(0, 1000)
+        self.pd_sp_inf = QSpinBox(); self.pd_sp_inf.setRange(0, 1000)
+        self.pd_sp_trav = QSpinBox(); self.pd_sp_trav.setRange(0, 5000)
+        self.pd_sp_ext = QSpinBox(); self.pd_sp_ext.setRange(0, 1000)
+        self.pd_sp_top = QSpinBox(); self.pd_sp_top.setRange(0, 1000)
+        self.pd_sp_bot = QSpinBox(); self.pd_sp_bot.setRange(0, 1000)
+        sp_row1 = QHBoxLayout(); sp_row1.addWidget(QLabel("Perimeter")); sp_row1.addWidget(self.pd_sp_per); sp_row1.addWidget(QLabel("Infill")); sp_row1.addWidget(self.pd_sp_inf); sp_row1.addWidget(QLabel("Travel")); sp_row1.addWidget(self.pd_sp_trav); sp_row1.addStretch(1)
+        form.addRow("Speeds (mm/s)", sp_row1)
+        sp_row2 = QHBoxLayout(); sp_row2.addWidget(QLabel("External")); sp_row2.addWidget(self.pd_sp_ext); sp_row2.addWidget(QLabel("Top")); sp_row2.addWidget(self.pd_sp_top); sp_row2.addWidget(QLabel("Bottom")); sp_row2.addWidget(self.pd_sp_bot); sp_row2.addStretch(1)
+        form.addRow(sp_row2)
+
+        # Retraction
+        self.pd_retract_len = QDoubleSpinBox(); self.pd_retract_len.setRange(0.0, 50.0); self.pd_retract_len.setDecimals(2)
+        self.pd_retract_spd = QSpinBox(); self.pd_retract_spd.setRange(0, 500)
+        self.hint_retract = QLabel("")
+        re_row = QHBoxLayout(); re_row.addWidget(QLabel("Length (mm)")); re_row.addWidget(self.pd_retract_len); re_row.addWidget(QLabel("Speed (mm/s)")); re_row.addWidget(self.pd_retract_spd); re_row.addWidget(self.hint_retract); re_row.addStretch(1)
+        form.addRow("Retraction", re_row)
+
+        # Adhesion and extrusion multiplier
+        self.pd_adhesion = QComboBox(); self.pd_adhesion.addItems(["none","skirt","brim","raft"])
+        self.pd_ext_mult = QDoubleSpinBox(); self.pd_ext_mult.setRange(0.1, 3.0); self.pd_ext_mult.setDecimals(2)
+        ae_row = QHBoxLayout(); ae_row.addWidget(QLabel("Adhesion")); ae_row.addWidget(self.pd_adhesion); ae_row.addWidget(QLabel("Extrusion multiplier")); ae_row.addWidget(self.pd_ext_mult); ae_row.addStretch(1)
+        form.addRow(ae_row)
+
+        # Cooling
+        self.pd_cool_time = QSpinBox(); self.pd_cool_time.setRange(0, 300)
+        self.pd_fan_min = QSpinBox(); self.pd_fan_min.setRange(0, 100); self.pd_fan_min.setSuffix(" %")
+        self.pd_fan_max = QSpinBox(); self.pd_fan_max.setRange(0, 100); self.pd_fan_max.setSuffix(" %")
+        self.pd_fan_always = QCheckBox("Fan always on")
+        cool_row = QHBoxLayout(); cool_row.addWidget(QLabel("Min layer time (s)")); cool_row.addWidget(self.pd_cool_time); cool_row.addWidget(QLabel("Fan min")); cool_row.addWidget(self.pd_fan_min); cool_row.addWidget(QLabel("Fan max")); cool_row.addWidget(self.pd_fan_max); cool_row.addWidget(self.pd_fan_always); cool_row.addStretch(1)
+        form.addRow("Cooling", cool_row)
+
+        # Accelerations (mm/s^2)
+        self.pd_acc_per = QSpinBox(); self.pd_acc_per.setRange(0, 100000)
+        self.pd_acc_inf = QSpinBox(); self.pd_acc_inf.setRange(0, 100000)
+        self.pd_acc_ext = QSpinBox(); self.pd_acc_ext.setRange(0, 100000)
+        self.pd_acc_top = QSpinBox(); self.pd_acc_top.setRange(0, 100000)
+        self.pd_acc_bot = QSpinBox(); self.pd_acc_bot.setRange(0, 100000)
+        self.pd_acc_travel = QSpinBox(); self.pd_acc_travel.setRange(0, 100000)
+        acc_row1 = QHBoxLayout(); acc_row1.addWidget(QLabel("Perimeter")); acc_row1.addWidget(self.pd_acc_per); acc_row1.addWidget(QLabel("Infill")); acc_row1.addWidget(self.pd_acc_inf); acc_row1.addWidget(QLabel("External")); acc_row1.addWidget(self.pd_acc_ext); acc_row1.addStretch(1)
+        form.addRow("Accelerations (mm/s²)", acc_row1)
+        acc_row2 = QHBoxLayout(); acc_row2.addWidget(QLabel("Top")); acc_row2.addWidget(self.pd_acc_top); acc_row2.addWidget(QLabel("Bottom")); acc_row2.addWidget(self.pd_acc_bot); acc_row2.addWidget(QLabel("Travel")); acc_row2.addWidget(self.pd_acc_travel); acc_row2.addStretch(1)
+        form.addRow(acc_row2)
+
+        idx = self.tabs.addTab(w, "Process Defaults"); self.tabs.setTabToolTip(idx, "Heights, speeds, retraction, cooling, accelerations")
+        self._reset_process_defaults()
 
     # ---------- OpenPrintTag ----------
     def _init_openprinttag_tab(self):
@@ -606,6 +741,8 @@ class PDLForm(QWidget):
     # ---------- Filaments ----------
     def _init_filaments_tab(self):
         w = QWidget(); v = QVBoxLayout(w)
+        fil_hdr = QHBoxLayout(); fil_hdr.addWidget(QLabel("Materials (Filaments)")); self.hint_filaments = QLabel(""); fil_hdr.addWidget(self.hint_filaments); fil_hdr.addStretch(1)
+        _filhdrw = QWidget(); _filhdrw.setLayout(fil_hdr); v.addWidget(_filhdrw)
         self.t_filaments = QTableWidget(0, 9)
         self.t_filaments.setHorizontalHeaderLabels([
             "Name","Type","Dia","Nozzle °C","Bed °C","Retract Len","Retract Spd","Fan %","Color"
@@ -1016,6 +1153,39 @@ class PDLForm(QWidget):
             for c, val in enumerate(vals):
                 self.t_filaments.setItem(r, c, QTableWidgetItem(val))
 
+        # Process Defaults (load into widgets if present)
+        pd = g.get("process_defaults") or {}
+        try: self.pd_lh.setValue(float(pd.get("layer_height_mm") or self.pd_lh.value()))
+        except Exception: pass
+        try: self.pd_flh.setValue(float(pd.get("first_layer_mm") or self.pd_flh.value()))
+        except Exception: pass
+        sp = pd.get("speeds_mms") or {}
+        for w, k in ((self.pd_sp_per, 'perimeter'), (self.pd_sp_inf, 'infill'), (self.pd_sp_trav, 'travel'), (self.pd_sp_ext, 'external_perimeter'), (self.pd_sp_top, 'top'), (self.pd_sp_bot, 'bottom')):
+            try: w.setValue(int(sp.get(k) or 0))
+            except Exception: pass
+        try: self.pd_retract_len.setValue(float(pd.get('retract_mm') or 0.0))
+        except Exception: pass
+        try: self.pd_retract_spd.setValue(int(pd.get('retract_speed_mms') or 35))
+        except Exception: pass
+        adh = str(pd.get('adhesion') or 'none').lower()
+        try: self.pd_adhesion.setCurrentIndex(max(0, ["none","skirt","brim","raft"].index(adh) if adh in ("none","skirt","brim","raft") else 0))
+        except Exception: pass
+        try: self.pd_ext_mult.setValue(float(pd.get('extrusion_multiplier') or 1.0))
+        except Exception: pass
+        cool = pd.get('cooling') or {}
+        try: self.pd_cool_time.setValue(int(cool.get('min_layer_time_s') or 0))
+        except Exception: pass
+        try: self.pd_fan_min.setValue(int(cool.get('fan_min_percent') or 0))
+        except Exception: pass
+        try: self.pd_fan_max.setValue(int(cool.get('fan_max_percent') or 0))
+        except Exception: pass
+        try: self.pd_fan_always.setChecked(bool(cool.get('fan_always_on') or False))
+        except Exception: pass
+        acc = pd.get('accelerations_mms2') or {}
+        for w, k in ((self.pd_acc_per, 'perimeter'), (self.pd_acc_inf, 'infill'), (self.pd_acc_ext, 'external_perimeter'), (self.pd_acc_top, 'top'), (self.pd_acc_bot, 'bottom'), (self.pd_acc_travel, 'travel')):
+            try: w.setValue(int(acc.get(k) or 0))
+            except Exception: pass
+
     def dump_pdl(self) -> Dict[str, Any]:
         g: Dict[str, Any] = {}
         g["pdl_version"] = self.f_pdl_version.text().strip() or "1.0"
@@ -1202,6 +1372,41 @@ class PDLForm(QWidget):
             mats.append(entry)
         if mats:
             g["materials"] = mats
+        # Process Defaults
+        pd_out: Dict[str, Any] = {}
+        if getattr(self, 'pd_lh', None) is not None:
+            if self.pd_lh.value(): pd_out['layer_height_mm'] = float(self.pd_lh.value())
+            if self.pd_flh.value(): pd_out['first_layer_mm'] = float(self.pd_flh.value())
+            sp: Dict[str, Any] = {}
+            if self.pd_sp_per.value(): sp['perimeter'] = int(self.pd_sp_per.value())
+            if self.pd_sp_inf.value(): sp['infill'] = int(self.pd_sp_inf.value())
+            if self.pd_sp_trav.value(): sp['travel'] = int(self.pd_sp_trav.value())
+            if self.pd_sp_ext.value(): sp['external_perimeter'] = int(self.pd_sp_ext.value())
+            if self.pd_sp_top.value(): sp['top'] = int(self.pd_sp_top.value())
+            if self.pd_sp_bot.value(): sp['bottom'] = int(self.pd_sp_bot.value())
+            if sp: pd_out['speeds_mms'] = sp
+            if self.pd_retract_len.value(): pd_out['retract_mm'] = float(self.pd_retract_len.value())
+            if self.pd_retract_spd.value(): pd_out['retract_speed_mms'] = int(self.pd_retract_spd.value())
+            adh = self.pd_adhesion.currentText().strip().lower()
+            if adh and adh != 'none': pd_out['adhesion'] = adh
+            if self.pd_ext_mult.value() and abs(self.pd_ext_mult.value() - 1.0) > 1e-6:
+                pd_out['extrusion_multiplier'] = float(self.pd_ext_mult.value())
+            cool: Dict[str, Any] = {}
+            if self.pd_cool_time.value(): cool['min_layer_time_s'] = int(self.pd_cool_time.value())
+            if self.pd_fan_min.value(): cool['fan_min_percent'] = int(self.pd_fan_min.value())
+            if self.pd_fan_max.value(): cool['fan_max_percent'] = int(self.pd_fan_max.value())
+            if self.pd_fan_always.isChecked(): cool['fan_always_on'] = True
+            if cool: pd_out['cooling'] = cool
+            acc_out: Dict[str, Any] = {}
+            if self.pd_acc_per.value(): acc_out['perimeter'] = int(self.pd_acc_per.value())
+            if self.pd_acc_inf.value(): acc_out['infill'] = int(self.pd_acc_inf.value())
+            if self.pd_acc_ext.value(): acc_out['external_perimeter'] = int(self.pd_acc_ext.value())
+            if self.pd_acc_top.value(): acc_out['top'] = int(self.pd_acc_top.value())
+            if self.pd_acc_bot.value(): acc_out['bottom'] = int(self.pd_acc_bot.value())
+            if self.pd_acc_travel.value(): acc_out['travel'] = int(self.pd_acc_travel.value())
+            if acc_out: pd_out['accelerations_mms2'] = acc_out
+        if pd_out:
+            g['process_defaults'] = pd_out
         # Endstops
         es_out: Dict[str, Any] = {
             "x_min_active_low": self.es_x_min.isChecked(),

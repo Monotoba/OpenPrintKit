@@ -171,6 +171,16 @@ Helpful actions:
 - Issues tab filters by level and search text.
 - Inline hint icons appear near fields when rules apply (hover for tips).
 
+### Process Defaults
+
+The Process Defaults tab centralizes key print parameters that map across slicers:
+- Layer heights; speeds for perimeter/infill/travel/external/top/bottom
+- Retraction length/speed; adhesion (none/skirt/brim/raft); extrusion multiplier
+- Cooling (min layer time, fan min/max, always on)
+- Per‑section accelerations (where supported)
+
+Use the “Check…” button to run rules and view a summary for this section. Inline hint icons appear near fields that need attention.
+
 ### Recents & Templates
 
 - G‑code Preview and Validate dialogs remember recent PDL/Vars files (limit configurable in Settings → Recent files limit). Use the “Recent” dropdowns or clear the lists from Tools → Clear Recent Files… or in Preferences.

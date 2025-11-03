@@ -6,10 +6,23 @@ This help page summarizes OPK concepts and UI:
 - Tabs: Build Area, Extruders, Multi‑Material, Filaments, Features, Machine Control, Peripherals, G‑code, Logs.
 - G‑code hooks, macros, and hooks map drive where commands are injected.
 - Structured `machine_control` captures high‑level intent; generators translate this per firmware.
-- Tools: G‑code Preview, Validate Hook Variables, M‑code Reference.
-  - Generate Snippets: produce firmware‑ready start/end G‑code files from a PDL.
+- Tools: G-code Preview, Validate Hook Variables, M-code Reference.
+  - Generate Snippets: produce firmware-ready start/end G-code files from a PDL.
   - Generate Profiles: produce slicer profiles for Orca, Cura, Prusa, ideaMaker, Bambu (with Preview before writing).
 - Settings: set default slicer/firmware, output directory, variables JSON, and firmware policies.
+
+## Process Defaults
+
+Use the Process Defaults tab in the GUI to set common parameters that map to multiple slicers:
+- Heights: layer height, first layer height
+- Speeds: perimeter, infill, travel, external, top/bottom
+- Retraction: length and speed
+- Adhesion: none/skirt/brim/raft
+- Extrusion multiplier (material flow)
+- Cooling: min layer time, fan min/max, fan always on
+- Accelerations (where supported): perimeter, infill, external, top/bottom, travel
+
+Click “Check…” to run rules and see inline hints for problematic values.
 
 See also: `docs/firmware-mapping.md`, `docs/mcode-reference.md`, `docs/cli-reference.md`.
 

@@ -18,6 +18,11 @@ We now have:
   - Prusa/SuperSlicer/Bambu (INI) with bundling (`.zip` for Prusa)
   - ideaMaker (CFG) with bundling (`.zip`)
 * ✅ GUI “Generate Profiles…” dialog with preview, bundle picker, recents (out/bundle), and suffix validation
+* ✅ GUI Issues tab: Level + Path filters; Rules dialog: Path + text filter
+* ✅ Inline hints for camera triggers, exhaust conflicts, aux outputs
+* ✅ Translations: ES/FR/DE/PT manuals + CLI/Overview pages
+* ✅ Exact generator keys automation + CI check; docs site regenerates keys
+* ✅ Lint workflow (ruff + black) and optional pre-commit
 
 ### Slicer Support Snapshot
 
@@ -98,6 +103,7 @@ OpenPrintKit/
 | 5    | Add **Cura → Orca Converter UI**                             | wraps converter logic                 |
 | 6    | Add **CLI/GUI integration**                                  | menu → call same backend as `opk gen` |
 | 7    | Add tests for GUI logic                                      | `pytest-qt` or mock-based tests       |
+| 8    | Add **Process Defaults tab** with inline hints               | `opk/ui/pdl_editor.py`                |
 
 ---
 
