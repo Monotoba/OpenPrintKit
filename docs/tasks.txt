@@ -20,8 +20,7 @@
   * Wire a “Browse…” button for the bundle path in Generate Profiles?
   * Update docs to reflect new persistence behavior and tips?
   * Generate Profiles: add bundle \"…\" picker; keep enablement in sync
-  - G-code Preview: persist PDL path, vars JSON, and hook selection
-  - G-code Validate: persist PDL and vars paths
+  * G-code Preview: persist PDL path, vars JSON, and hook selection
   - README + CLI Reference: add GUI Tips section
   - System Notes + Changelog: record persistence and bundle picker changes"
   

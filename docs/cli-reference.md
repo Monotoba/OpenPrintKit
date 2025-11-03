@@ -70,6 +70,12 @@ See also: `docs/overview.md`, `docs/gcode-help.md`, `docs/firmware-mapping.md`.
   - Generate Profiles: slicer, output directory, PDL path (when used), bundle enabled/path (`gen_profiles/*`).
   - Generate Snippets: PDL path and output directory (`gen_snippets/*`).
   - Build Bundle: last saved bundle path (`paths/last_bundle`).
+- Recents & templates:
+  - Generate Profiles: recent output directories and recent bundle outputs (Settings → Recent files limit; clear in Tools or Preferences).
+  - G-code Preview/Validate: recent PDL/Vars dropdowns and Clear; optional Variables Templates JSON in Settings.
+- Keyboard shortcuts (G-code dialogs):
+  - Preview: Ctrl+O (Open PDL), Ctrl+L (Load Vars), Ctrl+S (Save Vars As…), Ctrl+T (Insert Template…), Ctrl+R (Render).
+  - Validate: Ctrl+O (Open PDL), Ctrl+L (Open Vars), Ctrl+T (Template…), Ctrl+V (Validate).
 - Bundling from Generate Profiles:
   - Supported slicers: Orca, Cura, Prusa, ideaMaker.
   - If bundle path is empty, a sensible filename is suggested; required suffix is auto-added (`.orca_printer` for Orca; `.zip` otherwise).

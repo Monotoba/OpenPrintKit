@@ -142,6 +142,12 @@ OpenPrintKit/
   - Generate Profiles: slicer, output dir, PDL path (when applicable), and bundle settings.
   - Generate Snippets: PDL path and output dir.
   - Build Bundle: last bundle save location.
+- Recents & templates:
+  - Generate Profiles: recent output directories and recent bundle outputs (limit in Settings → Recent files limit). Clear via Tools → Clear Recent Files… or Preferences.
+  - G-code Preview/Validate: recent PDL/Vars dropdowns and Clear; configurable Variables Templates JSON (Settings) in addition to built-ins.
+- Keyboard shortcuts (G-code dialogs):
+  - Preview: Ctrl+O (Open PDL), Ctrl+L (Load Vars), Ctrl+S (Save Vars As…), Ctrl+T (Insert Template…), Ctrl+R (Render).
+  - Validate: Ctrl+O (Open PDL), Ctrl+L (Open Vars), Ctrl+T (Template…), Ctrl+V (Validate).
 - Bundling from Generate Profiles:
   - Supported for Orca, Cura, Prusa, ideaMaker; auto-suggests a filename if empty.
   - Suffix is added automatically (`.orca_printer` for Orca, `.zip` for others).
