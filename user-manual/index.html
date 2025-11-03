@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://example.com/user-manual/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>User Manual - OpenPrintKit Docs</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">OpenPrintKit Docs</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">User Manual</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Translations</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../user-manual.es/" class="dropdown-item">Español</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.es/" class="dropdown-item">Español (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.es/" class="dropdown-item">Español (Resumen)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.fr/" class="dropdown-item">Français</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.fr/" class="dropdown-item">Français (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.fr/" class="dropdown-item">Français (Aperçu)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.fr/" class="dropdown-item">Français (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.fr/" class="dropdown-item">Français (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.fr/" class="dropdown-item">Français (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.de/" class="dropdown-item">Deutsch</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.de/" class="dropdown-item">Deutsch (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.de/" class="dropdown-item">Deutsch (Überblick)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.de/" class="dropdown-item">Deutsch (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.de/" class="dropdown-item">Deutsch (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.de/" class="dropdown-item">Deutsch (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.pt/" class="dropdown-item">Português</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.pt/" class="dropdown-item">Português (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.pt/" class="dropdown-item">Português (Visão Geral)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.pt/" class="dropdown-item">Português (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.pt/" class="dropdown-item">Português (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.pt/" class="dropdown-item">Português (M-code)</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../quickstart/" class="nav-link">Quickstart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../cli-reference/" class="nav-link">CLI Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../overview/" class="nav-link">Overview</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../firmware-mapping/" class="nav-link">Firmware Mapping</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../gcode-help/" class="nav-link">G-code Help</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mcode-reference/" class="nav-link">M-code Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../generator-mappings/" class="nav-link">Generator Mappings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../exact-generator-keys/" class="nav-link">Exact Generator Keys</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../pdl-schema-reference/" class="nav-link">PDL Schema</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../implementation-status/" class="nav-link">Implementation Status</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../publishing/" class="nav-link">Publishing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../translations/" class="nav-link">Translations</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href=".." class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../user-manual.es/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/Monotoba/OpenPrintKit/edit/master/docs/user-manual.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#openprintkit-user-manual" class="nav-link">OpenPrintKit User Manual</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-is-openprintkit" class="nav-link">What Is OpenPrintKit?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#system-requirements" class="nav-link">System Requirements</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#installation" class="nav-link">Installation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#project-structure-essentials" class="nav-link">Project Structure (essentials)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#core-concepts" class="nav-link">Core Concepts</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#quick-start-cli" class="nav-link">Quick Start (CLI)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#generating-profiles-from-pdl" class="nav-link">Generating Profiles From PDL</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#converters" class="nav-link">Converters</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#install-to-orca-presets" class="nav-link">Install to Orca Presets</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#gcode-tools" class="nav-link">G‑code Tools</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#spool-databases-basic" class="nav-link">Spool Databases (Basic)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#the-gui-opk-studio" class="nav-link">The GUI (OPK Studio)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#firmwarespecific-guidance-summary" class="nav-link">Firmware‑Specific Guidance (summary)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced" class="nav-link">Advanced</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#workspaces" class="nav-link">Workspaces</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#environment-variables" class="nav-link">Environment Variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#references" class="nav-link">References</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="openprintkit-user-manual">OpenPrintKit User Manual</h1>
+<p>This manual explains how to install, use, and troubleshoot OpenPrintKit (OPK) — a toolkit for defining, validating, generating, bundling, and installing 3D printer configurations across slicers. It consolidates the essentials from the codebase and docs into a single, task‑oriented guide.</p>
+<h2 id="what-is-openprintkit">What Is OpenPrintKit?</h2>
+<p>Define once. Slice anywhere.
+OPK introduces a structured Printer Description Language (PDL) plus schemas, rules, generators, and tools to manage printer, filament, and process profiles. It targets OrcaSlicer initially and extends to Cura, Prusa/SuperSlicer, Bambu Studio, and more.</p>
+<ul>
+<li>Printers: build area, kinematics, firmware, machine control.</li>
+<li>Filaments: materials, temperatures, retraction, cooling.</li>
+<li>Processes: layer heights, speeds, accelerations, adhesion.</li>
+</ul>
+<p>OPK validates profiles, enforces rules, and produces reproducible, version‑controllable outputs.</p>
+<h2 id="system-requirements">System Requirements</h2>
+<ul>
+<li>Python 3.11+</li>
+<li>Optional: PySide6 for GUI (installed via project dependencies)</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<pre><code class="language-bash">python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+</code></pre>
+<h2 id="project-structure-essentials">Project Structure (essentials)</h2>
+<ul>
+<li><code>opk/</code> — Core library, CLI, GUI</li>
+<li><code>core/</code> — schemas, rules, bundling, gcode utilities</li>
+<li><code>plugins/</code> — generators and converters (Orca, Cura, Prusa, Bambu, etc.)</li>
+<li><code>cli/</code> — command-line entry (<code>opk</code>)</li>
+<li><code>ui/</code> — GUI (<code>opk-gui</code>)</li>
+<li><code>schemas/</code> — JSON schemas for profile validation</li>
+<li><code>examples/</code> — sample profiles</li>
+<li><code>docs/</code> — documentation (this manual and references)</li>
+</ul>
+<h2 id="core-concepts">Core Concepts</h2>
+<ul>
+<li>Profiles: JSON files for <code>printer</code>, <code>filament</code>, and <code>process</code> types.</li>
+<li>PDL (Printer Description Language): a structured model (JSON/YAML) that captures printer capabilities and hooks; generators map from PDL to slicer formats.</li>
+<li>Rules: schema‑independent checks (contextual tips, warnings, errors).</li>
+<li>Bundles: Orca‑compatible <code>.orca_printer</code> archives or <code>.zip</code> for other slicers.</li>
+</ul>
+<h2 id="quick-start-cli">Quick Start (CLI)</h2>
+<p>Validate example profiles:</p>
+<pre><code class="language-bash">opk validate examples/printers/Longer_LK5_Pro_Marlin.json             examples/filaments/PLA_Baseline_LK5Pro.json             examples/processes/Standard_0p20_LK5Pro.json
+</code></pre>
+<p>Run rule checks across profiles:</p>
+<pre><code class="language-bash">opk rules   --printer  examples/printers/Longer_LK5_Pro_Marlin.json   --filament examples/filaments/PLA_Baseline_LK5Pro.json   --process  examples/processes/Standard_0p20_LK5Pro.json
+</code></pre>
+<p>Bundle for Orca:</p>
+<pre><code class="language-bash">opk bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer
+</code></pre>
+<p>Initialize a workspace with standard folders:</p>
+<pre><code class="language-bash">opk workspace init ./my-workspace
+</code></pre>
+<h2 id="generating-profiles-from-pdl">Generating Profiles From PDL</h2>
+<p>Generate target slicer profiles from a PDL file:</p>
+<pre><code class="language-bash">opk gen --pdl my_printer.pdl.yaml --slicer orca --out ./outdir [--bundle ./out.orca_printer]
+</code></pre>
+<p>Supported <code>--slicer</code> values: <code>orca</code>, <code>cura</code>, <code>prusa</code>, <code>ideamaker</code>, <code>bambu</code>, <code>superslicer</code>, <code>kisslicer</code>.</p>
+<p>Acceleration overrides (optional) — merged into <code>process_defaults.accelerations_mms2</code>:</p>
+<pre><code class="language-bash">opk gen --pdl my.pdl.yaml --slicer prusa --out ./outdir   --acc-perimeter 1000 --acc-infill 1200 --acc-top 800
+</code></pre>
+<h2 id="converters">Converters</h2>
+<p>Convert existing configs to OPK profiles (best‑effort):</p>
+<pre><code class="language-bash">opk convert --from cura        --in CURA_FILE_OR_DIR --out OUT_DIR
+opk convert --from prusa       --in INPUT.ini        --out OUT_DIR
+opk convert --from superslicer --in INPUT.ini        --out OUT_DIR
+opk convert --from ideamaker   --in INPUT.cfg        --out OUT_DIR
+</code></pre>
+<h2 id="install-to-orca-presets">Install to Orca Presets</h2>
+<p>Dry run and install (with optional backup):</p>
+<pre><code class="language-bash">opk install --src ./profiles --dest ~/AppData/Roaming/OrcaSlicer/user/default/presets   --backup ./backup_orca_presets.zip --dry-run
+# then without --dry-run to write
+</code></pre>
+<h2 id="gcode-tools">G‑code Tools</h2>
+<ul>
+<li>List hooks after firmware policy mapping:
+  <code>bash
+  opk gcode-hooks --pdl my.pdl.yaml</code></li>
+<li>Preview a hook with variables:
+  <code>bash
+  opk gcode-preview --pdl my.pdl.yaml --hook start --vars vars.json</code></li>
+<li>Validate all hooks against variables:
+  <code>bash
+  opk gcode-validate --pdl my.pdl.yaml --vars vars.json</code></li>
+</ul>
+<h2 id="spool-databases-basic">Spool Databases (Basic)</h2>
+<p>Perform CRUD/search operations against spool databases (Spoolman, TigerTag, OpenSpool/OpenTag3D):</p>
+<pre><code class="language-bash"># items (raw) output
+opk spool --source spoolman --base-url http://host --action search --query PLA --page 1 --page-size 25 --format items
+
+# normalized output (envelope)
+opk spool --source tigertag --base-url https://api --action read --id 123 --format normalized
+</code></pre>
+<p>Endpoint overrides and pagination:</p>
+<pre><code class="language-bash"># Inline JSON or file-based overrides
+opk spool --source openspool --base-url https://api   --action read --id 123   --endpoints-json '{&quot;read&quot;:[[&quot;/custom/spool/{id}&quot;, null]]}'
+</code></pre>
+<p>Retries/backoff (defaults shown):
+- Retry limit: 5
+- Backoff: 0.5s base, Jitter: 0.25s
+- Set via GUI Settings, or env vars: <code>OPK_NET_RETRY_LIMIT</code>, <code>OPK_NET_RETRY_BACKOFF</code>, <code>OPK_NET_RETRY_JITTER</code>.</p>
+<h2 id="the-gui-opk-studio">The GUI (OPK Studio)</h2>
+<p>Launch the application:</p>
+<pre><code class="language-bash">opk-gui
+</code></pre>
+<p>Main areas:
+- Build Area: geometry, firmware, limits.
+- Extruders, Multi‑Material, Filaments.
+- Features: ABL, probe, endstops.
+- Machine Control: PSU, mesh, Z offset, custom start/end.
+- Peripherals: lights, RGB, chamber, camera, fans, SD logging, exhaust, aux outputs, custom peripherals.
+- G‑code: lifecycle, layer, tool/filament, motion, temperature/env, monitoring hooks; macros and additional hooks.
+- OpenPrintTag: metadata block embedded into start G‑code.
+- Issues: results from rule checks with filters.</p>
+<p>Screenshots (sample views):</p>
+<p><img alt="Main Window" src="../images/main_window.png" /></p>
+<p><img alt="Rules Dialog" src="../images/rules_dialog.png" /></p>
+<p><img alt="Generate Profiles" src="../images/generate_profiles.png" /></p>
+<p><img alt="Generate Snippets" src="../images/generate_snippets.png" /></p>
+<p><img alt="App Settings" src="../images/app_settings.png" /></p>
+<p><img alt="Preferences" src="../images/preferences.png" /></p>
+<p>Helpful actions:
+- Check… on various tabs runs rules and focuses relevant issues.
+- Help… buttons open domain docs (Overview, Firmware Mapping, G‑code Help, M‑code Reference).
+- Issues tab filters by level and search text.
+- Inline hint icons appear near fields when rules apply (hover for tips).</p>
+<h3 id="process-defaults">Process Defaults</h3>
+<p>The Process Defaults tab centralizes key print parameters that map across slicers:
+- Layer heights; speeds for perimeter/infill/travel/external/top/bottom
+- Retraction length/speed; adhesion (none/skirt/brim/raft); extrusion multiplier
+- Cooling (min layer time, fan min/max, always on)
+- Per‑section accelerations (where supported)</p>
+<p>Use the “Check…” button to run rules and view a summary for this section. Inline hint icons appear near fields that need attention.</p>
+<h3 id="recents-templates">Recents &amp; Templates</h3>
+<ul>
+<li>G‑code Preview and Validate dialogs remember recent PDL/Vars files (limit configurable in Settings → Recent files limit). Use the “Recent” dropdowns or clear the lists from Tools → Clear Recent Files… or in Preferences.</li>
+<li>Variables Templates let you prefill or save common JSON variable sets. Configure a templates JSON file (Settings → Vars Templates JSON) or use the built‑in templates. A sample file is provided at <code>docs/vars-templates.example.json</code>.</li>
+</ul>
+<h3 id="keyboard-shortcuts-gcode-dialogs">Keyboard Shortcuts (G‑code dialogs)</h3>
+<ul>
+<li>Preview:</li>
+<li>Ctrl+O — Open PDL</li>
+<li>Ctrl+L — Load Vars</li>
+<li>Ctrl+S — Save Vars As…</li>
+<li>Ctrl+T — Insert Template…</li>
+<li>Ctrl+R — Render</li>
+<li>Validate:</li>
+<li>Ctrl+O — Open PDL</li>
+<li>Ctrl+L — Open Vars</li>
+<li>Ctrl+T — Template… (save a template vars file)</li>
+<li>Ctrl+V — Validate</li>
+</ul>
+<h2 id="firmwarespecific-guidance-summary">Firmware‑Specific Guidance (summary)</h2>
+<ul>
+<li>Marlin:</li>
+<li>SD logging via <code>M928</code> start / <code>M29</code> stop.</li>
+<li>RGB via <code>M150</code> requires LED/NeoPixel support.</li>
+<li><code>M42</code> expects numeric pins; prefer fan <code>M106/M107</code> or numeric <code>P</code>.</li>
+<li>RRF (RepRapFirmware):</li>
+<li>SD logging via <code>M929 P"filename" S1</code> (stop: <code>M929 S0</code>).</li>
+<li>Prefer named pins (e.g., <code>out1</code>); fans use <code>M106/M107 P</code>.</li>
+<li>RGB via <code>M150 R/G/B</code>.</li>
+<li>Klipper:</li>
+<li><code>M240</code> maps to <code>M118 TIMELAPSE_TAKE_FRAME</code> by policy.</li>
+<li>Fans often implemented as macros; ensure <code>printer.cfg</code> defines them.</li>
+<li>GRBL/LinuxCNC:</li>
+<li>Exhaust maps to coolant: <code>M7/M8</code> on / <code>M9</code> off.</li>
+<li>Fans not standard; prefer coolant or custom peripherals.</li>
+<li>Bambu:</li>
+<li>Keep start/end minimal; prefer printer‑side macros.</li>
+</ul>
+<p>The Issues tab and inline hints surface contextual tips based on the selected firmware.</p>
+<h2 id="advanced">Advanced</h2>
+<h3 id="project-policies">Project Policies</h3>
+<p>OPK can merge project‑level policies into a PDL. Supported config files at or above the PDL path:</p>
+<ul>
+<li><code>.opk-project.yaml</code> / <code>.opk-project.yml</code> / <code>.opk-project.json</code></li>
+</ul>
+<p>When present, <code>policies</code> from the project file are shallow‑merged into the PDL’s <code>policies</code> before generation and tools like <code>gcode-preview</code>/<code>gcode-validate</code> (see <code>opk.core.project</code>). This enables per‑project defaults without modifying the PDL.</p>
+<h3 id="pdl-schema-overview">PDL Schema (overview)</h3>
+<p>Key top‑level keys (JSON/YAML):</p>
+<ul>
+<li><code>name</code>, <code>firmware</code>, <code>geometry</code> (<code>bed_shape</code>, <code>z_height</code>)</li>
+<li><code>extruders</code> (nozzle diameter, max temp, drive), <code>materials</code> (diameter, temps, retraction)</li>
+<li><code>process_defaults</code> (layer heights, speeds, accelerations, adhesion, cooling)</li>
+<li><code>machine_control</code> (PSU, mesh, Z offset, camera, lights/RGB, fans, SD logging, exhaust, aux outputs, custom peripherals)</li>
+<li><code>gcode</code> (explicit hooks and macros), plus optional <code>hooks</code> map</li>
+<li><code>open_print_tag</code> (ID, version, metadata)</li>
+</ul>
+<p>See also: <code>docs/firmware-mapping.md</code>, <code>docs/gcode-help.md</code>, <code>docs/mcode-reference.md</code>.</p>
+<h3 id="generator-mappings-per-slicer">Generator Mappings (per slicer)</h3>
+<p>Generators interpret a subset of PDL into slicer formats (best‑effort initial mappings):</p>
+<ul>
+<li>OrcaSlicer: printer/filament/process JSON written to out directory; optional <code>.orca_printer</code> bundle.</li>
+<li>Cura: combined <code>.cfg</code> with machine geometry, nozzle/filament diameters, temps, layer heights, speeds, retraction, adhesion, cooling, and optional limits.</li>
+<li>Prusa/SuperSlicer/Bambu: <code>.ini</code> with printer, filament, and print sections; includes nozzle diameter, diameters, temps, layer heights, speed/acceleration hints, start/end G‑code from hooks.</li>
+<li>ideaMaker/KISSlicer: minimal <code>.cfg</code>/<code>.ini</code> seeds with core geometry and process hints.</li>
+</ul>
+<p>Refer to <code>opk/plugins/slicers/*.py</code> for exact fields; add missing mappings incrementally as needed.</p>
+<h2 id="workspaces">Workspaces</h2>
+<p>Initialize a workspace with common directories:</p>
+<pre><code class="language-bash">opk workspace init ./my-workspace
+</code></pre>
+<p>Creates:
+- <code>profiles/printers</code>, <code>profiles/filaments</code>, <code>profiles/processes</code>
+- <code>bundles</code>, <code>logs</code>
+- Gitignore for bundles/logs/pyc</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>Profiles fail schema: run <code>opk validate</code> and check error messages.</li>
+<li>Rules show warnings: open the GUI, press “Check…” on related tabs to see hints inline.</li>
+<li>Orca install path: varies by OS and Orca version — try a dry run to confirm.</li>
+<li>Slicing with external CLI: ensure slicer binaries are on PATH (e.g., <code>CuraEngine</code>).</li>
+<li>Network operations (spool): adjust retry/backoff/jitter in Settings or env vars if needed.</li>
+<li>GUI exits immediately: try <code>OPK_DEBUG=1 python -m opk.ui.main_window</code> and set <code>QT_QPA_PLATFORM</code> (<code>xcb</code>/<code>wayland</code>) if necessary.</li>
+</ul>
+<h2 id="environment-variables">Environment Variables</h2>
+<ul>
+<li><code>OPK_NET_RETRY_LIMIT</code> — integer retries (default 5)</li>
+<li><code>OPK_NET_RETRY_BACKOFF</code> — base backoff seconds (default 0.5)</li>
+<li><code>OPK_NET_RETRY_JITTER</code> — jitter seconds (default 0.25)</li>
+<li><code>OPK_SPOOL_ENDPOINTS</code> — JSON overrides per source</li>
+<li><code>OPK_DEBUG</code> — if set, prints additional GUI debug info (platform/screens)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li>CLI Reference: <code>docs/cli-reference.md</code></li>
+<li>Firmware Mapping: <code>docs/firmware-mapping.md</code></li>
+<li>G‑code Help: <code>docs/gcode-help.md</code></li>
+<li>M‑code Reference: <code>docs/mcode-reference.md</code></li>
+<li>Project Overview: <code>docs/overview.md</code></li>
+<li>Implementation Status: <code>docs/implementation-status.md</code></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://example.com/system_notes/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>System Notes — Current Session - OpenPrintKit Docs</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">OpenPrintKit Docs</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../user-manual/" class="nav-link">User Manual</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Translations</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../user-manual.es/" class="dropdown-item">Español</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.es/" class="dropdown-item">Español (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.es/" class="dropdown-item">Español (Resumen)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.fr/" class="dropdown-item">Français</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.fr/" class="dropdown-item">Français (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.fr/" class="dropdown-item">Français (Aperçu)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.fr/" class="dropdown-item">Français (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.fr/" class="dropdown-item">Français (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.fr/" class="dropdown-item">Français (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.de/" class="dropdown-item">Deutsch</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.de/" class="dropdown-item">Deutsch (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.de/" class="dropdown-item">Deutsch (Überblick)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.de/" class="dropdown-item">Deutsch (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.de/" class="dropdown-item">Deutsch (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.de/" class="dropdown-item">Deutsch (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.pt/" class="dropdown-item">Português</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.pt/" class="dropdown-item">Português (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.pt/" class="dropdown-item">Português (Visão Geral)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.pt/" class="dropdown-item">Português (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.pt/" class="dropdown-item">Português (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.pt/" class="dropdown-item">Português (M-code)</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../quickstart/" class="nav-link">Quickstart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../cli-reference/" class="nav-link">CLI Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../overview/" class="nav-link">Overview</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../firmware-mapping/" class="nav-link">Firmware Mapping</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../gcode-help/" class="nav-link">G-code Help</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mcode-reference/" class="nav-link">M-code Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../generator-mappings/" class="nav-link">Generator Mappings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../exact-generator-keys/" class="nav-link">Exact Generator Keys</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../pdl-schema-reference/" class="nav-link">PDL Schema</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../implementation-status/" class="nav-link">Implementation Status</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../publishing/" class="nav-link">Publishing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../translations/" class="nav-link">Translations</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/Monotoba/OpenPrintKit/edit/master/docs/system_notes.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#system-notes-current-session" class="nav-link">System Notes — Current Session</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#summary-of-major-changes" class="nav-link">Summary of Major Changes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#rationale-decisions" class="nav-link">Rationale &amp; Decisions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#notable-todos-future-work" class="nav-link">Notable TODOs / Future Work</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#session-timeline-2025-11-01-2025-11-02" class="nav-link">Session Timeline (2025-11-01 → 2025-11-02)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#recent-commits" class="nav-link">Recent Commits</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="system-notes-current-session">System Notes — Current Session</h1>
+<p>This document captures key decisions, changes, and notes from the current development session.</p>
+<h2 id="summary-of-major-changes">Summary of Major Changes</h2>
+<ul>
+<li>Schema (PDL)</li>
+<li>Added <code>limits</code> (print_speed_max, travel_speed_max, acceleration_max, jerk_max).</li>
+<li>Added <code>materials</code> array (embedded filament presets).</li>
+<li>Added <code>features.probe.active_low</code> and top-level <code>endstops</code> polarity (active_low per axis).</li>
+<li>Expanded G-code hooks with comprehensive lifecycle coverage; added <code>macros</code> and generic <code>hooks</code> map.</li>
+<li>Introduced structured <code>machine_control</code> (PSU, lights/RGB, fans, chamber, camera, SD logging, exhaust, aux_outputs, custom_peripherals).</li>
+<li>Allowed string pins for RRF in <code>exhaust.pin</code> and <code>aux_outputs[].pin</code>.</li>
+<li>
+<p>Added <code>open_print_tag</code> metadata block support.</p>
+</li>
+<li>
+<p>Core (Generators/Utils)</p>
+</li>
+<li><code>render_hooks_with_firmware</code> merges <code>gcode</code> + <code>machine_control</code> and applies firmware policies.</li>
+<li>Firmware policies:<ul>
+<li>Klipper: map camera <code>M240</code> to <code>M118 TIMELAPSE_TAKE_FRAME</code>.</li>
+<li>RRF: map SD logging <code>M928/M29</code> to <code>M929 P"file" S1 / M929 S0</code>; support named pins.</li>
+<li>GRBL: exhaust → <code>M8</code> (on) / <code>M9</code> (off).</li>
+<li>LinuxCNC: exhaust → <code>M7</code> (on) / <code>M9</code> (off).</li>
+</ul>
+</li>
+<li><code>apply_machine_control</code> translates structured fields into hook sequences.</li>
+<li><code>generate_snippets</code> returns start/end G-code lists (firmware-ready).</li>
+<li>Slicer generators expanded (Cura/Prusa/Bambu):<ul>
+<li>Map <code>process_defaults</code> layer heights and speeds (perimeter/infill/travel; external_perimeter; top/bottom where supported).</li>
+<li>Map <code>process_defaults.extrusion_multiplier</code> (material_flow / extrusion_multiplier).</li>
+<li>Map <code>process_defaults.cooling</code> (min layer time, fan min/max/always on).</li>
+<li>Map <code>limits</code> acceleration/jerk (Cura: acceleration/jerk enabled + values; Prusa/Bambu: max_print/travel acceleration).</li>
+<li>Per-section accelerations via <code>process_defaults.accelerations_mms2</code> (perimeter/infill/external/top/bottom) to slicer-specific keys.</li>
+</ul>
+</li>
+<li>Added <code>build_profile_bundle(files, out, slicer)</code> to package generated profiles (Cura/Prusa/ideaMaker) with a manifest.</li>
+<li>Added import converters for Prusa/SuperSlicer INI, ideaMaker CFG, and KISSlicer INI (best‑effort) to OPK printer JSON.</li>
+<li>
+<p>G-code renderer supports dotted/array placeholders in preview.</p>
+</li>
+<li>
+<p>CLI</p>
+</li>
+<li>Added: <code>rules</code>, <code>workspace init</code>, <code>install</code>, <code>convert --from cura</code>, <code>gcode-hooks</code>, <code>gcode-preview</code>, <code>gcode-validate</code>, <code>pdl-validate</code>, <code>tag-preview</code>, <code>gen-snippets</code>.</li>
+<li>CLI applies firmware-aware mapping when previewing/validating hooks.</li>
+<li><code>gen</code> now supports bundling for cura/prusa/ideamaker via <code>--bundle OUT.zip</code> (Orca bundling unchanged).</li>
+<li><code>convert --from prusa|superslicer|ideamaker</code> for profile import to OPK printer JSON.</li>
+<li>Added fine-grained acceleration overrides (merged into <code>process_defaults.accelerations_mms2</code>): <code>--acc-perimeter</code>, <code>--acc-infill</code>, <code>--acc-external</code>, <code>--acc-top</code>, <code>--acc-bottom</code>.</li>
+<li>
+<p>Stabilized/deduplicated subparser registrations; fixed earlier argparse conflicts.</p>
+</li>
+<li>
+<p>GUI</p>
+</li>
+<li>Tabbed PDL editor with tabs: Build Area (polygon bed + limits), Extruders, Multi-Material, Filaments, Features (probe active_low + endstops), Machine Control (standard lifecycle), Peripherals (lights, RGB, chamber, camera, fans, SD, exhaust, Aux Outputs, Custom Peripherals), OpenPrintTag, Logs.</li>
+<li>Build menu added (Validate, Run Rules, Build Bundle). Keyboard shortcuts and tooltips/status tips added across menus.</li>
+<li>Tools: G-code Preview; Validate Hook Variables; Generate Snippets; Generate Profiles (with Preview before write); Slice (CLI) with QSettings‑persisted last selections; Capture Screenshots.</li>
+<li>Generate Profiles dialog: supports in-editor PDL (no need to save); multi-file preview; bundle summary with open-folder.<ul>
+<li>Bundle picker: “…” button opens the correct filter per slicer (Orca → <code>.orca_printer</code>; others → <code>.zip</code>).</li>
+<li>Recent paths: remembers recent output directories and recent bundle outputs (capped by <code>ui/recents_max</code> in Settings). Clear via Tools or Preferences.</li>
+<li>Enablement kept in sync: bundle controls enable/disable based on slicer + checkbox; placeholder/tooltip update dynamically with required suffix.</li>
+<li>Inline validation: shows required suffix hint and highlights bundle field until suffix is correct; suffix enforced at Generate time.</li>
+</ul>
+</li>
+<li>GUI polish: Persist last-used fields and improve UX<ul>
+<li>Persist bundle path, out dir, and slicer selection in Generate Profiles (QSettings under gen_profiles/*).</li>
+<li>Auto-suggest bundle filenames when empty (Orca: .orca_printer; Cura/Prusa/ideaMaker: .zip) and enforce suffixes.</li>
+<li>Enable bundle path only for supported slicers; dynamic placeholder updates.</li>
+<li>Persist PDL path and out dir in Generate Snippets (gen_snippets/*), and improve invalid-PDL messages.</li>
+<li>Add a “Browse…” button for bundle file selection in Generate Profiles.</li>
+<li>Persist G-code dialogs:</li>
+<li>G-code Preview: remembers PDL path, selected hook, and variables JSON (gcode_preview/*); recent PDL/Vars lists with Clear; templates (built-in + configurable JSON) and keyboard shortcuts.</li>
+<li>Validate Hook Variables: remembers PDL and vars.json paths (gcode_validate/*); recent PDL/Vars lists with Clear; templates save and keyboard shortcuts.</li>
+<li>Global recents cap (<code>ui/recents_max</code>), and “Clear Recent Files…” in Tools and Preferences.</li>
+<li>Remember last bundle save path in main window Build Bundle (paths/last_bundle).</li>
+</ul>
+</li>
+<li>Help: Overview, G-code Help, M-code Reference, Firmware Mapping.</li>
+<li>Settings dialog (default slicer/firmware, output dir, variables JSON, policy toggles) via QSettings.</li>
+<li>Dynamic firmware tips shown in Peripherals tab; targeted tooltips added throughout (RGB/chamber/camera/fans/exhaust/materials).</li>
+<li>Added Issues tab with inline rule validation (Refresh/Copy), and status bar issue counts; editor wrapped in scroll area to reduce height.</li>
+<li>
+<p>Improved headless import robustness: centralized PySide6 compatibility stubs; lazy-imported subdialogs.</p>
+</li>
+<li>
+<p>Rules &amp; Validation</p>
+</li>
+<li><code>pdl-validate</code> adds checks: exhaust pin vs fan ambiguity, camera triggers without command, duplicate aux pins, malformed custom_peripherals entries.</li>
+<li>Firmware guidance:<ul>
+<li>GRBL/LinuxCNC: coolant mapping (M7/M8/M9), recommend off_at_end; raw pin ignored for exhaust.</li>
+<li>Klipper: camera M240 mapping info to TIMELAPSE_TAKE_FRAME.</li>
+<li>RRF: SD logging mapped to M929 with quoted filename; warn about spaces; prefer named pins; aux fan needs off_at_end.</li>
+<li>Marlin: M42 requires numeric pin, warn on string pins in exhaust.</li>
+</ul>
+</li>
+<li>
+<p>Process defaults sanity checks: layer heights vs nozzle, cooling fan range and min layer time, non‑negative per‑section accelerations.</p>
+</li>
+<li>
+<p>Docs</p>
+</li>
+<li>Added pages: Firmware Mapping, Overview, G-code Help, CLI Reference (updated with bundling and overrides), M-code Reference (expanded), System Notes, Implementation Status.</li>
+<li>pdl-spec: added mkdocs site with Material theme; requirements pinned; added missing schema and getting-started docs.</li>
+<li>pdl-spec: documented <code>process_defaults.accelerations_mms2</code> and extended <code>speeds_mms</code> keys.</li>
+<li>README updated with Docs badge, website link, and documentation links.</li>
+<li>
+<p>Added Slicer Support Matrix page; CLI reference updated with new converters (Prusa/SuperSlicer/ideaMaker/KISSlicer) and slicing command.</p>
+</li>
+<li>
+<p>Tests</p>
+</li>
+<li>
+<p>Expanded coverage to 51 tests: schema, bundles, CLI (including overrides and converters), generators (process/limits/overrides), firmware mapping, OpenPrintTag, G‑code utils, GUI import smokes, firmware rules.</p>
+</li>
+<li>
+<p>CI/CD</p>
+</li>
+<li>CI matrix expanded to Python 3.10–3.14 on Ubuntu/Windows (exclude Windows+3.13/3.14 due to PySide6 wheels); QT_QPA_PLATFORM=offscreen.</li>
+<li>Headless PySide6 import stubs and lazy imports eliminate GUI plugin issues on runners.</li>
+<li>Docs workflow builds with MkDocs (3.10–3.14), deploys (3.12). Badges fixed; Pages configured to use GitHub Actions.</li>
+<li>Fixed Windows shell compatibility and stabilized workflows.</li>
+</ul>
+<h2 id="rationale-decisions">Rationale &amp; Decisions</h2>
+<ul>
+<li>Keep PDL slicer-agnostic: model high-level <code>machine_control</code> and derive G-code via generators per firmware.</li>
+<li>Separate common Machine Control (lifecycle) from Peripherals (vendor-/device-specific), reducing UI clutter.</li>
+<li>Provide firmware-aware guidance (GUI tips + mapping docs) to reduce surprises for end users.</li>
+<li>Use QSettings for app-level settings (simple, cross-platform). Project-level config can be added if needed.</li>
+</ul>
+<h2 id="notable-todos-future-work">Notable TODOs / Future Work</h2>
+<ul>
+<li>Add deeper mappings and hints for Bambu/Repetier/Smoothieware (beyond pass-through).</li>
+<li>Add GUI Tools → Generate Snippets… (uses Settings defaults).</li>
+<li>Support named pins thoroughly in UI for RRF (string input with validation).</li>
+<li>Add project-level settings file (<code>.opk-project.yml/json</code>) for per-project defaults (optional).</li>
+<li>Implement PDL→slicer generators (Orca, Cura, Prusa, Bambu): emit full profiles and bundles.</li>
+<li>Expand printer examples (Prusa XL, Voron variants, Bambu X1C, etc.) with matching filaments/processes.</li>
+<li>CI enhancements, packaging, and distribution notes.</li>
+</ul>
+<hr />
+<h2 id="session-timeline-2025-11-01-2025-11-02">Session Timeline (2025-11-01 → 2025-11-02)</h2>
+<p>2025-11-02
+- ui: Help menu shortcuts (F1/F2/F3), Restore Defaults + Help per tab, broad tooltips and status tips. [8f8636e]
+- ui: Build menu introduced; moved Validate/Rules/Bundle; shortcuts for Snippets/Profiles; tooltips. [9d2c80c]
+- docs(system-notes) backfilled with full session updates. [71dd84e]
+ - ui: Issues tab with inline rule validation + status bar counts; scrollable editor. [54a1fad]
+ - rules: firmware guidance (RRF, Marlin) and process_defaults sanity checks; tests added. [4aeda7a]</p>
+<p>2025-11-01
+- Generators: process_defaults mapping (layers/speeds), extrusion multiplier, cooling, limits; per-section accelerations; multi-file preview; bundling (Cura/Prusa/ideaMaker). [028e098, 75a358c, 17c5c1b, d50a072]
+- CLI: fine-grained <code>--acc-*</code> overrides; argparse conflicts resolved. [027d134, d50a072]
+- GUI: headless-safe imports; profile preview; bundle summary. [0eb2d59, d50a072]
+- Docs: mkdocs setup for pdl-spec, requirements, schema/getting-started; README docs badge + website link. [cf59d28, 976843f, c5abe7d, bbac34d, 4342f1a]
+- CI: expand Python matrix to 3.10–3.14 with exclusions; offscreen Qt; docs build matrix and deploy on 3.12. [2d49b73, 5fc7f99]</p>
+<h2 id="recent-commits">Recent Commits</h2>
+<ul>
+<li>71dd84e (2025-11-02) docs(system-notes): backfill session updates (generators, CLI bundling/overrides, GUI menus/preview, docs site, CI matrix, tests)</li>
+<li>8f8636e (2025-11-02) ui: Help menu shortcuts (F1/F2/F3), status tips; add Restore Defaults + Help buttons in Build Area, Machine Control, Peripherals; add more field tooltips</li>
+<li>9d2c80c (2025-11-02) ui: Build menu shortcuts, status tips; add tooltips across tabs (materials, camera, fans, RGB, chamber, exhaust); shortcuts for Snippets/Profiles</li>
+<li>693364d (2025-11-02) feat(GUI): richer Preview (size/modified) and bundle summary; test(CLI): verify --acc-* overrides; docs(PDL): document accelerations_mms2 and extended speeds_mms</li>
+<li>d50a072 (2025-11-01) feat: multi-file preview in GUI; bundle summary with open-folder; CLI gen: add fine-grained acceleration overrides; expand generator per-section mappings</li>
+<li>17c5c1b (2025-11-01) feat(generators): support ext/top/bottom speeds and per-section accelerations; GUI: multi-file Preview and bundling preview; docs: mapping details</li>
+<li>75a358c (2025-11-01) feat(generators): map extrusion multiplier + cooling and acceleration/jerk (Cura) and acceleration (Prusa/Bambu); GUI: add Preview in Generate Profiles; docs: update overview with mapping highlights</li>
+<li>028e098 (2025-11-01) feat(generators): map process_defaults into Cura/Prusa/Bambu; add tests; ui: clarify Endstops label '(Checked = Active Low)'</li>
+<li>4342f1a (2025-11-01) docs(README): add website link in Documentation section</li>
+<li>bbac34d (2025-11-01) docs(README): add docs badge linking to published site (GitHub Pages)</li>
+<li>c5abe7d (2025-11-01) docs(pages): remove deploy continue-on-error; set mkdocs site_url/repo_url to Monotoba/OpenPrintKit</li>
+<li>027d134 (2025-11-01) fix(cli): remove duplicate gcode/PDL subparser registrations causing argparse conflicts</li>
+<li>ddadeb1 (2025-11-01) ci(headless): use Qt compat layer in preferences/app settings dialogs; lazy-import these in main_window to avoid headless import failures</li>
+<li>85d6efa (2025-11-01) ci: make UI subdialog imports lazy in main_window; add workspace init fallback to support 3.10 source runs</li>
+<li>0eb2d59 (2025-11-01) ci(headless): centralize PySide6 stubs (_qt_compat) and use in UI modules; fix workspace init import; make docs deploy non-blocking if Pages disabled</li>
+<li>5fc7f99 (2025-11-01) docs(ci): add Python version matrix (3.10–3.14) to docs build; deploy only on 3.12</li>
+<li>976843f (2025-11-01) docs(pdl-spec): add mkdocs requirements and missing docs files (schema/, getting-started.md); fix nav targets</li>
+<li>cf59d28 (2025-11-01) docs(ci): fix docs build by adding mkdocs dependencies and schema path; pin docs workflow to Python 3.12</li>
+<li>2d49b73 (2025-11-01) ci: expand matrix to Python 3.10–3.14; use source-run deps for edge versions; set PYTHONPATH for module runs; keep Qt offscreen</li>
+<li>7bfa8d9 (2025-11-01) ci(headless): add Qt import stubs in main_window to allow import-only tests without Qt plugins; stabilizes CI on headless runners</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
