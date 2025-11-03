@@ -23,8 +23,23 @@ class GenerateProfilesDialog(QDialog):
         row_pdl = QHBoxLayout(); row_pdl.addWidget(self.ed_pdl); row_pdl.addWidget(b_pdl)
         self.cb_slicer = QComboBox(); self.cb_slicer.addItems(["orca","cura","prusa","ideamaker","bambu"]) 
         self.ed_out = QLineEdit(); self.ed_out.setPlaceholderText("Output directory")
+        try:
+            self.ed_out.textChanged.connect(lambda *_: self._maybe_push_recent_out())
+        except Exception:
+            pass
         b_out = QPushButton("…"); b_out.clicked.connect(self._pick_out)
-        row_out = QHBoxLayout(); row_out.addWidget(self.ed_out); row_out.addWidget(b_out)
+        self._recent_out = QComboBox(); self._recent_out.setEditable(False)
+        try:
+            self._recent_out.activated.connect(self._choose_recent_out)
+        except Exception:
+            pass
+        btn_clear_out = QPushButton("Clear"); btn_clear_out.setToolTip("Clear recent output directories"); btn_clear_out.clicked.connect(self._clear_recent_out)
+        row_out = QHBoxLayout();
+        row_out.addWidget(self.ed_out)
+        row_out.addWidget(b_out)
+        row_out.addWidget(QLabel("Recent:"))
+        row_out.addWidget(self._recent_out)
+        row_out.addWidget(btn_clear_out)
         self.ck_bundle = QCheckBox("Bundle (Orca/Cura/Prusa/ideaMaker)")
         self.ed_bundle = QLineEdit(); self.ed_bundle.setPlaceholderText("OUT.orca_printer")
         try:
@@ -104,6 +119,7 @@ class GenerateProfilesDialog(QDialog):
         # Populate recents and inline validate
         try:
             self._refresh_recent_bundles()
+            self._refresh_recent_out()
             self._validate_bundle_suffix_inline()
         except Exception:
             pass
@@ -114,7 +130,13 @@ class GenerateProfilesDialog(QDialog):
 
     def _pick_out(self):
         d = QFileDialog.getExistingDirectory(self, "Select Output Directory", self.ed_out.text() or "")
-        if d: self.ed_out.setText(d)
+        if d:
+            self.ed_out.setText(d)
+            try:
+                self._push_recent_out(d)
+                self._refresh_recent_out()
+            except Exception:
+                pass
 
     def _pick_bundle(self):
         slicer = self.cb_slicer.currentText()
