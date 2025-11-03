@@ -19,7 +19,7 @@ This document tracks major features, their implementation status, and next steps
   - [x] Firmware policies (Marlin/RRF/Klipper/GRBL/LinuxCNC)
   - [x] OpenPrintTag injection
   - [x] Generate start/end snippets
-  - [ ] Slicer-specific generators (Orca, Cura, Prusa, Bambu)
+  - [x] Slicer-specific generators (initial mappings): Orca, Cura, Prusa, Bambu, SuperSlicer, ideaMaker, KISSlicer
 
 - CLI
   - [x] validate, rules, bundle, install, convert(cura)
@@ -27,7 +27,7 @@ This document tracks major features, their implementation status, and next steps
   - [x] pdl-validate (schema + rules)
   - [x] tag-preview
   - [x] gen-snippets
-  - [ ] gen (PDL→slicer profiles)
+  - [x] gen (PDL→slicer profiles) with optional bundle output for orca/cura/prusa/ideamaker and acceleration overrides
 
 - GUI
   - [x] Tabbed PDL editor (Build Area/Extruders/Multi-Material/Filaments/Features/Machine Control/Peripherals/OpenPrintTag)
@@ -43,7 +43,7 @@ This document tracks major features, their implementation status, and next steps
 
 - Rules & Validation
   - [x] Basic rules for machine_control consistency
-  - [ ] Expanded rules per firmware (narrow warnings based on target)
+  - [x] Expanded rules per firmware (initial set; add more per-target nuance over time)
 
 - Docs
   - [x] Firmware Mapping, Overview, G-code Help, CLI Reference, M-code Reference
@@ -55,15 +55,15 @@ This document tracks major features, their implementation status, and next steps
 - Established robust schema for PDL including lifecycle hooks, machine control, and metadata.
 - Built GUI editor with comprehensive tabs and contextual firmware tips.
 - Added firmware-aware generation policies and CLI tools to preview/validate and produce snippets.
+- Implemented working slicer generators (Orca, Cura, Prusa, Bambu, SuperSlicer, ideaMaker, KISSlicer) and CLI `gen` with bundling support (where applicable).
 - Documented the system (firmware mapping, G-code usage, CLI reference) and integrated help into GUI.
-- Ensured changes are tested (29 tests passing) and committed incrementally.
+- Ensured changes are tested and committed incrementally.
 
 ## Next Steps
 
-1. Implement PDL→slicer generators
-   - OrcaSlicer: emit printer/filament/process JSON and bundles.
-   - Cura: refine convert/generate paths.
-   - Prusa/Bambu: define mappings; decide on profile format.
+1. Refine PDL→slicer mappings
+   - Expand coverage of advanced settings per slicer; align with evolving PDL fields.
+   - Add normalization or version notes where slicer formats diverge.
 
 2. Extend firmware mappings
    - Bambu and Repetier/Smoothie nuanced behaviors.

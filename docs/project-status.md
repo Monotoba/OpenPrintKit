@@ -12,7 +12,12 @@ We now have:
 * ✅ **OpenPrintKit (OPK)** base project (schemas, CLI, tests all green)
 * ✅ CI/CD with GitHub Actions (test + bundle)
 * ✅ PDL subproject (`pdl-spec/`) as a reference spec & docs base
-* ✅ `opk gen` → working Orca profile generation pipeline
+* ✅ Working slicer generators + CLI `opk gen`:
+  - Orca (JSON profiles + `.orca_printer` bundle)
+  - Cura (CFG) with bundling (`.zip`)
+  - Prusa/SuperSlicer/Bambu (INI) with bundling (`.zip` for Prusa)
+  - ideaMaker (CFG) with bundling (`.zip`)
+* ✅ GUI “Generate Profiles…” dialog with preview, bundle picker, recents (out/bundle), and suffix validation
 
 ---
 
