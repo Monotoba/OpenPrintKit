@@ -15,6 +15,7 @@
 - [Quickstart](#quickstart)
 - [Documentation](#documentation)
 - [CLI Overview](#cli-overview)
+- [Slicer Support](#slicer-support)
 - [GUI](#gui)
   - [GUI Tips](#gui-tips)
 - [Development](#development)
@@ -137,6 +138,20 @@ OpenPrintKit/
 - `opk gen-snippets --pdl PDL.yaml --out-dir OUTDIR [--firmware marlin|klipper|rrf|grbl|linuxcnc]` — Generate start/end G-code files
 - `opk gen --pdl PDL.yaml --slicer orca|cura|prusa|ideamaker|bambu --out OUTDIR [--bundle BUNDLE.orca_printer]` — Generate slicer profiles
 - `opk spool --source spoolman|tigertag|openspool|opentag3d --base-url URL --action create|read|update|delete|search [--query Q] [--page N] [--page-size N] [--format items|normalized] [--endpoints-file FILE.json] [--endpoints-json JSON]` — Spool DB ops with pagination and endpoint overrides. Default retry limit: 5 attempts (configurable in App Settings or `OPK_NET_RETRY_LIMIT`).
+
+### Slicer Support
+
+| Slicer        | Generate | Bundle |
+|---------------|----------|--------|
+| OrcaSlicer    | ✅ JSON  | ✅ `.orca_printer` |
+| Cura          | ✅ CFG   | ✅ `.zip`         |
+| PrusaSlicer   | ✅ INI   | ✅ `.zip`         |
+| SuperSlicer   | ✅ INI   | ❌ seed only      |
+| Bambu Studio  | ✅ INI   | ❌ seed only      |
+| ideaMaker     | ✅ CFG   | ✅ `.zip`         |
+| KISSlicer     | ✅ INI   | ❌ seed only      |
+
+See full details in docs/project-status.md.
 
 ### GUI
 
