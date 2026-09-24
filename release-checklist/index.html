@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://example.com/release-checklist/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>OpenPrintKit — Release Checklist (Minimal) - OpenPrintKit Docs</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">OpenPrintKit Docs</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../user-manual/" class="nav-link">User Manual</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Translations</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../user-manual.es/" class="dropdown-item">Español</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.es/" class="dropdown-item">Español (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.es/" class="dropdown-item">Español (Resumen)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.fr/" class="dropdown-item">Français</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.fr/" class="dropdown-item">Français (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.fr/" class="dropdown-item">Français (Aperçu)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.fr/" class="dropdown-item">Français (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.fr/" class="dropdown-item">Français (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.fr/" class="dropdown-item">Français (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.de/" class="dropdown-item">Deutsch</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.de/" class="dropdown-item">Deutsch (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.de/" class="dropdown-item">Deutsch (Überblick)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.de/" class="dropdown-item">Deutsch (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.de/" class="dropdown-item">Deutsch (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.de/" class="dropdown-item">Deutsch (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.pt/" class="dropdown-item">Português</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.pt/" class="dropdown-item">Português (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.pt/" class="dropdown-item">Português (Visão Geral)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.pt/" class="dropdown-item">Português (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.pt/" class="dropdown-item">Português (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.pt/" class="dropdown-item">Português (M-code)</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../quickstart/" class="nav-link">Quickstart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../cli-reference/" class="nav-link">CLI Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../overview/" class="nav-link">Overview</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../firmware-mapping/" class="nav-link">Firmware Mapping</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../gcode-help/" class="nav-link">G-code Help</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mcode-reference/" class="nav-link">M-code Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../generator-mappings/" class="nav-link">Generator Mappings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../exact-generator-keys/" class="nav-link">Exact Generator Keys</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../pdl-schema-reference/" class="nav-link">PDL Schema</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../implementation-status/" class="nav-link">Implementation Status</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../publishing/" class="nav-link">Publishing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../translations/" class="nav-link">Translations</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/Monotoba/OpenPrintKit/edit/master/docs/release-checklist.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#openprintkit-release-checklist-minimal" class="nav-link">OpenPrintKit — Release Checklist (Minimal)</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#1-prep-and-sanity" class="nav-link">1) Prep and sanity</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#2-version-changelog" class="nav-link">2) Version + changelog</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#3-docs" class="nav-link">3) Docs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#4-packaging" class="nav-link">4) Packaging</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#5-tag-release" class="nav-link">5) Tag + release</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#6-publish-to-pypi" class="nav-link">6) Publish to PyPI</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#7-post-release" class="nav-link">7) Post-release</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="openprintkit-release-checklist-minimal">OpenPrintKit — Release Checklist (Minimal)</h1>
+<p>Use this checklist to publish a new OPK release confidently.</p>
+<h2 id="1-prep-and-sanity">1) Prep and sanity</h2>
+<ul>
+<li>[ ] Ensure a clean working tree (no uncommitted changes).</li>
+<li>[ ] Run full test suite locally:
+  <code>bash
+  PYTHONPATH=. pytest -q</code></li>
+<li>[ ] Verify CLI help works: <code>python -m opk.cli --help</code>.</li>
+<li>[ ] GUI smoke import (headless ok): <code>python -c "import opk.ui.main_window as _; print('GUI import OK')"</code>.</li>
+</ul>
+<h2 id="2-version-changelog">2) Version + changelog</h2>
+<ul>
+<li>[ ] Bump <code>version</code> in <code>pyproject.toml</code>.</li>
+<li>[ ] Update <code>CHANGELOG.md</code> with highlights (features, fixes, docs) and date.</li>
+</ul>
+<h2 id="3-docs">3) Docs</h2>
+<ul>
+<li>[ ] Build docs locally with MkDocs:
+  <code>bash
+  pip install .[docs]
+  mkdocs build</code></li>
+<li>[ ] Update screenshots if UI changed:
+  <code>bash
+  python -c "from opk.ui.screenshot import capture; import pathlib; capture(['main','rules','profiles','snippets','settings','preferences'], pathlib.Path('docs/images'))"</code></li>
+<li>[ ] Skim User Manual for out-of-date sections.</li>
+</ul>
+<h2 id="4-packaging">4) Packaging</h2>
+<ul>
+<li>[ ] Build sdist/wheel:
+  <code>bash
+  python -m pip install --upgrade build twine
+  python -m build
+  twine check dist/*</code></li>
+<li>[ ] Test install in a clean venv (with optional extras):
+  <code>bash
+  python -m venv .venv-rel &amp;&amp; source .venv-rel/bin/activate
+  pip install dist/openprintkit-&lt;VERSION&gt;-py3-none-any.whl
+  pip install "openprintkit[gui] @ file://$(pwd)/dist/openprintkit-&lt;VERSION&gt;-py3-none-any.whl"
+  pip install "openprintkit[full] @ file://$(pwd)/dist/openprintkit-&lt;VERSION&gt;-py3-none-any.whl"</code></li>
+</ul>
+<h2 id="5-tag-release">5) Tag + release</h2>
+<ul>
+<li>[ ] Commit changes and tag:
+  <code>bash
+  git add -A &amp;&amp; git commit -m "release: v&lt;VERSION&gt;"
+  git tag -a v&lt;VERSION&gt; -m "OpenPrintKit v&lt;VERSION&gt;"
+  git push &amp;&amp; git push --tags</code></li>
+<li>[ ] Create GitHub Release from the tag; attach highlights from the changelog.</li>
+</ul>
+<h2 id="6-publish-to-pypi">6) Publish to PyPI</h2>
+<ul>
+<li>[ ] Upload once satisfied:
+  <code>bash
+  twine upload dist/*</code></li>
+</ul>
+<h2 id="7-post-release">7) Post-release</h2>
+<ul>
+<li>[ ] Verify GitHub Pages docs site updated (workflow <code>docs.yml</code>).</li>
+<li>[ ] Update pinned installation snippets if the version appears in docs.</li>
+<li>[ ] Open an issue to track next milestones if needed.</li>
+</ul>
+<p>Tip: Use optional extras:
+- GUI: <code>pip install openprintkit[gui]</code>
+- NFC: <code>pip install openprintkit[nfc]</code>
+- Docs: <code>pip install openprintkit[docs]</code>
+- Full: <code>pip install openprintkit[full]</code></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

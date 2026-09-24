@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://example.com/project-spec/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>OpenPrintKit Studio — Functional Spec (v1) - OpenPrintKit Docs</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">OpenPrintKit Docs</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../user-manual/" class="nav-link">User Manual</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Translations</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../user-manual.es/" class="dropdown-item">Español</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.es/" class="dropdown-item">Español (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.es/" class="dropdown-item">Español (Resumen)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.fr/" class="dropdown-item">Français</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.fr/" class="dropdown-item">Français (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.fr/" class="dropdown-item">Français (Aperçu)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.fr/" class="dropdown-item">Français (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.fr/" class="dropdown-item">Français (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.fr/" class="dropdown-item">Français (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.de/" class="dropdown-item">Deutsch</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.de/" class="dropdown-item">Deutsch (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.de/" class="dropdown-item">Deutsch (Überblick)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.de/" class="dropdown-item">Deutsch (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.de/" class="dropdown-item">Deutsch (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.de/" class="dropdown-item">Deutsch (M-code)</a>
+</li>
+                                    
+<li>
+    <a href="../user-manual.pt/" class="dropdown-item">Português</a>
+</li>
+                                    
+<li>
+    <a href="../cli-reference.pt/" class="dropdown-item">Português (CLI)</a>
+</li>
+                                    
+<li>
+    <a href="../overview.pt/" class="dropdown-item">Português (Visão Geral)</a>
+</li>
+                                    
+<li>
+    <a href="../firmware-mapping.pt/" class="dropdown-item">Português (Firmware)</a>
+</li>
+                                    
+<li>
+    <a href="../gcode-help.pt/" class="dropdown-item">Português (G-code)</a>
+</li>
+                                    
+<li>
+    <a href="../mcode-reference.pt/" class="dropdown-item">Português (M-code)</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../quickstart/" class="nav-link">Quickstart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../cli-reference/" class="nav-link">CLI Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../overview/" class="nav-link">Overview</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../firmware-mapping/" class="nav-link">Firmware Mapping</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../gcode-help/" class="nav-link">G-code Help</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mcode-reference/" class="nav-link">M-code Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../generator-mappings/" class="nav-link">Generator Mappings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../exact-generator-keys/" class="nav-link">Exact Generator Keys</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../pdl-schema-reference/" class="nav-link">PDL Schema</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../implementation-status/" class="nav-link">Implementation Status</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../publishing/" class="nav-link">Publishing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../translations/" class="nav-link">Translations</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/Monotoba/OpenPrintKit/edit/master/docs/project-spec.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#openprintkit-studio-functional-spec-v1" class="nav-link">OpenPrintKit Studio — Functional Spec (v1)</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#scope" class="nav-link">Scope</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#global-non-functional-requirements" class="nav-link">Global Non-Functional Requirements</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#a-workspace-project-model" class="nav-link">A. Workspace &amp; Project Model</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#b-editors" class="nav-link">B. Editors</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#c-validators" class="nav-link">C. Validators</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#d-converters" class="nav-link">D. Converters</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#e-bundling" class="nav-link">E. Bundling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#f-install-wizard" class="nav-link">F. Install Wizard</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#g-matrix-templates" class="nav-link">G. Matrix &amp; Templates</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#h-diff-compare" class="nav-link">H. Diff &amp; Compare</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#i-telemetry-logging-local-only" class="nav-link">I. Telemetry &amp; Logging (Local Only)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#j-cli-parity" class="nav-link">J. CLI Parity</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#k-ux-flows-happy-paths" class="nav-link">K. UX Flows (Happy Paths)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#l-file-formats-contracts" class="nav-link">L. File Formats &amp; Contracts</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#m-error-handling-examples" class="nav-link">M. Error Handling (Examples)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#n-security" class="nav-link">N. Security</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#o-testing-strategy" class="nav-link">O. Testing Strategy</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#p-extensibility" class="nav-link">P. Extensibility</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#q-performance-targets" class="nav-link">Q. Performance Targets</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#r-packaging-distribution" class="nav-link">R. Packaging &amp; Distribution</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#s-milestones-git-discipline" class="nav-link">S. Milestones &amp; Git Discipline</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#t-acceptance-checklist-exit-criteria-v10" class="nav-link">T. Acceptance Checklist (Exit Criteria v1.0)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="openprintkit-studio-functional-spec-v1">OpenPrintKit Studio — Functional Spec (v1)</h1>
+<h2 id="scope">Scope</h2>
+<p>A desktop + CLI toolchain for creating, validating, converting, diffing, bundling, and installing 3D printer profiles. Canonical data source is <strong>PDL</strong> (Printer Definition Language). Slicers supported initially: <strong>OrcaSlicer</strong> (emit and bundle). Cura/Prusa planned.
+Eventually, an industry-wide Open Definition Language for defining 3D Printers, Filament, processes, etc. and a toolset to all the easy generation of definition files containing the properties of the target printer.</p>
+<p>This project makes use of universal intermediate languages:</p>
+<ul>
+<li>PDL (Printer Definition Language)</li>
+<li>FDL (Filament Definition Language)</li>
+</ul>
+<p>These languages allow users and manufacturers to create and share definition files. This project is a toolset for creating, and bundling these files
+into slicer specific formats.</p>
+<hr />
+<h2 id="global-non-functional-requirements">Global Non-Functional Requirements</h2>
+<ul>
+<li><strong>Deterministic</strong>: same inputs → same outputs (bundle hashing + stable sort).</li>
+<li><strong>Validation-first</strong>: schema + rules gate every write/bundle/install.</li>
+<li><strong>Testable</strong>: unit tests + golden tests; GUI logic separable from UI (MVVM).</li>
+<li><strong>CLI/GUI parity</strong>: all GUI actions wrap CLI-exposed functions.</li>
+<li><strong>Cross-platform</strong>: Win/Linux; macOS best-effort.</li>
+<li><strong>No network</strong>: local-first; future updates opt-in.</li>
+<li><strong>Secure by default</strong>: never execute code from profiles; sanitize paths.</li>
+<li><strong>Performance</strong>: typical operations &lt;200 ms; large bundles &lt;2 s.</li>
+</ul>
+<hr />
+<h2 id="a-workspace-project-model">A. Workspace &amp; Project Model</h2>
+<h3 id="goals">Goals</h3>
+<p>Single folder “Workspace” containing sources (PDL, profiles) and outputs (generated configs, bundles).</p>
+<h3 id="user-stories">User Stories</h3>
+<ul>
+<li>As a user, I can <strong>open a workspace</strong> (existing folder) or <strong>init</strong> a new one with standard subfolders.</li>
+<li>As a user, I can <strong>track changes</strong> and see a status panel (dirty files, validation state).</li>
+<li>As a user, I can <strong>configure paths</strong> (Orca preset directories).</li>
+</ul>
+<h3 id="data-model">Data Model</h3>
+<pre><code>workspace/
+  pdl/registry/&lt;vendor&gt;/&lt;model&gt;.yaml
+  profiles/
+    printers/*.json
+    filaments/*.json
+    processes/*.json
+  bundles/*.orca_printer
+  logs/*.jsonl
+  settings.json  # GUI state, paths (per-machine), not committed
+</code></pre>
+<h3 id="acceptance-criteria">Acceptance Criteria</h3>
+<ul>
+<li>Initialization scaffolds folders and <code>.gitignore</code> entries.</li>
+<li>“Status” shows counts: valid/invalid files; last bundle hash/date.</li>
+</ul>
+<hr />
+<h2 id="b-editors">B. Editors</h2>
+<h3 id="b1-pdl-editor">B1. PDL Editor</h3>
+<ul>
+<li><strong>Purpose</strong>: Edit <code>.yaml</code> PDL with schema + rule validation and live diagnostics.</li>
+</ul>
+<p><strong>Features</strong></p>
+<ul>
+<li>YAML editor with schema autocompletion (optional), side diagnostics.</li>
+<li>Form view for common fields (geometry, extruder, materials).</li>
+<li>Multi-extruder editor with nozzle type/diameter and mixing channels.</li>
+<li>Multi-material banks (e.g., AMS/MMU) with arbitrary capacity.</li>
+<li>Validate button (schema + rules) → issues panel with line/field refs.</li>
+<li>Save guarded by “no errors” (warnings allowed).</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Invalid PDL highlights exact fields; cannot save invalid unless “force” with reason (logged).</li>
+</ul>
+<p><strong>Edge Cases</strong></p>
+<ul>
+<li>Non-simple polygons for <code>bed_shape</code> → rule warning.</li>
+<li>Missing <code>pdl_version</code> → schema error.</li>
+</ul>
+<h3 id="b2-orca-profile-editors-printerfilamentprocess-json">B2. Orca Profile Editors (Printer/Filament/Process JSON)</h3>
+<ul>
+<li><strong>Purpose</strong>: Edit native profile JSONs.</li>
+</ul>
+<p><strong>Features</strong></p>
+<ul>
+<li>Form + JSON side-by-side; sync edits.</li>
+<li>Constraints (e.g., <code>layer_height ≤ 0.8 × nozzle</code>) raise rule warnings.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>On save, schema validation passes (specific to type).</li>
+<li>Diff view available against last committed version or file on disk.</li>
+</ul>
+<hr />
+<h2 id="c-validators">C. Validators</h2>
+<h3 id="c1-schema-validator">C1. Schema Validator</h3>
+<ul>
+<li>Select file(s) → Validate against appropriate JSON Schema.</li>
+<li>Batch mode: entire workspace.</li>
+</ul>
+<h3 id="c2-rules-validator">C2. Rules Validator</h3>
+<ul>
+<li>Run rules: nozzle/layer, temps ranges per material, adhesion types, retraction vs extruder type, ABL/probe + G-code consistency, multi-extruder sanity.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Produces structured report (JSON) with severity (error/warn/info), path, message.</li>
+</ul>
+<hr />
+<h2 id="d-converters">D. Converters</h2>
+<h3 id="d1-cura-orca-converter">D1. Cura → Orca Converter</h3>
+<ul>
+<li><strong>Input</strong>: Cura INI/JSON/3MF fragments.</li>
+<li><strong>Output</strong>: OPK process/filament/printer JSON approximations.</li>
+<li><strong>Mapping</strong>: YAML-driven transforms + Python code hooks.</li>
+</ul>
+<p><strong>UI</strong></p>
+<ul>
+<li>File picker; show mapping coverage %; diagnostics panel for unmapped keys; “Open mapping YAML” button for edits.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Produces valid process JSON (schema pass) or fails with actionable diagnostics.</li>
+<li>Logs unmapped keys with suggestions.</li>
+</ul>
+<p><strong>Edge Cases</strong></p>
+<ul>
+<li>Conflicting Cura settings (e.g., multiple vendor overrides) → warning; choose precedence per policy.</li>
+</ul>
+<h3 id="d2-pdl-orca-generator">D2. PDL → Orca Generator</h3>
+<ul>
+<li><strong>Input</strong>: PDL file.</li>
+<li><strong>Output</strong>: <code>/profiles/{printers,filaments,processes}</code> + bundle.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Generated files validate (schema pass).</li>
+<li>Bundle hash remains stable given same inputs.</li>
+</ul>
+<hr />
+<h2 id="e-bundling">E. Bundling</h2>
+<h3 id="bundle-manager">Bundle Manager</h3>
+<ul>
+<li>Select source directory → build <code>.orca_printer</code>.</li>
+<li>Manifest generated (counts, timestamp, tool version, checksum).</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Bundle contains <code>printers/</code>, <code>filaments/</code>, <code>processes/</code>, <code>manifest.json</code>.</li>
+<li>Schema pass for manifest; explicit plural→singular mapping (tested).</li>
+</ul>
+<p><strong>Edge Cases</strong></p>
+<ul>
+<li>Empty category → error with remediation hint.</li>
+</ul>
+<hr />
+<h2 id="f-install-wizard">F. Install Wizard</h2>
+<h3 id="scope_1">Scope</h3>
+<p>Install generated profiles to Orca user presets (with <strong>backup</strong> and <strong>dry-run</strong>).</p>
+<p><strong>Features</strong></p>
+<ul>
+<li>Detect Orca preset path (configurable).</li>
+<li>Dry-run diff (added/updated/unchanged).</li>
+<li>One-click backup (timestamped ZIP) + install.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Dry-run shows file list + diffs.</li>
+<li>Install writes files; backup path retained; rollback option reverts.</li>
+</ul>
+<p><strong>Edge Cases</strong></p>
+<ul>
+<li>Permission denied → clear message and instructions.</li>
+</ul>
+<hr />
+<h2 id="g-matrix-templates">G. Matrix &amp; Templates</h2>
+<h3 id="g1-matrix-generators">G1. Matrix Generators</h3>
+<ul>
+<li>Generate <strong>speed</strong> and <strong>temperature</strong> variants from a base process/filament.</li>
+</ul>
+<p><strong>UI</strong></p>
+<ul>
+<li>Input base file; list of speeds/temps; output directory.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>N variants created; all validate; names normalized.</li>
+</ul>
+<h3 id="g2-templates">G2. Templates</h3>
+<ul>
+<li>Create from wizard: minimal PDL, printer/filament/process skeletons.</li>
+</ul>
+<hr />
+<h2 id="h-diff-compare">H. Diff &amp; Compare</h2>
+<p><strong>Features</strong></p>
+<ul>
+<li>JSON structural diff (ignore ordering).</li>
+<li>Side-by-side display; copy chunk to right/left; export patch.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Works for any profile types and PDL files; whitespace-insensitive.</li>
+</ul>
+<hr />
+<h2 id="i-telemetry-logging-local-only">I. Telemetry &amp; Logging (Local Only)</h2>
+<ul>
+<li><strong>Local audit log</strong> (<code>logs/actions.jsonl</code>): action, inputs, outputs, durations, errors.</li>
+<li>No network; optional anonymized metrics toggle (default OFF).</li>
+</ul>
+<hr />
+<h2 id="j-cli-parity">J. CLI Parity</h2>
+<table>
+<thead>
+<tr>
+<th>GUI Action</th>
+<th>CLI Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validate files</td>
+<td><code>opk validate {paths...}</code></td>
+</tr>
+<tr>
+<td>Bundle</td>
+<td><code>opk bundle --in SRC --out OUT.orca_printer</code></td>
+</tr>
+<tr>
+<td>PDL validate</td>
+<td><code>opk pdl-validate {pdl.yaml ...}</code></td>
+</tr>
+<tr>
+<td>Generate from PDL</td>
+<td><code>opk gen --pdl FILE --slicer orca --out DIR</code></td>
+</tr>
+<tr>
+<td>Matrix speed/temp</td>
+<td><code>opk matrix-speed --base BASE.json --speeds 40,50 --out OUTDIR</code><br><code>opk matrix-temp --base FIL.json --temps 195,200 --out OUTDIR</code></td>
+</tr>
+<tr>
+<td>Cura → Orca convert</td>
+<td><code>opk convert --from cura --in CURA_FILE --out DIR</code></td>
+</tr>
+<tr>
+<td>Install</td>
+<td><code>opk install --src DIR --dest ORCA_PRESET_DIR --backup BACKUP.zip --dry-run</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="cli-usage-examples">CLI Usage Examples</h3>
+<pre><code class="language-bash"># Validate individual profiles
+opk validate examples/printers/Longer_LK5_Pro_Marlin.json \
+             examples/filaments/PLA_Baseline_LK5Pro.json \
+             examples/processes/Standard_0p20_LK5Pro.json
+
+# Run rule-based checks (heuristics beyond schema)
+opk rules \
+  --printer  examples/printers/Longer_LK5_Pro_Marlin.json \
+  --filament examples/filaments/PLA_Baseline_LK5Pro.json \
+  --process  examples/processes/Standard_0p20_LK5Pro.json
+
+# Build an Orca bundle
+opk bundle --in examples --out dist/LK5Pro_OrcaProfile_v1.orca_printer
+
+# Initialize a workspace (with examples by default)
+opk workspace init ./my-workspace
+
+# Install to Orca presets (dry-run and backup)
+opk install --src ./examples --dest ~/.config/OrcaSlicer/user/ --dry-run
+opk install --src ./examples --dest ~/.config/OrcaSlicer/user/ --backup ./backup_orca.zip
+</code></pre>
+<h2 id="k-ux-flows-happy-paths">K. UX Flows (Happy Paths)</h2>
+<h3 id="generate-from-pdl-bundle-install">Generate from PDL, bundle, install</h3>
+<ol>
+<li>Open PDL in Editor → Validate (green).</li>
+<li><strong>Generate</strong> (Orca) → Profiles folder created.</li>
+<li><strong>Bundle</strong> → <code>.orca_printer</code> produced.</li>
+<li><strong>Install</strong> → dry-run diff → backup → install.</li>
+<li>Confirm message with next steps.</li>
+</ol>
+<h3 id="convert-cura-profiles-bundle">Convert Cura → Profiles → Bundle</h3>
+<ol>
+<li>Pick Cura file(s) → Convert (shows coverage).</li>
+<li>Review/adjust fields in Process Editor.</li>
+<li>Validate → Bundle → Install.</li>
+</ol>
+<hr />
+<h2 id="l-file-formats-contracts">L. File Formats &amp; Contracts</h2>
+<ul>
+<li><strong>PDL</strong>: YAML/JSON; schema <code>pdl.schema.json</code>; SemVer field <code>pdl_version</code>.</li>
+<li><strong>Profiles</strong>: JSON; types <code>printer|filament|process</code>; strict schemas.</li>
+<li><strong>Bundle</strong>: ZIP <code>.orca_printer</code> with <code>manifest.json</code>.</li>
+<li><strong>Logs</strong>: <code>.jsonl</code> NDJSON.</li>
+</ul>
+<hr />
+<h2 id="m-error-handling-examples">M. Error Handling (Examples)</h2>
+<ul>
+<li>Schema error → modal with first N issues + link to full report.</li>
+<li>Rules warning → non-blocking banner; save allowed.</li>
+<li>Bundle failure (empty category) → blocking error with “Open source dir” action.</li>
+<li>Install permission error → suggest “Run as admin” or change destination.</li>
+</ul>
+<hr />
+<h2 id="n-security">N. Security</h2>
+<ul>
+<li>Never execute profile content.</li>
+<li>Sanitize file names (no <code>..</code>, no absolute paths).</li>
+<li>No network unless user explicitly enables in settings (future).</li>
+<li>Backups do not include secrets; only profile data.</li>
+</ul>
+<hr />
+<h2 id="o-testing-strategy">O. Testing Strategy</h2>
+<h3 id="unit">Unit</h3>
+<ul>
+<li>Schema validators (positive/negative).</li>
+<li>Rules (nozzle/layer, temps, adhesion).</li>
+<li>Converters (fixtures + expected dict subsets).</li>
+<li>Bundle builder (stable contents + manifest).</li>
+</ul>
+<h3 id="integration">Integration</h3>
+<ul>
+<li>PDL → IR → Orca emitter → schema pass.</li>
+<li>CLI round-trips (validate, gen, bundle).</li>
+<li>Install dry-run vs actual install (temp dir).</li>
+</ul>
+<h3 id="gui">GUI</h3>
+<ul>
+<li>Model tests decoupled from widgets.</li>
+<li>Smoke tests for actions (pytest-qt optional, but can mock event handling).</li>
+</ul>
+<h3 id="golden-tests">Golden Tests</h3>
+<ul>
+<li>Known inputs → expected outputs checksummed (allowlist of key paths).</li>
+</ul>
+<hr />
+<h2 id="p-extensibility">P. Extensibility</h2>
+<ul>
+<li>
+<p>Plugin interfaces:</p>
+</li>
+<li>
+<p><code>opk.plugins.slicers.&lt;name&gt;.gen.py</code> → emitters</p>
+</li>
+<li><code>opk.plugins.converters.&lt;name&gt;.py</code> → importers</li>
+<li>Mapping files for converters (YAML) loaded at runtime.</li>
+<li>Rule engine accepts custom rule modules via entry points (future).</li>
+</ul>
+<hr />
+<h2 id="q-performance-targets">Q. Performance Targets</h2>
+<ul>
+<li>Validate PDL &lt;100 ms typical.</li>
+<li>Convert Cura profile &lt;500 ms.</li>
+<li>Bundle build &lt;2 s with ≤100 files.</li>
+</ul>
+<hr />
+<h2 id="r-packaging-distribution">R. Packaging &amp; Distribution</h2>
+<ul>
+<li><code>pipx</code> compatible CLI.</li>
+<li>Optional <code>PyInstaller</code> mode for a single-file GUI app (later).</li>
+<li>Wheel includes <strong>no</strong> GUI resources unless requested (keep size down).</li>
+</ul>
+<hr />
+<h2 id="s-milestones-git-discipline">S. Milestones &amp; Git Discipline</h2>
+<p><strong>M1 (1–2 days):</strong></p>
+<ul>
+<li>Workspace scaffolding, validators (schema + rules), CLI parity for validate/bundle.</li>
+<li>Tests: schema, bundle, rules.</li>
+</ul>
+<p><strong>M2 (2–3 days):</strong></p>
+<ul>
+<li>PDL editor (text + diagnostics), generator (Orca), GUI shell.</li>
+<li>Tests: PDL→IR→Orca integration.</li>
+</ul>
+<p><strong>M3 (2–3 days):</strong></p>
+<ul>
+<li>Cura→Orca converter (core mappings), matrix tools, install wizard (dry-run + backup).</li>
+<li>Tests: converter fixtures, install round-trip.</li>
+</ul>
+<p><strong>Commits</strong>: granular, conventional commits (<code>feat:</code>, <code>fix:</code>, <code>test:</code>, <code>docs:</code>).
+<strong>PRs</strong>: include tests and README updates.</p>
+<hr />
+<h2 id="t-acceptance-checklist-exit-criteria-v10">T. Acceptance Checklist (Exit Criteria v1.0)</h2>
+<ul>
+<li>CLI: <code>validate</code>, <code>pdl-validate</code>, <code>gen --slicer orca</code>, <code>bundle</code>, <code>matrix-*</code>, <code>install</code>, <code>convert --from cura</code>.</li>
+<li>GUI: PDL editor (validate), profile editor, generator, bundle, install, converter, matrix tools, diff.</li>
+<li>Tests: ≥90% of core paths; all green in CI.</li>
+<li>Docs: README, quickstart, tool help, troubleshooting.</li>
+</ul>
+<hr />
+<h3 id="ready-to-build">Ready to Build?</h3>
+<p>If this spec meets your expectations, I’ll generate:</p>
+<ul>
+<li>the <strong>GUI skeleton</strong> (menus, tool registry, dockable panels),</li>
+<li>stubs for each tool module with TODOs and test scaffolds, and</li>
+<li>initial fixtures for converters, rules, and golden tests.</li>
+</ul>
+<p>Just say “go build M1,” and I’ll output the code scaffolding and tests for Milestone 1.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

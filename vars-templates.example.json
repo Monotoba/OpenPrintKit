@@ -1,0 +1,16 @@
+{
+  "Basic (nozzle/bed/layer/tool)": {
+    "nozzle": 205,
+    "bed": 60,
+    "layer": 1,
+    "tool": 0
+  },
+  "Monitoring (progress/time)": {
+    "progress": 25,
+    "elapsed_s": 0
+  },
+  "Environment (chamber/fan)": {
+    "chamber": 40,
+    "fan": 100
+  }
+}
