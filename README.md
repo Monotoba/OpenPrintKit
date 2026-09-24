@@ -1,14 +1,12 @@
 # 🧩 OpenPrintKit (OPK)
 
-[![Build Status](https://github.com/Monotoba/OpenPrintKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions)
-[![Docs](https://img.shields.io/badge/docs-site-blue.svg)](https://monotoba.github.io/OpenPrintKit/)
-[![Release](https://github.com/Monotoba/OpenPrintKit/actions/workflows/release.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions/workflows/release.yml)
-[![User Manual](https://img.shields.io/badge/User%20Manual-read-blue.svg)](https://monotoba.github.io/OpenPrintKit/user-manual/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![Chat](https://img.shields.io/badge/community-chat-brightgreen.svg)]()
+[![CI](https://github.com/Monotoba/OpenPrintKit/actions/workflows/ci.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions/workflows/ci.yml)
+[![Lint](https://github.com/Monotoba/OpenPrintKit/actions/workflows/lint.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions/workflows/lint.yml)
+[![Documentation](https://github.com/Monotoba/OpenPrintKit/actions/workflows/docs.yml/badge.svg)](https://github.com/Monotoba/OpenPrintKit/actions/workflows/docs.yml)
+[![Docs site](https://img.shields.io/badge/docs-live-blue.svg)](https://monotoba.github.io/OpenPrintKit/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
