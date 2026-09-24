@@ -49,6 +49,8 @@ def generate_kisslicer(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
     hooks = render_hooks_with_firmware(pdl or {})
     start_g = '\n'.join(hooks.get('start') or [])
     end_g = '\n'.join(hooks.get('end') or [])
+    start_g_escaped = start_g.replace('\n', '\\n')
+    end_g_escaped = end_g.replace('\n', '\\n')
     # Optional: infill density and supports (best-effort generic keys)
     try:
         infill_pct = int(float((pdl.get('process_defaults') or {}).get('infill_percent') or 0))
@@ -75,8 +77,8 @@ def generate_kisslicer(pdl: Dict[str, Any], out_dir: Path) -> Dict[str, Path]:
         *( [f'retraction_length = {retr_len:.2f}', f'retraction_speed = {int(retr_spd)}'] if retr_len else [] ),
         *( [f'cool_min_layer_time = {min_layer_time}'] if min_layer_time else [] ),
         *( [f'fan_min = {fan_min}', f'fan_max = {fan_max}'] if (fan_min or fan_max) else [] ),
-        f'start_gcode = {start_g.replace("\n","\\n")}',
-        f'end_gcode = {end_g.replace("\n","\\n")}',
+        f'start_gcode = {start_g_escaped}',
+        f'end_gcode = {end_g_escaped}',
     ]
     ini.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     out['profile'] = ini

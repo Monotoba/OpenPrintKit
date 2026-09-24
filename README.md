@@ -83,6 +83,7 @@ ls ./my-workspace
 ### Documentation
 
 - Website: https://monotoba.github.io/OpenPrintKit/
+- PDL Specification: https://monotoba.github.io/OpenPrintKit/pdl/
 - Changelog: CHANGELOG.md
 - Overview: [docs/overview.md](docs/overview.md)
 - Quickstart: [docs/quickstart.md](docs/quickstart.md)

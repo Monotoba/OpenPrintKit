@@ -1,9 +1,9 @@
 site_name: OpenPrintKit Docs
-site_url: https://example.com/
+site_url: https://monotoba.github.io/OpenPrintKit/
 repo_url: https://github.com/Monotoba/OpenPrintKit
 docs_dir: docs
 theme:
-  name: mkdocs
+  name: material
 nav:
   - Home: index.md
   - User Manual: user-manual.md
@@ -38,6 +38,7 @@ nav:
   - Generator Mappings: generator-mappings.md
   - Exact Generator Keys: exact-generator-keys.md
   - PDL Schema: pdl-schema-reference.md
+  - PDL Specification: https://monotoba.github.io/OpenPrintKit/pdl/
   - Implementation Status: implementation-status.md
   - Publishing: publishing.md
   - Translations: translations.md

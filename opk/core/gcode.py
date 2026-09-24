@@ -261,11 +261,13 @@ def render_hooks_with_firmware(pdl: Dict[str, object]) -> Dict[str, List[str]]:
             # choose mode by policy for GRBL; default M8; LinuxCNC uses M7
             on = policies.get('grbl', {}).get('exhaust_mode', 'M8') if firmware == 'grbl' else 'M7'
             seq = list(out.get("start") or [])
-            add(seq, on)
+            if on and on not in seq:
+                seq.append(on)
             out["start"] = seq
         if ex.get("off_at_end"):
             seq = list(out.get("end") or [])
-            add(seq, "M9")
+            if "M9" not in seq:
+                seq.append("M9")
             out["end"] = seq
 
     # OpenPrintTag injection: emit as comment block at start
